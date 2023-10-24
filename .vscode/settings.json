@@ -1,0 +1,5 @@
+{
+	"editor.formatOnSave": true,
+	"git.enableCommitSigning": true,
+	"github.gitProtocol": "ssh"
+}
