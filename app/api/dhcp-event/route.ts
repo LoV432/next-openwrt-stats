@@ -51,7 +51,7 @@ export async function POST(request: Request) {
 	} else {
 		let insertDevice = db
 			.prepare(
-				'INSERT INTO users (name, ip, macaddress, lastupdated, devicetype, lastEventType) VALUES (?, ?, ?, ?, ?)'
+				'INSERT INTO users (name, ip, macaddress, lastupdated, devicetype, lastEventType) VALUES (?, ?, ?, ?, ?, ?)'
 			)
 			.run(body.hostname, body.ip, body.mac, Date.now(), 'generic', body.type);
 		return new Response(JSON.stringify(insertDevice), {
