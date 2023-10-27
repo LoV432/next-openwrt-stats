@@ -52,7 +52,7 @@ export default function Home() {
 	);
 }
 
-export function UserCard({
+function UserCard({
 	name,
 	ip,
 	macAddress,
@@ -88,7 +88,7 @@ export function UserCard({
 	);
 }
 
-export function DashboardCardBase({
+function DashboardCardBase({
 	children,
 	backgroundColor
 }: {
@@ -102,7 +102,7 @@ export function DashboardCardBase({
 	);
 }
 
-export function DashboardCardNetWork() {
+function DashboardCardNetWork() {
 	return (
 		<>
 			<DashboardCardBase backgroundColor="bg-base-100">
@@ -122,11 +122,7 @@ export function DashboardCardNetWork() {
 	);
 }
 
-export function DashboardCardCurrentStatus({
-	isConnected
-}: {
-	isConnected: boolean;
-}) {
+function DashboardCardCurrentStatus({ isConnected }: { isConnected: boolean }) {
 	let status = isConnected ? 'bg-emerald-700' : 'bg-red-800';
 	return (
 		<>
@@ -140,7 +136,7 @@ export function DashboardCardCurrentStatus({
 	);
 }
 
-export function DashboardCardTotalDisconnectTime({
+function DashboardCardTotalDisconnectTime({
 	totalDisconnects,
 	totalDowntime
 }: {
@@ -160,7 +156,7 @@ export function DashboardCardTotalDisconnectTime({
 	);
 }
 
-export function SpeedMeter({
+function SpeedMeter({
 	precentage,
 	mbpsInNumber
 }: {
