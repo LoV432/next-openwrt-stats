@@ -30,3 +30,8 @@ const rpcdTokenTable = db.prepare(`CREATE TABLE IF NOT EXISTS rpcdtoken (
 	token TEXT
 )`);
 rpcdTokenTable.run();
+
+const checkToken = db.prepare(`SELECT * FROM rpcdtoken WHERE id = 1`).get();
+if (!checkToken) {
+	db.prepare('INSERT INTO rpcdtoken (token) VALUES (?)').run('0');
+}
