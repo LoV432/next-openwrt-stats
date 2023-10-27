@@ -20,7 +20,16 @@ type userReturnType = {
 export async function POST(request: Request) {
 	const body = (await request.json()) as dhcpEventType;
 
-	if (!body.hostname || !body.ip || !body.mac || !body.type) {
+	if (
+		!body.hostname ||
+		body.hostname === '' ||
+		!body.ip ||
+		body.ip === '' ||
+		!body.mac ||
+		body.mac === '' ||
+		!body.type ||
+		body.type === ''
+	) {
 		return new Response(JSON.stringify({ error: 'Missing required fields' }), {
 			status: 400
 		});
