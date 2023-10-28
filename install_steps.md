@@ -6,6 +6,8 @@ enable and start wrtbwmon from /cgi-bin/luci/admin/system/startup
 
 run script
 
+turn off rebinding on router?
+
 setup webui
 
 that should be it?

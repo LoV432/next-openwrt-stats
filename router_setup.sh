@@ -78,8 +78,7 @@ content='#!/bin/ash
 
 HOSTNAME=${HOSTNAME/OpenWrt/"Unknown"}
 data="{\"hostname\": \"$HOSTNAME\", \"ip\": \"$IPADDR\", \"mac\": \"$MACADDR\", \"type\": \"$ACTION\"}"
-
-curl -d ${data} -X POST URL_HERE/api/dhcp-event
+curl -d "$data" -X POST URL_HERE/api/dhcp-event
 '
 content="${content/URL_HERE/$1}"
 
