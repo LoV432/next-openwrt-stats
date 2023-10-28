@@ -1,28 +1,26 @@
+import { db } from '@/lib/db';
+import { DashboardCardCurrentStatus } from './DashboardCardCurrentStatus.client';
+import DashboardCardBase from './DashboardBase.server';
 import DashboardUptime from './DashboardUptime.client';
+
+export type allConnectionStatusType = {
+	id: number;
+	status: string;
+	time: number;
+}[];
 export default function Dashboard() {
+	let allConnectionStatus = db
+		.prepare('SELECT * FROM connectionlogs')
+		.all() as allConnectionStatusType;
 	return (
 		<>
 			<DashboardCardNetWork />
-			<DashboardCardCurrentStatus isConnected={true} />
+			<DashboardCardCurrentStatus allConnectionStatus={allConnectionStatus} />
 			<DashboardCardTotalDisconnectTime
 				totalDisconnects={4}
 				totalDowntime={0}
 			/>
 		</>
-	);
-}
-
-function DashboardCardBase({
-	children,
-	backgroundColor
-}: {
-	children: React.ReactNode;
-	backgroundColor: string;
-}) {
-	return (
-		<div className={`card w-full sm:w-96 ${backgroundColor} shadow-xl`}>
-			<div className="card-body justify-center">{children}</div>
-		</div>
 	);
 }
 
@@ -43,20 +41,6 @@ async function DashboardCardNetWork() {
 					<div>
 						<SpeedMeter mbpsInNumber={20} precentage={20} />
 					</div>
-				</div>
-			</DashboardCardBase>
-		</>
-	);
-}
-
-function DashboardCardCurrentStatus({ isConnected }: { isConnected: boolean }) {
-	let status = isConnected ? 'bg-emerald-700' : 'bg-red-800';
-	return (
-		<>
-			<DashboardCardBase backgroundColor={status}>
-				<div className="text-2xl font-bold">
-					<h1>Current Stauts:</h1>
-					<h1>Connected</h1>
 				</div>
 			</DashboardCardBase>
 		</>
