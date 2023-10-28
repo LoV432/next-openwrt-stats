@@ -9,9 +9,11 @@ export type allConnectionStatusType = {
 	time: number;
 }[];
 export default function Dashboard() {
+	let now = Date.now();
+	let yesterday = now - 86400000;
 	let allConnectionStatus = db
-		.prepare('SELECT * FROM connectionlogs')
-		.all() as allConnectionStatusType;
+		.prepare('SELECT * FROM connectionlogs WHERE time > ?')
+		.all(yesterday) as allConnectionStatusType;
 	return (
 		<>
 			<DashboardCardNetWork />
