@@ -25,6 +25,16 @@ const createConnectionLogsTable =
 )`);
 createConnectionLogsTable.run();
 
+const checkForEmptyConnectionsTable = db
+	.prepare(`SELECT * FROM connectionlogs WHERE id = 1`)
+	.get();
+if (!checkForEmptyConnectionsTable) {
+	db.prepare('INSERT INTO connectionlogs (status, time) VALUES (?, ?)').run(
+		'connected',
+		Date.now()
+	);
+}
+
 const rpcdTokenTable = db.prepare(`CREATE TABLE IF NOT EXISTS rpcdtoken (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	token TEXT
