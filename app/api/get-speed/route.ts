@@ -63,8 +63,9 @@ async function makeRequest(token: string) {
 
 function formatSpeedOutput(speed: string) {
 	speed = speed.replace('#mac', 'mac');
-	const lines = speed.split('\n');
-	const headers = lines[0].split('\t');
+	let lines = speed.split('\n');
+	lines = lines.filter((line) => line !== '');
+	let headers = lines[0].split('\t');
 	const result = [];
 
 	for (let i = 1; i < lines.length; i++) {
@@ -72,11 +73,11 @@ function formatSpeedOutput(speed: string) {
 		const rowData: { [key: string]: string } = {};
 
 		for (let j = 0; j < headers.length; j++) {
-			rowData[headers[j]] = columns[j];
+			if (headers[j] === 'mac' || headers[j] === 'in' || headers[j] === 'out') {
+				rowData[headers[j]] = columns[j];
+			}
 		}
-
 		result.push(rowData);
 	}
-
-	return JSON.stringify(result, null, 2);
+	return JSON.stringify(result);
 }
