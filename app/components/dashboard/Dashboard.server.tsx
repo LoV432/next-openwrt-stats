@@ -2,6 +2,7 @@ import { db } from '@/lib/db';
 import { DashboardCardCurrentStatus } from './DashboardCardCurrentStatus.client';
 import DashboardCardBase from './DashboardBase.server';
 import DashboardUptime from './DashboardUptime.client';
+import DashboardCardTotalDisconnectTime from './DashboardCardTotalDisconnectTime.client';
 
 export type allConnectionStatusType = {
 	id: number;
@@ -11,16 +12,23 @@ export type allConnectionStatusType = {
 export default function Dashboard() {
 	let now = Date.now();
 	let yesterday = now - 86400000;
+	let isWithinTimeFrame = true;
 	let allConnectionStatus = db
 		.prepare('SELECT * FROM connectionlogs WHERE time > ?')
 		.all(yesterday) as allConnectionStatusType;
+	if (!allConnectionStatus) {
+		allConnectionStatus = db
+			.prepare('SELECT * FROM connectionlogs ORDER BY column DESC LIMIT 1')
+			.all() as allConnectionStatusType;
+		isWithinTimeFrame = false;
+	}
 	return (
 		<>
 			<DashboardCardNetWork />
 			<DashboardCardCurrentStatus allConnectionStatus={allConnectionStatus} />
 			<DashboardCardTotalDisconnectTime
-				totalDisconnects={4}
-				totalDowntime={0}
+				allConnectionStatus={allConnectionStatus}
+				isWithinTimeFrame={isWithinTimeFrame}
 			/>
 		</>
 	);
@@ -43,26 +51,6 @@ async function DashboardCardNetWork() {
 					<div>
 						<SpeedMeter mbpsInNumber={20} precentage={20} />
 					</div>
-				</div>
-			</DashboardCardBase>
-		</>
-	);
-}
-
-function DashboardCardTotalDisconnectTime({
-	totalDisconnects,
-	totalDowntime
-}: {
-	totalDisconnects: number;
-	totalDowntime: number;
-}) {
-	let status = totalDisconnects > 0 ? 'bg-red-800' : 'bg-emerald-700';
-	return (
-		<>
-			<DashboardCardBase backgroundColor={status}>
-				<div className="text-xl font-bold">
-					Disconnected {totalDisconnects} times with 4 Hours, 32 Mintues, 30
-					Senconds of downtime in 24 hours
 				</div>
 			</DashboardCardBase>
 		</>
