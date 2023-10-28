@@ -3,6 +3,7 @@ import { DashboardCardCurrentStatus } from './DashboardCardCurrentStatus.client'
 import DashboardCardBase from './DashboardBase.server';
 import DashboardUptime from './DashboardUptime.client';
 import DashboardCardTotalDisconnectTime from './DashboardCardTotalDisconnectTime.client';
+import { getUptime } from '@/lib/get-uptime';
 
 export type allConnectionStatusType = {
 	id: number;
@@ -35,9 +36,7 @@ export default function Dashboard() {
 }
 
 async function DashboardCardNetWork() {
-	let uptime = (await fetch(`${process.env.NEXT_PUBLIC_URL}/api/get-uptime`, {
-		cache: 'no-cache'
-	}).then((res) => res.json())) as string;
+	let uptime = await getUptime();
 	return (
 		<>
 			<DashboardCardBase backgroundColor="bg-base-100">
