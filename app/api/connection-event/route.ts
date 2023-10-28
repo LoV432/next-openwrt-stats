@@ -23,6 +23,13 @@ export async function POST(request: Request) {
 		.prepare('SELECT * FROM connectionlogs ORDER BY id DESC LIMIT 1')
 		.get() as lastConnectionEventType;
 
+	if (!lastConnectionEvent) {
+		lastConnectionEvent = {
+			id: 0,
+			status: 'A New Beginning :)',
+			time: 0
+		};
+	}
 	if (lastConnectionEvent.status === body.status) {
 		return new Response(
 			JSON.stringify({ info: 'Connection event already exists' }),
