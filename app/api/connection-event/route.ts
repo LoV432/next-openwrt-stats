@@ -19,6 +19,15 @@ export async function POST(request: Request) {
 		});
 	}
 
+	if (body.status !== 'connected' && body.status !== 'disconnected') {
+		return new Response(
+			JSON.stringify({ error: 'Status must be connected or disconnected' }),
+			{
+				status: 400
+			}
+		);
+	}
+
 	let lastConnectionEvent = db
 		.prepare('SELECT * FROM connectionlogs ORDER BY id DESC LIMIT 1')
 		.get() as lastConnectionEventType;
