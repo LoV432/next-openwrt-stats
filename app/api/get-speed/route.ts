@@ -4,6 +4,7 @@ type speedReturnType = {
 	id: number;
 	result: [0, { code: string; stdout: string }?];
 };
+export async function POST() {}
 
 export async function GET() {
 	let speed = await getSpeed();
@@ -14,7 +15,6 @@ export async function GET() {
 		}
 	});
 }
-
 async function getSpeed() {
 	let token = (await getToken()) as string;
 	let speedResponse = await makeRequest(token);

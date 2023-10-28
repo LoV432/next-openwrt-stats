@@ -4,6 +4,7 @@ type upTimeReturnType = {
 	id: number;
 	result?: [0, { data: string }];
 };
+export async function POST() {}
 
 export async function GET() {
 	let uptime = await getUptime();
