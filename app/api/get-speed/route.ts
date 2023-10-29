@@ -72,6 +72,7 @@ function formatSpeedOutput(speed: string) {
 
 	for (let i = 1; i < lines.length; i++) {
 		const columns = lines[i].split('\t');
+		if (!columns.includes('br-lan')) continue;
 		const rowData: { [key: string]: string } = {};
 
 		for (let j = 0; j < headers.length; j++) {
