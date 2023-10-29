@@ -8,6 +8,16 @@ export async function POST() {}
 
 export async function GET() {
 	let speed = await getSpeed();
+	if (speed === 'Token not found') {
+		return new Response(JSON.stringify({ error: 'Token not found' }), {
+			status: 400
+		});
+	}
+	if (speed === 'Something went wrong') {
+		return new Response(JSON.stringify({ error: 'Something went wrong' }), {
+			status: 400
+		});
+	}
 	return new Response(speed, {
 		status: 200,
 		headers: {
