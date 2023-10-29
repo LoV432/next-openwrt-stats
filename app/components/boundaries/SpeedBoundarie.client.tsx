@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { SetterOrUpdater, atom, useRecoilState } from 'recoil';
 
 type allUsersSpeedType = {
-	mac: string;
+	ip: string;
 	in: string;
 	out: string;
 }[];
@@ -63,7 +63,7 @@ async function fetchDataAndCalculateMbps(
 		newData = JSON.parse(JSON.stringify(data));
 		tempNewData = JSON.parse(JSON.stringify(newData));
 		newData.map((user) => {
-			const oldUser = oldData.find((oldUser) => oldUser.mac === user.mac);
+			const oldUser = oldData.find((oldUser) => oldUser.ip === user.ip);
 			if (oldUser) {
 				let inValue = parseFloat(user.in) - parseFloat(oldUser.in);
 				inValue = inValue * 8;

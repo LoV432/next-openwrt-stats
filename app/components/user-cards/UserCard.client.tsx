@@ -60,7 +60,7 @@ function UserSpeed({ macaddress }: { macaddress: string }) {
 	useEffect(() => {
 		if (!allSpeeds[0].length) return;
 		allSpeeds[0].map((user) => {
-			if (user.mac === macaddress) {
+			if (user.ip === macaddress) {
 				setSpeed({
 					upload: user.in,
 					download: user.out

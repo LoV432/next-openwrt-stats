@@ -76,7 +76,7 @@ function formatSpeedOutput(speed: string) {
 		const rowData: { [key: string]: string } = {};
 
 		for (let j = 0; j < headers.length; j++) {
-			if (headers[j] === 'mac' || headers[j] === 'in' || headers[j] === 'out') {
+			if (headers[j] === 'ip' || headers[j] === 'in' || headers[j] === 'out') {
 				rowData[headers[j]] = columns[j];
 			}
 		}
