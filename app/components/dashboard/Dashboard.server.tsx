@@ -3,6 +3,7 @@ import { DashboardCardCurrentStatus } from './DashboardCardCurrentStatus.client'
 import DashboardCardBase from './DashboardBase.server';
 import DashboardUptime from './DashboardUptime.client';
 import DashboardCardTotalDisconnectTime from './DashboardCardTotalDisconnectTime.client';
+import SpeedMeter from './SpeedMeter.client';
 import { getUptime } from '@/lib/get-uptime';
 
 export type allConnectionStatusType = {
@@ -45,32 +46,13 @@ async function DashboardCardNetWork() {
 				</div>
 				<div>
 					<div className="my-3">
-						<SpeedMeter mbpsInNumber={30} precentage={50} />
+						<SpeedMeter upload={false} />
 					</div>
 					<div>
-						<SpeedMeter mbpsInNumber={20} precentage={20} />
+						<SpeedMeter upload={true} />
 					</div>
 				</div>
 			</DashboardCardBase>
-		</>
-	);
-}
-
-function SpeedMeter({
-	precentage,
-	mbpsInNumber
-}: {
-	precentage: number;
-	mbpsInNumber: number;
-}) {
-	return (
-		<>
-			<progress
-				className="progress progress-error w-56"
-				value={precentage}
-				max="100"
-			></progress>
-			<p>{mbpsInNumber} Mbps</p>
 		</>
 	);
 }
