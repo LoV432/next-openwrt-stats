@@ -18,9 +18,9 @@ export default function Dashboard() {
 	let allConnectionStatus = db
 		.prepare('SELECT * FROM connectionlogs WHERE time > ?')
 		.all(yesterday) as allConnectionStatusType;
-	if (!allConnectionStatus) {
+	if (allConnectionStatus.length === 0) {
 		allConnectionStatus = db
-			.prepare('SELECT * FROM connectionlogs ORDER BY column DESC LIMIT 1')
+			.prepare('SELECT * FROM connectionlogs ORDER BY id DESC LIMIT 1')
 			.all() as allConnectionStatusType;
 		isWithinTimeFrame = false;
 	}

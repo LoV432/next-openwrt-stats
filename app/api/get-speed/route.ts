@@ -2,7 +2,7 @@ import { getToken } from '@/lib/get-token';
 
 type speedReturnType = {
 	id: number;
-	result: [0, { code: string; stdout: string }?];
+	result?: [0, { code: string; stdout: string }];
 };
 export async function POST() {}
 
@@ -28,21 +28,13 @@ export async function GET() {
 async function getSpeed() {
 	let token = (await getToken()) as string;
 	let speedResponse = await makeRequest(token);
-	if (
-		!(speedResponse && speedResponse.result && speedResponse.result.length > 1)
-	) {
+	if (!speedResponse.result) {
 		let newToken = await getToken(true);
 		if (!newToken) {
 			return 'Token not found';
 		}
 		speedResponse = await makeRequest(newToken);
-		if (
-			!(
-				speedResponse &&
-				speedResponse.result &&
-				speedResponse.result.length > 1
-			)
-		) {
+		if (!speedResponse.result) {
 			return 'Something went wrong';
 		}
 	}

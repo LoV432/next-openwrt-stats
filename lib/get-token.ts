@@ -7,7 +7,7 @@ type tokenFromDBReturnType = {
 
 type loginReturnType = {
 	id: number;
-	result: [number, { ubus_rpc_session?: string }];
+	result: [number, { ubus_rpc_session: string }?];
 };
 
 export async function getToken(forceLogin = false) {
@@ -52,7 +52,7 @@ async function loginToRouter() {
 
 	let response = (await makeRequest.json()) as loginReturnType;
 
-	if (!response.result[1].ubus_rpc_session) {
+	if (!response.result[1]) {
 		return undefined;
 	} else {
 		return response.result[1].ubus_rpc_session;

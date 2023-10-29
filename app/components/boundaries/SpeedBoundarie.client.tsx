@@ -57,6 +57,9 @@ async function fetchDataAndCalculateMbps(
 	let interval = setInterval(async () => {
 		const response = await fetch('/api/get-speed', { cache: 'no-cache' });
 		const data = (await response.json()) as allUsersSpeedType;
+		if (response.status !== 200) {
+			return;
+		}
 		newData = JSON.parse(JSON.stringify(data));
 		tempNewData = JSON.parse(JSON.stringify(newData));
 		newData.map((user) => {
