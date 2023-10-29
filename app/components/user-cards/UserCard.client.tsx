@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRecoilState } from 'recoil';
+import { speedState } from '../boundaries/SpeedBoundarie.client';
 
 export default function UserCard({
 	name,
@@ -27,24 +29,50 @@ export default function UserCard({
 		);
 	}, []);
 	return (
-		<div className="card card-side m-5 w-full bg-base-100 shadow-xl sm:w-[400px] md:w-[400px] lg:max-w-[700px]">
-			<figure className="w-1/3 p-4">
-				<img className="" src={`/${devicetype}.svg`} alt={devicetype} />
-			</figure>
-			<div className="card-body w-2/3 pl-3">
-				<h2 className="card-title border-b border-white border-opacity-30 pb-2">
-					{name}
-				</h2>
-				<h2 className="card-title border-b border-white border-opacity-30 pb-2">
-					{ip}
-				</h2>
-				<h2 className="card-title line-clamp-1 border-b border-white border-opacity-30 pb-2">
-					{macaddress.toUpperCase()}
-				</h2>
-				<h2 className="card-title border-b border-white border-opacity-30 pb-2">
-					{localUpdateTime || lastupdated}
-				</h2>
+		<>
+			<div className="card card-side m-5 w-full bg-base-100 shadow-xl sm:w-[400px] md:w-[400px] lg:max-w-[700px]">
+				<UserSpeed macaddress={macaddress} />
+				<figure className="w-1/3 p-4">
+					<img className="" src={`/${devicetype}.svg`} alt={devicetype} />
+				</figure>
+				<div className="card-body w-2/3 pl-3">
+					<h2 className="card-title border-b border-white border-opacity-30 pb-2">
+						{name}
+					</h2>
+					<h2 className="card-title border-b border-white border-opacity-30 pb-2">
+						{ip}
+					</h2>
+					<h2 className="card-title line-clamp-1 border-b border-white border-opacity-30 pb-2">
+						{macaddress.toUpperCase()}
+					</h2>
+					<h2 className="card-title border-b border-white border-opacity-30 pb-2">
+						{localUpdateTime || lastupdated}
+					</h2>
+				</div>
 			</div>
-		</div>
+		</>
+	);
+}
+
+function UserSpeed({ macaddress }: { macaddress: string }) {
+	const [allSpeeds] = useRecoilState(speedState);
+	const [speed, setSpeed] = useState({ upload: 0, download: 0 });
+	useEffect(() => {
+		if (!allSpeeds[0].length) return;
+		allSpeeds[0].map((user) => {
+			if (user.mac === macaddress) {
+				setSpeed({
+					upload: parseFloat(user.in),
+					download: parseFloat(user.out)
+				});
+			}
+		});
+	}, [allSpeeds]);
+	return speed.upload > 0 || speed.download > 0 ? (
+		<p className="absolute right-4">
+			▲ {speed.upload} / {speed.download} ▼
+		</p>
+	) : (
+		<></>
 	);
 }
