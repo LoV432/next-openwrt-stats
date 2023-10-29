@@ -10,8 +10,9 @@ export default function SpeedMeter({ upload }: { upload: boolean }) {
 	}));
 	const [speed] = useRecoilState(speedState);
 	const [precentage, setPrecentage] = useState(0);
-	const [mbpsInNumber, setMbpsInNumber] = useState(1);
+	const [mbpsInNumber, setMbpsInNumber] = useState(0);
 	useEffect(() => {
+		if (!speed[0].length) return;
 		let mbpsInNumber = upload
 			? speed[1].totalMbpsUpload
 			: speed[1].totalMbpsDownload;
