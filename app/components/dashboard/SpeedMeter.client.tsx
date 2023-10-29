@@ -6,7 +6,7 @@ import { useSpring, animated } from '@react-spring/web';
 
 export default function SpeedMeter({ upload }: { upload: boolean }) {
 	const [springPercentage, setSpringPercentage] = useSpring(() => ({
-		from: { '--value': 1 }
+		from: { '--percentage': 1 }
 	}));
 	const [speed] = useRecoilState(speedState);
 	const [precentage, setPrecentage] = useState(0);
@@ -20,8 +20,8 @@ export default function SpeedMeter({ upload }: { upload: boolean }) {
 		let newPercentage = Math.round((mbpsInNumber * 100) / 40); // TODO: hardcoded max network speed value. Make dynamic
 		setPrecentage(newPercentage);
 		setSpringPercentage.start({
-			from: { '--value': oldPercentage },
-			to: { '--value': newPercentage }
+			from: { '--percentage': oldPercentage },
+			to: { '--percentage': newPercentage }
 		});
 	}, [speed]);
 	return (
@@ -29,7 +29,7 @@ export default function SpeedMeter({ upload }: { upload: boolean }) {
 			<p>{upload ? 'Upload:' : 'Download:'}</p>
 			<animated.progress
 				className="progress progress-error w-56"
-				value={springPercentage['--value']}
+				value={springPercentage['--percentage']}
 				max="100"
 			></animated.progress>
 			<p className="sm:inline-block sm:pl-5">{mbpsInNumber} Mbps</p>
