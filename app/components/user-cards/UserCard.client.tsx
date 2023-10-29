@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import { speedState } from '../boundaries/SpeedBoundarie.client';
+import { allSpeedStates } from '../boundaries/SpeedBoundarie.client';
 
 export default function UserCard({
 	name,
@@ -55,7 +55,7 @@ export default function UserCard({
 }
 
 function UserSpeed({ macaddress }: { macaddress: string }) {
-	const [allSpeeds] = useRecoilState(speedState);
+	const [allSpeeds] = useRecoilState(allSpeedStates);
 	const [speed, setSpeed] = useState({ upload: '', download: '' });
 	useEffect(() => {
 		if (!allSpeeds[0].length) return;

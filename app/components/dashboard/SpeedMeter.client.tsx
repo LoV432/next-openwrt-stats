@@ -1,6 +1,6 @@
 'use client';
 import { useRecoilState } from 'recoil';
-import { speedState } from '../boundaries/SpeedBoundarie.client';
+import { allSpeedStates } from '../boundaries/SpeedBoundarie.client';
 import { useEffect, useState } from 'react';
 import { useSpring, animated } from '@react-spring/web';
 
@@ -8,7 +8,7 @@ export default function SpeedMeter({ upload }: { upload: boolean }) {
 	const [springPercentage, setSpringPercentage] = useSpring(() => ({
 		from: { '--percentage': 1 }
 	}));
-	const [speed] = useRecoilState(speedState);
+	const [speed] = useRecoilState(allSpeedStates);
 	const [precentage, setPrecentage] = useState(0);
 	const [mbpsInNumber, setMbpsInNumber] = useState(0);
 	useEffect(() => {

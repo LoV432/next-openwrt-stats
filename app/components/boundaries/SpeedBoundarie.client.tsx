@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { SetterOrUpdater, atom, useRecoilState } from 'recoil';
 
-type speedReturnType = {
+type allUsersSpeedType = {
 	mac: string;
 	in: string;
 	out: string;
@@ -14,7 +14,7 @@ export default function SpeedWrapper({
 }: {
 	children: React.ReactNode;
 }) {
-	const [speed, setSpeed] = useRecoilState(speedState);
+	const [speed, setSpeed] = useRecoilState(allSpeedStates);
 	useEffect(() => {
 		let interval: NodeJS.Timeout;
 		(async () => {
@@ -24,13 +24,13 @@ export default function SpeedWrapper({
 			clearInterval(interval);
 		};
 	}, []);
-	return <>{children}</>; //Everything inside this child will have access to speedState
+	return <>{children}</>; //Everything inside this child will have access to allSpeedStates
 }
 
-export const speedState = atom({
+export const allSpeedStates = atom({
 	key: 'speed',
 	default: [{}, {}] as [
-		speedReturnType,
+		allUsersSpeedType,
 		{ totalMbpsUpload: string; totalMbpsDownload: string }
 	]
 });
@@ -38,7 +38,7 @@ export const speedState = atom({
 async function fetchDataAndCalculateMbps(
 	setSpeed: SetterOrUpdater<
 		[
-			speedReturnType,
+			allUsersSpeedType,
 			{
 				totalMbpsUpload: string;
 				totalMbpsDownload: string;
@@ -47,7 +47,7 @@ async function fetchDataAndCalculateMbps(
 	>
 ) {
 	const response = await fetch('/api/get-speed', { cache: 'no-cache' });
-	const data = (await response.json()) as speedReturnType;
+	const data = (await response.json()) as allUsersSpeedType;
 	let oldData = data;
 	let newData = data;
 	let tempNewData = data;
@@ -56,7 +56,7 @@ async function fetchDataAndCalculateMbps(
 
 	let interval = setInterval(async () => {
 		const response = await fetch('/api/get-speed', { cache: 'no-cache' });
-		const data = (await response.json()) as speedReturnType;
+		const data = (await response.json()) as allUsersSpeedType;
 		newData = JSON.parse(JSON.stringify(data));
 		tempNewData = JSON.parse(JSON.stringify(newData));
 		newData.map((user) => {
