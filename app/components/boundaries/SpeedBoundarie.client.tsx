@@ -31,7 +31,7 @@ export const speedState = atom({
 	key: 'speed',
 	default: [{}, {}] as [
 		speedReturnType,
-		{ totalMbpsUpload: number; totalMbpsDownload: number }
+		{ totalMbpsUpload: string; totalMbpsDownload: string }
 	]
 });
 
@@ -40,8 +40,8 @@ async function fetchDataAndCalculateMbps(
 		[
 			speedReturnType,
 			{
-				totalMbpsUpload: number;
-				totalMbpsDownload: number;
+				totalMbpsUpload: string;
+				totalMbpsDownload: string;
 			}
 		]
 	>
@@ -62,11 +62,11 @@ async function fetchDataAndCalculateMbps(
 		newData.map((user) => {
 			const oldUser = oldData.find((oldUser) => oldUser.mac === user.mac);
 			if (oldUser) {
-				let inValue = parseInt(user.in) - parseInt(oldUser.in);
+				let inValue = parseFloat(user.in) - parseFloat(oldUser.in);
 				inValue = inValue * 8;
 				inValue = inValue / 1000000;
 				inValue = inValue / 5;
-				let outValue = parseInt(user.out) - parseInt(oldUser.out);
+				let outValue = parseFloat(user.out) - parseFloat(oldUser.out);
 				outValue = outValue * 8;
 				outValue = outValue / 1000000;
 				outValue = outValue / 5;
@@ -78,14 +78,14 @@ async function fetchDataAndCalculateMbps(
 		totalMbpsDownload = 0;
 		totalMbpsUpload = 0;
 		newData.map((user) => {
-			totalMbpsUpload += parseInt(user.out);
-			totalMbpsDownload += parseInt(user.in);
+			totalMbpsUpload += parseFloat(user.out);
+			totalMbpsDownload += parseFloat(user.in);
 		});
 		setSpeed([
 			newData,
 			{
-				totalMbpsUpload: totalMbpsUpload,
-				totalMbpsDownload: totalMbpsDownload
+				totalMbpsUpload: totalMbpsUpload.toFixed(2),
+				totalMbpsDownload: totalMbpsDownload.toFixed(2)
 			}
 		]);
 	}, 5000);

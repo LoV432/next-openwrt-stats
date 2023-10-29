@@ -56,19 +56,19 @@ export default function UserCard({
 
 function UserSpeed({ macaddress }: { macaddress: string }) {
 	const [allSpeeds] = useRecoilState(speedState);
-	const [speed, setSpeed] = useState({ upload: 0, download: 0 });
+	const [speed, setSpeed] = useState({ upload: '', download: '' });
 	useEffect(() => {
 		if (!allSpeeds[0].length) return;
 		allSpeeds[0].map((user) => {
 			if (user.mac === macaddress) {
 				setSpeed({
-					upload: parseFloat(user.in),
-					download: parseFloat(user.out)
+					upload: user.in,
+					download: user.out
 				});
 			}
 		});
 	}, [allSpeeds]);
-	return speed.upload > 0 || speed.download > 0 ? (
+	return parseFloat(speed.upload) > 0 || parseFloat(speed.download) > 0 ? (
 		<p className="absolute right-4">
 			▲ {speed.upload} / {speed.download} ▼
 		</p>

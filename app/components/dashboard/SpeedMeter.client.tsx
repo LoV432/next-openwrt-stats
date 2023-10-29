@@ -16,9 +16,9 @@ export default function SpeedMeter({ upload }: { upload: boolean }) {
 		let mbpsInNumber = upload
 			? speed[1].totalMbpsUpload
 			: speed[1].totalMbpsDownload;
-		setMbpsInNumber(mbpsInNumber);
+		setMbpsInNumber(parseFloat(mbpsInNumber));
 		let oldPercentage = precentage;
-		let newPercentage = Math.round((mbpsInNumber * 100) / 40); // TODO: hardcoded max network speed value. Make dynamic
+		let newPercentage = Math.round((parseFloat(mbpsInNumber) * 100) / 40); // TODO: hardcoded max network speed value. Make dynamic
 		setPrecentage(newPercentage);
 		setSpringPercentage.start({
 			from: { '--percentage': oldPercentage },
