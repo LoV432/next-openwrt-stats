@@ -2,19 +2,21 @@ import { getToken } from '@/lib/get-token';
 
 type upTimeReturnType = {
 	id: number;
-	result?: [0, { data: string }];
+	result?: [0, { data: string }?];
 };
 
 export async function getUptime() {
 	let token = (await getToken()) as string;
 	let uptimeResponse = await makeRequest(token);
-	if (!uptimeResponse.result) {
+	if (!uptimeResponse.result || !uptimeResponse.result[1]) {
 		let newToken = await getToken(true);
 		if (!newToken) {
+			console.log('getUptime: Token not found');
 			return 'Token not found';
 		}
 		uptimeResponse = await makeRequest(newToken);
-		if (!uptimeResponse.result) {
+		if (!uptimeResponse.result || !uptimeResponse.result[1]) {
+			console.log('getUptime: Something went wrong');
 			return 'Something went wrong';
 		}
 	}
