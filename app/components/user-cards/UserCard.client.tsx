@@ -31,12 +31,12 @@ export default function UserCard({
 	}, []);
 	return (
 		<>
-			<div className="card card-side m-5 h-fit w-full bg-base-100 shadow-xl sm:w-[400px] md:w-[400px] lg:max-w-[700px]">
+			<div className="card card-side m-5 h-fit w-full bg-base-100 p-2 shadow-xl sm:w-[300px]">
 				<UserSpeed ip={ip} />
-				<figure className="w-1/4 p-4">
+				<figure className="w-1/4 px-2 py-4">
 					<img className="" src={`/${devicetype}.svg`} alt={devicetype} />
 				</figure>
-				<div className="card-body w-2/3 pl-3">
+				<div className="card-body w-2/3 p-4">
 					<h2 className="card-title border-b border-white border-opacity-30 pb-2">
 						{name}
 					</h2>
@@ -82,7 +82,7 @@ function UserSpeed({ ip }: { ip: string }) {
 		});
 	}, [allSpeeds]);
 	return parseFloat(speed.upload) > 0 || parseFloat(speed.download) > 0 ? (
-		<p className="absolute right-4">
+		<p className="semi-bold absolute -top-6 text-sm text-zinc-300">
 			▲ {speed.upload} / {speed.download} ▼
 		</p>
 	) : (
