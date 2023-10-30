@@ -27,10 +27,10 @@ export default function SpeedMeter({ upload }: { upload: boolean }) {
 	}, [speed]);
 	return (
 		<>
-			<p className="w-5/6">
+			<div className="w-5/6">
 				{upload ? 'Upload:' : 'Download:'}
 				<p className="float-right inline-block">{mbpsInNumber} Mbps</p>
-			</p>
+			</div>
 
 			<animated.progress
 				className="progress progress-error w-5/6"
