@@ -31,7 +31,7 @@ export default function UserCard({
 	return (
 		<>
 			<div className="card card-side m-5 w-full bg-base-100 shadow-xl sm:w-[400px] md:w-[400px] lg:max-w-[700px]">
-				<UserSpeed macaddress={macaddress} />
+				<UserSpeed ip={ip} />
 				<figure className="w-1/3 p-4">
 					<img className="" src={`/${devicetype}.svg`} alt={devicetype} />
 				</figure>
@@ -54,13 +54,13 @@ export default function UserCard({
 	);
 }
 
-function UserSpeed({ macaddress }: { macaddress: string }) {
+function UserSpeed({ ip }: { ip: string }) {
 	const [allSpeeds] = useRecoilState(allSpeedStates);
 	const [speed, setSpeed] = useState({ upload: '', download: '' });
 	useEffect(() => {
 		if (!allSpeeds[0].length) return;
 		allSpeeds[0].map((user) => {
-			if (user.ip === macaddress) {
+			if (user.ip === ip) {
 				setSpeed({
 					upload: user.in,
 					download: user.out
