@@ -62,8 +62,8 @@ function UserSpeed({ ip }: { ip: string }) {
 		allSpeeds[0].map((user) => {
 			if (user.ip === ip) {
 				setSpeed({
-					upload: user.in,
-					download: user.out
+					upload: user.out,
+					download: user.in
 				});
 			}
 		});
