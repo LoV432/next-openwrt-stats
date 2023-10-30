@@ -27,13 +27,16 @@ export default function SpeedMeter({ upload }: { upload: boolean }) {
 	}, [speed]);
 	return (
 		<>
-			<p>{upload ? 'Upload:' : 'Download:'}</p>
+			<p className="w-5/6">
+				{upload ? 'Upload:' : 'Download:'}
+				<p className="float-right inline-block">{mbpsInNumber} Mbps</p>
+			</p>
+
 			<animated.progress
-				className="progress progress-error w-56"
+				className="progress progress-error w-5/6"
 				value={springPercentage['--percentage']}
 				max="100"
 			></animated.progress>
-			<p className="sm:inline-block sm:pl-5">{mbpsInNumber} Mbps</p>
 		</>
 	);
 }
