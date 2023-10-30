@@ -18,6 +18,7 @@ export default function UserCard({
 	devicetype: string;
 }) {
 	const [localUpdateTime, setLocalUpdateTime] = useState('');
+	const [showDetails, setShowDetails] = useState(false);
 	useEffect(() => {
 		setLocalUpdateTime(
 			new Date(lastupdated).toLocaleString('en-US', {
@@ -30,9 +31,9 @@ export default function UserCard({
 	}, []);
 	return (
 		<>
-			<div className="card card-side m-5 w-full bg-base-100 shadow-xl sm:w-[400px] md:w-[400px] lg:max-w-[700px]">
+			<div className="card card-side m-5 h-fit w-full bg-base-100 shadow-xl sm:w-[400px] md:w-[400px] lg:max-w-[700px]">
 				<UserSpeed ip={ip} />
-				<figure className="w-1/3 p-4">
+				<figure className="w-1/4 p-4">
 					<img className="" src={`/${devicetype}.svg`} alt={devicetype} />
 				</figure>
 				<div className="card-body w-2/3 pl-3">
@@ -42,12 +43,24 @@ export default function UserCard({
 					<h2 className="card-title border-b border-white border-opacity-30 pb-2">
 						{ip}
 					</h2>
-					<h2 className="card-title line-clamp-1 border-b border-white border-opacity-30 pb-2">
-						{macaddress.toUpperCase()}
-					</h2>
-					<h2 className="card-title border-b border-white border-opacity-30 pb-2">
-						{localUpdateTime || lastupdated}
-					</h2>
+					{showDetails ? (
+						<>
+							<h2 className="card-title line-clamp-1 border-b border-white border-opacity-30 pb-2">
+								{macaddress.toUpperCase()}
+							</h2>
+							<h2 className="card-title border-b border-white border-opacity-30 pb-2">
+								{localUpdateTime || lastupdated}
+							</h2>
+						</>
+					) : (
+						<></>
+					)}
+					<div
+						className="hover:cursor-pointer"
+						onClick={() => setShowDetails(!showDetails)}
+					>
+						{showDetails ? 'Hide Details' : 'Show Details'}
+					</div>
 				</div>
 			</div>
 		</>
