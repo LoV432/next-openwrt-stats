@@ -56,7 +56,7 @@ export default function UserCard({
 						<></>
 					)}
 					<div
-						className="hover:cursor-pointer"
+						className="text-right text-sm font-semibold text-zinc-500 hover:cursor-pointer"
 						onClick={() => setShowDetails(!showDetails)}
 					>
 						{showDetails ? 'Hide Details' : 'Show Details'}
