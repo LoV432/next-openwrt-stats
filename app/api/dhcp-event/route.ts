@@ -9,11 +9,12 @@ type dhcpEventType = {
 
 export type userReturnType = {
 	id: number;
+	displayName: string;
 	name: string;
 	ip: string;
-	macAddress: string;
-	lastUpdated: number;
-	deviceType: string;
+	macaddress: string;
+	lastupdated: number;
+	devicetype: string;
 	lastEventType: string;
 };
 
