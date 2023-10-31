@@ -7,7 +7,7 @@ type dhcpEventType = {
 	type: string;
 };
 
-type userReturnType = {
+export type userReturnType = {
 	id: number;
 	name: string;
 	ip: string;
