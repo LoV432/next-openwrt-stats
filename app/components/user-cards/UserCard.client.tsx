@@ -6,12 +6,14 @@ import { allSpeedStates } from '../boundaries/SpeedBoundarie.client';
 
 export default function UserCard({
 	name,
+	displayName,
 	ip,
 	macaddress,
 	lastupdated,
 	devicetype
 }: {
 	name: string;
+	displayName: string;
 	ip: string;
 	macaddress: string;
 	lastupdated: number;
@@ -38,7 +40,7 @@ export default function UserCard({
 				</figure>
 				<div className="card-body w-2/3 p-4">
 					<h2 className="card-title border-b border-white border-opacity-30 pb-2">
-						{name}
+						{displayName || name}
 					</h2>
 					<h2 className="card-title border-b border-white border-opacity-30 pb-2">
 						{ip}

@@ -6,6 +6,7 @@ export default function UserCards() {
 	return allUsers.map((user) => (
 		<UserCard
 			name={user.name}
+			displayName={user.displayName}
 			ip={user.ip}
 			macaddress={user.macaddress}
 			lastupdated={user.lastupdated}
