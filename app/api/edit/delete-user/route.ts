@@ -8,6 +8,12 @@ type deleteUserType = {
 export async function POST(request: Request) {
 	const body = (await request.json()) as deleteUserType;
 
+	if (!body.macAddress || body.macAddress === '') {
+		return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+			status: 400
+		});
+	}
+
 	let existingMacAddress = db
 		.prepare('SELECT * FROM users WHERE macaddress = ?')
 		.get(body.macAddress) as userReturnType | undefined;
