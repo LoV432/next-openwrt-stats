@@ -15,7 +15,7 @@ export default function DashboardUptime({ uptime }: { uptime: string }) {
 		}, 60000);
 	}, []);
 
-	return humanReadableUptime;
+	return <>Uptime: {humanReadableUptime}</>;
 }
 
 function formatRouterUpTime(totalSeconds: number) {
