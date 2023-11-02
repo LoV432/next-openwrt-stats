@@ -11,6 +11,9 @@ export default function SpeedMeter({ upload }: { upload: boolean }) {
 	const [speed] = useRecoilState(allSpeedStates);
 	const [precentage, setPrecentage] = useState(0);
 	const [mbpsInNumber, setMbpsInNumber] = useState(0);
+	const maxSpeed = upload
+		? parseInt(process.env.NEXT_PUBLIC_MAX_UPLOAD_SPEED || '15')
+		: parseInt(process.env.NEXT_PUBLIC_MAX_DOWNLOAD_SPEED || '15');
 	useEffect(() => {
 		if (!speed[0].length) return;
 		let mbpsInNumber = upload
@@ -18,7 +21,7 @@ export default function SpeedMeter({ upload }: { upload: boolean }) {
 			: speed[1].totalMbpsDownload;
 		setMbpsInNumber(parseFloat(mbpsInNumber));
 		let oldPercentage = precentage;
-		let newPercentage = Math.round((parseFloat(mbpsInNumber) * 100) / 40); // TODO: hardcoded max network speed value. Make dynamic
+		let newPercentage = Math.round((parseFloat(mbpsInNumber) * 100) / maxSpeed);
 		setPrecentage(newPercentage);
 		setSpringPercentage.start({
 			from: { '--percentage': oldPercentage },
