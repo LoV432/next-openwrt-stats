@@ -135,9 +135,10 @@ function DropDown({
 			{dropDownIsOpen && (
 				<>
 					<div className="absolute left-0 top-0 z-30 h-20">
-						<ul className="menu rounded-box w-36 bg-base-200">
+						<ul className="text-md menu rounded-box w-48 bg-base-200 font-semibold">
 							<li>
 								<p
+									className="flex h-12 justify-center"
 									onClick={() => {
 										toggleNameModal();
 										SetDropDownIsOpen(false);
@@ -148,6 +149,7 @@ function DropDown({
 							</li>
 							<li>
 								<p
+									className="flex h-12 justify-center"
 									onClick={() => {
 										toggleIconModal();
 										SetDropDownIsOpen(false);
@@ -157,15 +159,15 @@ function DropDown({
 								</p>
 							</li>
 							<li>
-								<a
+								<p
 									onClick={() => {
 										setDeleteDeviceModalIsOpen(true);
 										SetDropDownIsOpen(false);
 									}}
-									className="!btn-error !bg-base-200 !text-white hover:!text-black hover:!outline-none focus:!text-black active:!text-black"
+									className="!btn-error flex h-12 justify-center !bg-base-200 !text-white hover:!text-black hover:!outline-none focus:!text-black active:!text-black"
 								>
 									Delete
-								</a>
+								</p>
 							</li>
 						</ul>
 					</div>
