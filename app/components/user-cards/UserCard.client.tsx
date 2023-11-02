@@ -225,6 +225,12 @@ function NameChangePopUp({
 			<div className="modal-box">
 				<h3 className="pb-5 text-lg font-bold">Enter New Name</h3>
 				<input
+					autoFocus
+					onKeyDown={(e) => {
+						if (e.key === 'Enter') {
+							changeName();
+						}
+					}}
 					ref={changeNameValue}
 					type="text"
 					placeholder="Name"
