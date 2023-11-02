@@ -68,11 +68,11 @@ async function fetchDataAndCalculateMbps(
 				let inValue = parseFloat(user.in) - parseFloat(oldUser.in);
 				inValue = inValue * 8;
 				inValue = inValue / 1000000;
-				inValue = inValue / 5;
+				inValue = inValue / 2;
 				let outValue = parseFloat(user.out) - parseFloat(oldUser.out);
 				outValue = outValue * 8;
 				outValue = outValue / 1000000;
-				outValue = outValue / 5;
+				outValue = outValue / 2;
 				user.in = inValue.toFixed(2);
 				user.out = outValue.toFixed(2);
 			}
@@ -91,6 +91,6 @@ async function fetchDataAndCalculateMbps(
 				totalMbpsDownload: totalMbpsDownload.toFixed(2)
 			}
 		]);
-	}, 5000);
+	}, 2000);
 	return interval;
 }
