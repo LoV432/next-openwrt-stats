@@ -104,6 +104,7 @@ function DropDown({
 	const [macAddress] = useState(macaddress);
 	const [changeNameModalIsOpen, setChangeNamemodalIsOpen] = useState(false);
 	const [iconModalIsOpen, setIconModalIsOpen] = useState(false);
+	const [deleteDeviceModalIsOpen, setDeleteDeviceModalIsOpen] = useState(false);
 
 	function toggleNameModal() {
 		setChangeNamemodalIsOpen(!changeNameModalIsOpen);
@@ -111,6 +112,10 @@ function DropDown({
 
 	function toggleIconModal() {
 		setIconModalIsOpen(!iconModalIsOpen);
+	}
+
+	function toggleDeleteDeviceModal() {
+		setDeleteDeviceModalIsOpen(!deleteDeviceModalIsOpen);
 	}
 
 	return (
@@ -152,7 +157,15 @@ function DropDown({
 								</p>
 							</li>
 							<li>
-								<a>Delete</a>
+								<a
+									onClick={() => {
+										setDeleteDeviceModalIsOpen(true);
+										SetDropDownIsOpen(false);
+									}}
+									className="!btn-error !bg-base-200 !text-white hover:!text-black hover:!outline-none focus:!text-black active:!text-black"
+								>
+									Delete
+								</a>
 							</li>
 						</ul>
 					</div>
@@ -174,6 +187,12 @@ function DropDown({
 				<IconChangePopUp
 					macAddress={macAddress}
 					toggleIconModal={toggleIconModal}
+				/>
+			)}
+			{deleteDeviceModalIsOpen && (
+				<DeleteDevicePopUp
+					macAddress={macAddress}
+					toggleDeleteDeviceModal={toggleDeleteDeviceModal}
 				/>
 			)}
 		</>
@@ -223,6 +242,52 @@ function NameChangePopUp({
 			</div>
 			<div className="modal-backdrop bg-zinc-700 opacity-30">
 				<button onClick={toggleNameModal}>close</button>
+			</div>
+		</dialog>
+	);
+}
+
+function DeleteDevicePopUp({
+	macAddress,
+	toggleDeleteDeviceModal
+}: {
+	macAddress: string;
+	toggleDeleteDeviceModal: () => void;
+}) {
+	let router = useRouter();
+	function deleteDevice() {
+		fetch(`/api/edit/delete-user`, {
+			body: JSON.stringify({
+				macAddress: macAddress
+			}),
+			method: 'POST'
+		});
+		toggleDeleteDeviceModal();
+		router.refresh();
+	}
+	return (
+		<dialog id="deleteDeviceModal" className="modal" open>
+			<div className="modal-box">
+				<h3 className="pb-5 text-lg font-bold">Delete Device</h3>
+				<p>Are you sure you want to delete this device?</p>
+				<button onClick={deleteDevice} className="btn btn-error mt-5 w-full">
+					Delete
+				</button>
+				<button
+					onClick={toggleDeleteDeviceModal}
+					className="btn btn-ghost mt-5 w-full"
+				>
+					Cancel
+				</button>
+				<button
+					onClick={toggleDeleteDeviceModal}
+					className="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
+				>
+					✕
+				</button>
+			</div>
+			<div className="modal-backdrop bg-zinc-700 opacity-30">
+				<button onClick={toggleDeleteDeviceModal}>close</button>
 			</div>
 		</dialog>
 	);
