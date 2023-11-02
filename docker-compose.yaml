@@ -1,0 +1,14 @@
+---
+version: "2.1"
+services:
+  openwrtstats:
+    image: lov432/openwrt-stats:latest
+    container_name: openwrtstats
+    volumes:
+     - ./db/:/app/db/
+    environment:
+      - PASSWORD= # Password given by router_setup.sh
+      - ROUTER_URL= # URL of your router
+      - NEXT_PUBLIC_MAX_UPLOAD_SPEED= # Max upload speed in Mbps
+      - NEXT_PUBLIC_MAX_DOWNLOAD_SPEED= # Max download speed in Mbps
+    restart: unless-stopped
