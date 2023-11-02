@@ -164,7 +164,7 @@ function DropDown({
 										setDeleteDeviceModalIsOpen(true);
 										SetDropDownIsOpen(false);
 									}}
-									className="!btn-error flex h-12 justify-center !bg-base-200 !text-white hover:!text-black hover:!outline-none focus:!text-black active:!text-black"
+									className="flex h-12 justify-center hover:!bg-error hover:!text-black focus:!bg-error focus:!text-black active:!bg-error active:!text-black "
 								>
 									Delete
 								</p>
