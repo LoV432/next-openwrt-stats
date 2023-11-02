@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: production
+        ref: master
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
