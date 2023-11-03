@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 	}
 
 	let existingMacAddress = db
-		.prepare('SELECT * FROM users WHERE macaddress = ?')
+		.prepare('SELECT * FROM users WHERE mac_address = ?')
 		.get(body.macAddress) as userReturnType | undefined;
 	if (!existingMacAddress) {
 		return new Response(

@@ -9,14 +9,14 @@ type dhcpEventType = {
 
 export type userReturnType = {
 	id: number;
-	indexNumber: number;
-	displayName: string;
+	index_number: number;
+	display_name: string;
 	name: string;
 	ip: string;
-	macaddress: string;
-	lastupdated: number;
-	devicetype: string;
-	lastEventType: string;
+	mac_address: string;
+	last_updated: number;
+	device_type: string;
+	last_event_type: string;
 };
 
 export async function POST(request: Request) {
@@ -38,13 +38,13 @@ export async function POST(request: Request) {
 	}
 
 	let existingMacAddress = db
-		.prepare('SELECT * FROM users WHERE macaddress = ?')
+		.prepare('SELECT * FROM users WHERE mac_address = ?')
 		.get(body.mac) as userReturnType | undefined;
 	if (existingMacAddress) {
 		let userID = existingMacAddress.id;
 		let updateDevice = db
 			.prepare(
-				'UPDATE users SET ip = ?, lastupdated = ?, lastEventType = ? WHERE id = ?'
+				'UPDATE users SET ip = ?, last_updated = ?, last_event_type = ? WHERE id = ?'
 			)
 			.run(body.ip, Date.now(), body.type, userID);
 		return new Response(JSON.stringify(updateDevice), {
@@ -52,14 +52,14 @@ export async function POST(request: Request) {
 		});
 	} else {
 		let highestIndex = db
-			.prepare('SELECT MAX(indexNumber) FROM users')
-			.get() as { 'MAX(indexNumber)': number };
+			.prepare('SELECT MAX(index_number) FROM users')
+			.get() as { 'MAX(index_number)': number };
 		let insertDevice = db
 			.prepare(
-				'INSERT INTO users (indexNumber, name, ip, macaddress, lastupdated, devicetype, lastEventType) VALUES (?, ?, ?, ?, ?, ?, ?)'
+				'INSERT INTO users (index_number, name, ip, mac_address, last_updated, device_type, last_event_type) VALUES (?, ?, ?, ?, ?, ?, ?)'
 			)
 			.run(
-				highestIndex['MAX(indexNumber)'] + 1,
+				highestIndex['MAX(index_number)'] + 1,
 				body.hostname,
 				body.ip,
 				body.mac,

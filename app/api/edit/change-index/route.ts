@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 	}
 
 	let currentUser = db
-		.prepare('SELECT * FROM users WHERE macaddress = ?')
+		.prepare('SELECT * FROM users WHERE mac_address = ?')
 		.get(body.macAddress) as userReturnType | undefined;
 	if (!currentUser) {
 		return new Response(
@@ -32,11 +32,11 @@ export async function POST(request: Request) {
 	}
 
 	let conflictingUser = db
-		.prepare('SELECT * FROM users WHERE indexNumber = ?')
+		.prepare('SELECT * FROM users WHERE index_number = ?')
 		.get(body.index) as userReturnType | undefined;
 	if (!conflictingUser) {
 		let updateIndex = db
-			.prepare('UPDATE users SET indexNumber = ? WHERE macaddress = ?')
+			.prepare('UPDATE users SET index_number = ? WHERE mac_address = ?')
 			.run(body.index, body.macAddress);
 		return new Response(JSON.stringify(updateIndex), {
 			status: 200
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 	}
 
 	let updateIndex = db.prepare(
-		'UPDATE users SET indexNumber = @index WHERE macaddress = @mac'
+		'UPDATE users SET index_number = @index WHERE mac_address = @mac'
 	);
 
 	let updateMany = db.transaction((users: { index: number; mac: string }[]) => {
@@ -59,8 +59,8 @@ export async function POST(request: Request) {
 			mac: body.macAddress
 		},
 		{
-			index: currentUser.indexNumber,
-			mac: conflictingUser.macaddress
+			index: currentUser.index_number,
+			mac: conflictingUser.mac_address
 		}
 	]);
 

@@ -5,26 +5,13 @@ import { useRecoilState } from 'recoil';
 import { allSpeedStates } from '../boundaries/SpeedBoundarie.client';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-export default function UserCard({
-	name,
-	displayName,
-	ip,
-	macaddress,
-	lastupdated,
-	devicetype
-}: {
-	name: string;
-	displayName: string;
-	ip: string;
-	macaddress: string;
-	lastupdated: number;
-	devicetype: string;
-}) {
+import { userReturnType } from '@/app/api/dhcp-event/route';
+export default function UserCard({ user }: { user: userReturnType }) {
 	const [localUpdateTime, setLocalUpdateTime] = useState('');
 	const [showDetails, setShowDetails] = useState(false);
 	useEffect(() => {
 		setLocalUpdateTime(
-			new Date(lastupdated).toLocaleString('en-US', {
+			new Date(user.last_updated).toLocaleString('en-US', {
 				day: '2-digit',
 				month: 'short',
 				hour: 'numeric',
@@ -35,24 +22,27 @@ export default function UserCard({
 	return (
 		<>
 			<div className="card card-side m-5 h-fit w-full bg-base-100 p-2 shadow-xl sm:w-[300px]">
-				<UserSpeed ip={ip} />
+				<UserSpeed ip={user.ip} />
 				<figure className="relative flex w-1/4 items-center justify-center overflow-visible px-1 py-4">
-					<DropDown macaddress={macaddress} deviceType={devicetype} />
+					<DropDown
+						mac_address={user.mac_address}
+						deviceType={user.device_type}
+					/>
 				</figure>
 				<div className="card-body w-2/3 p-4">
 					<h2 className="card-title border-b border-white border-opacity-30 pb-2">
-						{displayName || name}
+						{user.display_name || user.name}
 					</h2>
 					<h2 className="card-title border-b border-white border-opacity-30 pb-2">
-						{ip}
+						{user.ip}
 					</h2>
 					{showDetails ? (
 						<>
 							<h2 className="card-title line-clamp-1 border-b border-white border-opacity-30 pb-2">
-								{macaddress.toUpperCase()}
+								{user.mac_address.toUpperCase()}
 							</h2>
 							<h2 className="card-title border-b border-white border-opacity-30 pb-2">
-								{localUpdateTime || lastupdated}
+								{localUpdateTime || user.last_updated}
 							</h2>
 						</>
 					) : (
@@ -94,14 +84,14 @@ function UserSpeed({ ip }: { ip: string }) {
 }
 
 function DropDown({
-	macaddress,
+	mac_address,
 	deviceType
 }: {
-	macaddress: string;
+	mac_address: string;
 	deviceType: string;
 }) {
 	const [dropDownIsOpen, SetDropDownIsOpen] = useState(false);
-	const [macAddress] = useState(macaddress);
+	const [macAddress] = useState(mac_address);
 	const [changeNameModalIsOpen, setChangeNamemodalIsOpen] = useState(false);
 	const [iconModalIsOpen, setIconModalIsOpen] = useState(false);
 	const [deleteDeviceModalIsOpen, setDeleteDeviceModalIsOpen] = useState(false);
@@ -215,7 +205,7 @@ function NameChangePopUp({
 		fetch(`/api/edit/display-name`, {
 			body: JSON.stringify({
 				macAddress: macAddress,
-				displayName: newName
+				display_name: newName
 			}),
 			method: 'POST'
 		});
