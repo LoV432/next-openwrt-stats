@@ -9,6 +9,7 @@ type dhcpEventType = {
 
 export type userReturnType = {
 	id: number;
+	indexNumber: number;
 	displayName: string;
 	name: string;
 	ip: string;
@@ -50,11 +51,22 @@ export async function POST(request: Request) {
 			status: 200
 		});
 	} else {
+		let highestIndex = db
+			.prepare('SELECT MAX(indexNumber) FROM users')
+			.get() as { 'MAX(indexNumber)': number };
 		let insertDevice = db
 			.prepare(
-				'INSERT INTO users (name, ip, macaddress, lastupdated, devicetype, lastEventType) VALUES (?, ?, ?, ?, ?, ?)'
+				'INSERT INTO users (indexNumber, name, ip, macaddress, lastupdated, devicetype, lastEventType) VALUES (?, ?, ?, ?, ?, ?, ?)'
 			)
-			.run(body.hostname, body.ip, body.mac, Date.now(), 'generic', body.type);
+			.run(
+				highestIndex['MAX(indexNumber)'] + 1,
+				body.hostname,
+				body.ip,
+				body.mac,
+				Date.now(),
+				'generic',
+				body.type
+			);
 		return new Response(JSON.stringify(insertDevice), {
 			status: 200
 		});

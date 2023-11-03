@@ -8,6 +8,7 @@ export const db = new Database('./db/next-openwrt-stats.db');
 
 const createUserTable = db.prepare(`CREATE TABLE IF NOT EXISTS users (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	indexNumber INTEGER,
 	name TEXT,
 	displayName TEXT,
 	ip TEXT,
