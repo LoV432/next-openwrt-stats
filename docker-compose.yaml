@@ -1,11 +1,13 @@
 ---
-version: "2.1"
+version: '2.1'
 services:
   openwrtstats:
     image: lov432/openwrt-stats:latest
     container_name: openwrtstats
     volumes:
-     - ./db/:/app/db/
+      - ./db/:/app/db/
+    ports:
+      - 3000:3000
     environment:
       - PASSWORD= # Password given by router_setup.sh
       - ROUTER_URL= # URL of your router
