@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 	}
 	let userID = existingMacAddress.id;
 	let updateDevice = db
-		.prepare('UPDATE users SET deviceType = ? WHERE id = ?')
+		.prepare('UPDATE users SET device_type = ? WHERE id = ?')
 		.run(body.deviceType, userID);
 	return new Response(JSON.stringify(updateDevice), {
 		status: 200

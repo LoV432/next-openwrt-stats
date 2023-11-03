@@ -26,7 +26,7 @@ export default function UserCard({ user }: { user: userReturnType }) {
 				<figure className="relative flex w-1/4 items-center justify-center overflow-visible px-1 py-4">
 					<DropDown
 						mac_address={user.mac_address}
-						deviceType={user.device_type}
+						device_type={user.device_type}
 					/>
 				</figure>
 				<div className="card-body w-2/3 p-4">
@@ -85,10 +85,10 @@ function UserSpeed({ ip }: { ip: string }) {
 
 function DropDown({
 	mac_address,
-	deviceType
+	device_type
 }: {
 	mac_address: string;
-	deviceType: string;
+	device_type: string;
 }) {
 	const [dropDownIsOpen, SetDropDownIsOpen] = useState(false);
 	const [macAddress] = useState(mac_address);
@@ -115,7 +115,7 @@ function DropDown({
 				className="btn m-0 h-fit w-full border-none bg-transparent p-0 hover:bg-transparent active:bg-transparent"
 			>
 				<Image
-					src={`/${deviceType}.svg`}
+					src={`/${device_type}.svg`}
 					alt="Android Icon"
 					width={25}
 					height={25}
@@ -205,7 +205,7 @@ function NameChangePopUp({
 		fetch(`/api/edit/display-name`, {
 			body: JSON.stringify({
 				macAddress: macAddress,
-				display_name: newName
+				displayName: newName
 			}),
 			method: 'POST'
 		});

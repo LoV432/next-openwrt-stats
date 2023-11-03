@@ -1,18 +1,18 @@
 import { db } from '@/lib/db';
 import { userReturnType } from '../../dhcp-event/route';
 
-type display_nameType = {
+type displayNameType = {
 	macAddress: string;
-	display_name: string;
+	displayName: string;
 };
 export async function POST(request: Request) {
-	const body = (await request.json()) as display_nameType;
+	const body = (await request.json()) as displayNameType;
 
 	if (
 		!body.macAddress ||
 		body.macAddress === '' ||
-		!body.display_name ||
-		body.display_name === ''
+		!body.displayName ||
+		body.displayName === ''
 	) {
 		return new Response(JSON.stringify({ error: 'Missing required fields' }), {
 			status: 400
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 	let userID = existingMacAddress.id;
 	let updateDisplayName = db
 		.prepare('UPDATE users SET display_name = ? WHERE id = ?')
-		.run(body.display_name, userID);
+		.run(body.displayName, userID);
 	return new Response(JSON.stringify(updateDisplayName), {
 		status: 200
 	});
