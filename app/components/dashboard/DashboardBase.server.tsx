@@ -6,7 +6,7 @@ export default function DashboardCardBase({
 	backgroundColor: string;
 }) {
 	return (
-		<div className={`card w-full sm:w-96 ${backgroundColor} shadow-xl`}>
+		<div className={`card w-full sm:w-96 ${backgroundColor}`}>
 			<div className="card-body justify-center">{children}</div>
 		</div>
 	);

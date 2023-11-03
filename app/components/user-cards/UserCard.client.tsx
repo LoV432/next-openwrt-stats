@@ -21,7 +21,7 @@ export default function UserCard({ user }: { user: userReturnType }) {
 	}, []);
 	return (
 		<>
-			<div className="card card-side m-5 h-fit w-full bg-base-100 p-2 shadow-xl sm:w-[300px]">
+			<div className="card card-side m-5 h-fit w-full bg-zinc-900 p-2 shadow-xl sm:w-[300px]">
 				<UserSpeed ip={user.ip} />
 				<figure className="relative flex w-1/4 items-center justify-center overflow-visible px-1 py-4">
 					<DropDown
@@ -130,7 +130,7 @@ function DropDown({
 			{dropDownIsOpen && (
 				<>
 					<div className="absolute left-0 top-0 z-30 h-20">
-						<ul className="menu rounded-box w-48 bg-base-200 text-lg font-semibold">
+						<ul className="menu rounded-box w-48 border border-white border-opacity-20 bg-zinc-900 text-lg font-semibold">
 							<li>
 								<p
 									className="flex h-12 justify-center"
@@ -236,7 +236,7 @@ function NameChangePopUp({
 	}
 	return (
 		<dialog id="changeNameModal" className="modal" open>
-			<div className="modal-box">
+			<div className="modal-box bg-zinc-900">
 				<h3 className="pb-5 text-lg font-bold">Enter New Name</h3>
 				<input
 					autoFocus
@@ -248,7 +248,7 @@ function NameChangePopUp({
 					ref={changeNameValue}
 					type="text"
 					placeholder="Name"
-					className="input input-bordered w-full"
+					className="input input-bordered w-full bg-zinc-900"
 				/>
 				<button onClick={changeName} className="btn btn-primary mt-5 w-full">
 					Apply
@@ -290,7 +290,7 @@ function ChangeIndexPopUp({
 	}
 	return (
 		<dialog id="changeIndexModal" className="modal" open>
-			<div className="modal-box">
+			<div className="modal-box bg-zinc-900">
 				<h3 className="pb-5 text-lg font-bold">Enter New Index</h3>
 				<input
 					autoFocus
@@ -302,7 +302,7 @@ function ChangeIndexPopUp({
 					ref={changeIndexValue}
 					type="text"
 					placeholder="Index"
-					className="input input-bordered w-full"
+					className="input input-bordered w-full bg-zinc-900"
 				/>
 				<button onClick={changeIndex} className="btn btn-primary mt-5 w-full">
 					Apply
@@ -341,7 +341,7 @@ function DeleteDevicePopUp({
 	}
 	return (
 		<dialog id="deleteDeviceModal" className="modal" open>
-			<div className="modal-box">
+			<div className="modal-box bg-zinc-900">
 				<h3 className="pb-5 text-lg font-bold">Delete Device</h3>
 				<p>Are you sure you want to delete this device?</p>
 				<button onClick={deleteDevice} className="btn btn-error mt-5 w-full">
@@ -388,7 +388,7 @@ function IconChangePopUp({
 	}
 	return (
 		<dialog id="changeNameModal" className="modal" open>
-			<div className="modal-box">
+			<div className="modal-box bg-zinc-900">
 				<h3 className="pb-5 text-lg font-bold">Select Icon</h3>
 				<div className="flex flex-row flex-wrap justify-evenly gap-5">
 					<Image
