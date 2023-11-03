@@ -4,21 +4,23 @@ import { allSpeedStates } from '../boundaries/SpeedBoundarie.client';
 import { useEffect, useState } from 'react';
 import { useSpring, animated } from '@react-spring/web';
 
-export default function SpeedMeter({ upload }: { upload: boolean }) {
+export default function SpeedMeter({
+	type,
+	maxSpeed
+}: {
+	type: 'Upload' | 'Download';
+	maxSpeed: number;
+}) {
 	const [springPercentage, setSpringPercentage] = useSpring(() => ({
 		from: { '--percentage': 1 }
 	}));
 	const [speed] = useRecoilState(allSpeedStates);
 	const [precentage, setPrecentage] = useState(0);
 	const [mbpsInNumber, setMbpsInNumber] = useState(0);
-	const maxSpeed = upload
-		? parseInt(process.env.NEXT_PUBLIC_MAX_UPLOAD_SPEED || '15')
-		: parseInt(process.env.NEXT_PUBLIC_MAX_DOWNLOAD_SPEED || '15');
 	useEffect(() => {
 		if (!speed[0].length) return;
-		let mbpsInNumber = upload
-			? speed[1].totalMbpsUpload
-			: speed[1].totalMbpsDownload;
+		let mbpsInNumber =
+			type === 'Upload' ? speed[1].totalMbpsUpload : speed[1].totalMbpsDownload;
 		setMbpsInNumber(parseFloat(mbpsInNumber));
 		let oldPercentage = precentage;
 		let newPercentage = Math.round((parseFloat(mbpsInNumber) * 100) / maxSpeed);
@@ -31,7 +33,7 @@ export default function SpeedMeter({ upload }: { upload: boolean }) {
 	return (
 		<>
 			<div className="w-5/6">
-				{upload ? 'Upload:' : 'Download:'}
+				{type}
 				<p className="float-right inline-block">{mbpsInNumber} Mbps</p>
 			</div>
 

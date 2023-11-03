@@ -46,10 +46,16 @@ async function DashboardCardNetWork() {
 				</div>
 				<div>
 					<div className="my-3">
-						<SpeedMeter upload={false} />
+						<SpeedMeter
+							type="Download"
+							maxSpeed={parseInt(process.env.MAX_DOWNLOAD_SPEED || '15')}
+						/>
 					</div>
 					<div>
-						<SpeedMeter upload={true} />
+						<SpeedMeter
+							type="Upload"
+							maxSpeed={parseInt(process.env.MAX_UPLOAD_SPEED || '15')}
+						/>
 					</div>
 				</div>
 			</DashboardCardBase>
