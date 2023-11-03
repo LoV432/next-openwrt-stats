@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# OpenWrt Stats WebUI Setup
 
-## Getting Started
+`docker-compose.yml`
 
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```yaml
+---
+version: '2.1'
+services:
+  openwrtstats:
+    image: lov432/openwrt-stats:latest
+    container_name: openwrtstats
+    volumes:
+      - ./db/:/app/db/
+    ports:
+      - 3000:3000
+    environment:
+      - PASSWORD= # Password given by router_setup.sh. You can keep it empty if you haven't setup the router yet
+      - ROUTER_URL=http://192.168.1.1 # URL of your router
+      - MAX_UPLOAD_SPEED=20 # Max upload speed in Mbps
+      - MAX_DOWNLOAD_SPEED=20 # Max download speed in Mbps
+    restart: unless-stopped
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# Router Setup Script
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Prerequisites
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Before running the script, make sure you have the following dependencies installed on your OpenWrt router:
 
-## Learn More
+1. **curl**:
+   To install curl:
 
-To learn more about Next.js, take a look at the following resources:
+   ```shell
+   opkg update
+   opkg install curl
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **iptables-zz-legacy**:
+   To install iptables-zz-legacy:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+   ```shell
+   opkg update
+   opkg install iptables-zz-legacy
+   ```
 
-## Deploy on Vercel
+3. **wrtbwmon**:
+   You can install the wrtbwmon package by uploading the .ipk file via OpenWrt's LuCI interface. Navigate to "System > Software," then use the "Upload Package" feature to install it. You can find the package at [https://github.com/pyrovski/wrtbwmon](https://github.com/pyrovski/wrtbwmon).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Enabling wrtbwmon
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Before proceeding, you need to enable the `wrtbwmon` service. Run the following commands to start and enable it:
+
+```shell
+/etc/init.d/wrtbwmon start
+/etc/init.d/wrtbwmon enable
+```
+
+## Setup Script
+
+1. Download the setup script to your router using curl:
+
+```shell
+curl -LO https://raw.githubusercontent.com/LoV432/next-openwrt-stats/master/router_setup.sh
+```
+
+2. Make the script executable by running the following command:
+
+```shell
+chmod +x router_setup.sh
+```
+
+## Running the Script
+
+To execute the setup script, you need to provide your WebUI URL. Ensure that there are no trailing slashes in the URL. Replace `https://webui.example.com` with your actual WebUI URL.
+
+```shell
+./router_setup.sh https://webui.example.com
+```
+
+The script will generate a password, which you'll need to add to your `docker-compose.yml` file.
+
+## Additional Configuration
+
+In some cases, you might need to disable DNS rebind protection. You can do this from the "Network > DHCP and DNS" settings in your OpenWrt router's configuration.

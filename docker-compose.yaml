@@ -9,8 +9,8 @@ services:
     ports:
       - 3000:3000
     environment:
-      - PASSWORD= # Password given by router_setup.sh
-      - ROUTER_URL= # URL of your router
-      - MAX_UPLOAD_SPEED= # Max upload speed in Mbps
-      - MAX_DOWNLOAD_SPEED= # Max download speed in Mbps
+      - PASSWORD= # Password given by router_setup.sh. You can keep it empty if you haven't setup the router yet
+      - ROUTER_URL=http://192.168.1.1 # URL of your router
+      - MAX_UPLOAD_SPEED=20 # Max upload speed in Mbps
+      - MAX_DOWNLOAD_SPEED=20 # Max download speed in Mbps
     restart: unless-stopped
