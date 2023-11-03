@@ -125,7 +125,7 @@ function DropDown({
 			{dropDownIsOpen && (
 				<>
 					<div className="absolute left-0 top-0 z-30 h-20">
-						<ul className="text-md menu rounded-box w-48 bg-base-200 font-semibold">
+						<ul className="menu rounded-box w-48 bg-base-200 text-lg font-semibold">
 							<li>
 								<p
 									className="flex h-12 justify-center"
