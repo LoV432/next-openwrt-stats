@@ -95,6 +95,7 @@ function DropDown({
 	const [changeNameModalIsOpen, setChangeNamemodalIsOpen] = useState(false);
 	const [iconModalIsOpen, setIconModalIsOpen] = useState(false);
 	const [deleteDeviceModalIsOpen, setDeleteDeviceModalIsOpen] = useState(false);
+	const [changeIndexModalIsOpen, setChangeIndexModalIsOpen] = useState(false);
 
 	function toggleNameModal() {
 		setChangeNamemodalIsOpen(!changeNameModalIsOpen);
@@ -106,6 +107,10 @@ function DropDown({
 
 	function toggleDeleteDeviceModal() {
 		setDeleteDeviceModalIsOpen(!deleteDeviceModalIsOpen);
+	}
+
+	function toggleChangeIndexModal() {
+		setChangeIndexModalIsOpen(!changeIndexModalIsOpen);
 	}
 
 	return (
@@ -151,6 +156,17 @@ function DropDown({
 							<li>
 								<p
 									onClick={() => {
+										toggleChangeIndexModal();
+										SetDropDownIsOpen(false);
+									}}
+									className="flex h-12 justify-center"
+								>
+									Change Index
+								</p>
+							</li>
+							<li>
+								<p
+									onClick={() => {
 										setDeleteDeviceModalIsOpen(true);
 										SetDropDownIsOpen(false);
 									}}
@@ -185,6 +201,12 @@ function DropDown({
 				<DeleteDevicePopUp
 					macAddress={macAddress}
 					toggleDeleteDeviceModal={toggleDeleteDeviceModal}
+				/>
+			)}
+			{changeIndexModalIsOpen && (
+				<ChangeIndexPopUp
+					macAddress={macAddress}
+					toggleChangeIndexPopUp={toggleChangeIndexModal}
 				/>
 			)}
 		</>
@@ -240,6 +262,60 @@ function NameChangePopUp({
 			</div>
 			<div className="modal-backdrop bg-zinc-700 opacity-30">
 				<button onClick={toggleNameModal}>close</button>
+			</div>
+		</dialog>
+	);
+}
+
+function ChangeIndexPopUp({
+	macAddress,
+	toggleChangeIndexPopUp
+}: {
+	macAddress: string;
+	toggleChangeIndexPopUp: () => void;
+}) {
+	let router = useRouter();
+	const changeIndexValue = useRef<HTMLInputElement>(null);
+	function changeIndex() {
+		let newIndex = changeIndexValue.current?.value;
+		fetch(`/api/edit/change-index`, {
+			body: JSON.stringify({
+				macAddress: macAddress,
+				index: newIndex
+			}),
+			method: 'POST'
+		});
+		toggleChangeIndexPopUp();
+		router.refresh();
+	}
+	return (
+		<dialog id="changeIndexModal" className="modal" open>
+			<div className="modal-box">
+				<h3 className="pb-5 text-lg font-bold">Enter New Index</h3>
+				<input
+					autoFocus
+					onKeyDown={(e) => {
+						if (e.key === 'Enter') {
+							changeIndex();
+						}
+					}}
+					ref={changeIndexValue}
+					type="text"
+					placeholder="Index"
+					className="input input-bordered w-full"
+				/>
+				<button onClick={changeIndex} className="btn btn-primary mt-5 w-full">
+					Apply
+				</button>
+				<button
+					onClick={toggleChangeIndexPopUp}
+					className="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
+				>
+					✕
+				</button>
+			</div>
+			<div className="modal-backdrop bg-zinc-700 opacity-30">
+				<button onClick={toggleChangeIndexPopUp}>close</button>
 			</div>
 		</dialog>
 	);
