@@ -97,22 +97,6 @@ function DropDown({
 	const [deleteDeviceModalIsOpen, setDeleteDeviceModalIsOpen] = useState(false);
 	const [changeIndexModalIsOpen, setChangeIndexModalIsOpen] = useState(false);
 
-	function toggleNameModal() {
-		setChangeNamemodalIsOpen(!changeNameModalIsOpen);
-	}
-
-	function toggleIconModal() {
-		setIconModalIsOpen(!iconModalIsOpen);
-	}
-
-	function toggleDeleteDeviceModal() {
-		setDeleteDeviceModalIsOpen(!deleteDeviceModalIsOpen);
-	}
-
-	function toggleChangeIndexModal() {
-		setChangeIndexModalIsOpen(!changeIndexModalIsOpen);
-	}
-
 	return (
 		<>
 			<button
@@ -135,7 +119,7 @@ function DropDown({
 								<p
 									className="flex h-12 justify-center"
 									onClick={() => {
-										toggleNameModal();
+										setChangeNamemodalIsOpen(true);
 										SetDropDownIsOpen(false);
 									}}
 								>
@@ -146,7 +130,7 @@ function DropDown({
 								<p
 									className="flex h-12 justify-center"
 									onClick={() => {
-										toggleIconModal();
+										setIconModalIsOpen(true);
 										SetDropDownIsOpen(false);
 									}}
 								>
@@ -156,7 +140,7 @@ function DropDown({
 							<li>
 								<p
 									onClick={() => {
-										toggleChangeIndexModal();
+										setChangeIndexModalIsOpen(true);
 										SetDropDownIsOpen(false);
 									}}
 									className="flex h-12 justify-center"
@@ -188,40 +172,43 @@ function DropDown({
 			{changeNameModalIsOpen && (
 				<NameChangePopUp
 					macAddress={macAddress}
-					toggleNameModal={toggleNameModal}
+					setChangeNamemodalIsOpen={setChangeNamemodalIsOpen}
 				/>
 			)}
 			{iconModalIsOpen && (
 				<IconChangePopUp
 					macAddress={macAddress}
-					toggleIconModal={toggleIconModal}
+					setIconModalIsOpen={setIconModalIsOpen}
 				/>
 			)}
 			{deleteDeviceModalIsOpen && (
 				<DeleteDevicePopUp
 					macAddress={macAddress}
-					toggleDeleteDeviceModal={toggleDeleteDeviceModal}
+					setDeleteDeviceModalIsOpen={setDeleteDeviceModalIsOpen}
 				/>
 			)}
 			{changeIndexModalIsOpen && (
 				<ChangeIndexPopUp
 					macAddress={macAddress}
-					toggleChangeIndexPopUp={toggleChangeIndexModal}
+					setChangeIndexModalIsOpen={setChangeIndexModalIsOpen}
 				/>
 			)}
 		</>
 	);
 }
 
+// All the timeouts below this are for animations
+
 function NameChangePopUp({
 	macAddress,
-	toggleNameModal
+	setChangeNamemodalIsOpen
 }: {
 	macAddress: string;
-	toggleNameModal: () => void;
+	setChangeNamemodalIsOpen: (value: boolean) => void;
 }) {
 	let router = useRouter();
 	const changeNameValue = useRef<HTMLInputElement>(null);
+	let changeNameModal = useRef<HTMLDialogElement>(null);
 	function changeName() {
 		let newName = changeNameValue.current?.value;
 		fetch(`/api/edit/display-name`, {
@@ -231,11 +218,19 @@ function NameChangePopUp({
 			}),
 			method: 'POST'
 		});
-		toggleNameModal();
+		closePopUp();
 		router.refresh();
 	}
+	async function closePopUp() {
+		changeNameModal.current?.close();
+		await new Promise((resolve) => setTimeout(resolve, 100));
+		setChangeNamemodalIsOpen(false);
+	}
+	useEffect(() => {
+		changeNameModal.current?.showModal();
+	}, []);
 	return (
-		<dialog id="changeNameModal" className="modal" open>
+		<dialog ref={changeNameModal} className="modal">
 			<div className="modal-box bg-zinc-900">
 				<h3 className="pb-5 text-lg font-bold">Enter New Name</h3>
 				<input
@@ -254,14 +249,14 @@ function NameChangePopUp({
 					Apply
 				</button>
 				<button
-					onClick={toggleNameModal}
+					onClick={closePopUp}
 					className="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
 				>
 					✕
 				</button>
 			</div>
 			<div className="modal-backdrop bg-zinc-700 opacity-30">
-				<button onClick={toggleNameModal}>close</button>
+				<button onClick={closePopUp}>close</button>
 			</div>
 		</dialog>
 	);
@@ -269,13 +264,14 @@ function NameChangePopUp({
 
 function ChangeIndexPopUp({
 	macAddress,
-	toggleChangeIndexPopUp
+	setChangeIndexModalIsOpen
 }: {
 	macAddress: string;
-	toggleChangeIndexPopUp: () => void;
+	setChangeIndexModalIsOpen: (value: boolean) => void;
 }) {
 	let router = useRouter();
 	const changeIndexValue = useRef<HTMLInputElement>(null);
+	let setChangeIndexModal = useRef<HTMLDialogElement>(null);
 	function changeIndex() {
 		let newIndex = changeIndexValue.current?.value;
 		fetch(`/api/edit/change-index`, {
@@ -285,11 +281,22 @@ function ChangeIndexPopUp({
 			}),
 			method: 'POST'
 		});
-		toggleChangeIndexPopUp();
+		closePopUp();
 		router.refresh();
 	}
+	async function closePopUp() {
+		setChangeIndexModal.current?.close();
+		await new Promise((resolve) => setTimeout(resolve, 100));
+		setChangeIndexModalIsOpen(false);
+	}
+	useEffect(() => {
+		(async () => {
+			await new Promise((resolve) => setTimeout(resolve, 1));
+			setChangeIndexModal.current?.showModal();
+		})();
+	}, []);
 	return (
-		<dialog id="changeIndexModal" className="modal" open>
+		<dialog ref={setChangeIndexModal} className="modal">
 			<div className="modal-box bg-zinc-900">
 				<h3 className="pb-5 text-lg font-bold">Enter New Index</h3>
 				<input
@@ -308,14 +315,14 @@ function ChangeIndexPopUp({
 					Apply
 				</button>
 				<button
-					onClick={toggleChangeIndexPopUp}
+					onClick={closePopUp}
 					className="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
 				>
 					✕
 				</button>
 			</div>
 			<div className="modal-backdrop bg-zinc-700 opacity-30">
-				<button onClick={toggleChangeIndexPopUp}>close</button>
+				<button onClick={closePopUp}>close</button>
 			</div>
 		</dialog>
 	);
@@ -323,12 +330,13 @@ function ChangeIndexPopUp({
 
 function DeleteDevicePopUp({
 	macAddress,
-	toggleDeleteDeviceModal
+	setDeleteDeviceModalIsOpen
 }: {
 	macAddress: string;
-	toggleDeleteDeviceModal: () => void;
+	setDeleteDeviceModalIsOpen: (value: boolean) => void;
 }) {
 	let router = useRouter();
+	let deleteDeviceModal = useRef<HTMLDialogElement>(null);
 	function deleteDevice() {
 		fetch(`/api/edit/delete-user`, {
 			body: JSON.stringify({
@@ -336,32 +344,41 @@ function DeleteDevicePopUp({
 			}),
 			method: 'POST'
 		});
-		toggleDeleteDeviceModal();
+		closePopUp();
 		router.refresh();
 	}
+	async function closePopUp() {
+		deleteDeviceModal.current?.close();
+		await new Promise((resolve) => setTimeout(resolve, 100));
+		setDeleteDeviceModalIsOpen(false);
+	}
+
+	useEffect(() => {
+		(async () => {
+			await new Promise((resolve) => setTimeout(resolve, 1));
+			deleteDeviceModal.current?.showModal();
+		})();
+	}, []);
 	return (
-		<dialog id="deleteDeviceModal" className="modal" open>
+		<dialog ref={deleteDeviceModal} className="modal">
 			<div className="modal-box bg-zinc-900">
 				<h3 className="pb-5 text-lg font-bold">Delete Device</h3>
 				<p>Are you sure you want to delete this device?</p>
 				<button onClick={deleteDevice} className="btn btn-error mt-5 w-full">
 					Delete
 				</button>
-				<button
-					onClick={toggleDeleteDeviceModal}
-					className="btn btn-ghost mt-5 w-full"
-				>
+				<button onClick={closePopUp} className="btn btn-ghost mt-5 w-full">
 					Cancel
 				</button>
 				<button
-					onClick={toggleDeleteDeviceModal}
+					onClick={closePopUp}
 					className="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
 				>
 					✕
 				</button>
 			</div>
 			<div className="modal-backdrop bg-zinc-700 opacity-30">
-				<button onClick={toggleDeleteDeviceModal}>close</button>
+				<button onClick={closePopUp}>close</button>
 			</div>
 		</dialog>
 	);
@@ -369,12 +386,13 @@ function DeleteDevicePopUp({
 
 function IconChangePopUp({
 	macAddress,
-	toggleIconModal
+	setIconModalIsOpen
 }: {
 	macAddress: string;
-	toggleIconModal: () => void;
+	setIconModalIsOpen: (value: boolean) => void;
 }) {
 	let router = useRouter();
+	let changeIconModal = useRef<HTMLDialogElement>(null);
 	function changeIcon(icon: string) {
 		fetch(`/api/edit/device-type`, {
 			body: JSON.stringify({
@@ -383,11 +401,22 @@ function IconChangePopUp({
 			}),
 			method: 'POST'
 		});
-		toggleIconModal();
+		closePopUp();
 		router.refresh();
 	}
+	async function closePopUp() {
+		changeIconModal.current?.close();
+		await new Promise((resolve) => setTimeout(resolve, 100));
+		setIconModalIsOpen(false);
+	}
+	useEffect(() => {
+		(async () => {
+			await new Promise((resolve) => setTimeout(resolve, 1));
+			changeIconModal.current?.showModal();
+		})();
+	}, []);
 	return (
-		<dialog id="changeNameModal" className="modal" open>
+		<dialog ref={changeIconModal} className="modal">
 			<div className="modal-box bg-zinc-900">
 				<h3 className="pb-5 text-lg font-bold">Select Icon</h3>
 				<div className="flex flex-row flex-wrap justify-evenly gap-5">
@@ -474,14 +503,14 @@ function IconChangePopUp({
 					/>
 				</div>
 				<button
-					onClick={toggleIconModal}
+					onClick={closePopUp}
 					className="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
 				>
 					✕
 				</button>
 			</div>
 			<div className="modal-backdrop bg-zinc-700 opacity-30">
-				<button onClick={toggleIconModal}>close</button>
+				<button onClick={closePopUp}>close</button>
 			</div>
 		</dialog>
 	);
