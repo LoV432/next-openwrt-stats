@@ -209,9 +209,9 @@ function NameChangePopUp({
 	let router = useRouter();
 	const changeNameValue = useRef<HTMLInputElement>(null);
 	let changeNameModal = useRef<HTMLDialogElement>(null);
-	function changeName() {
+	async function changeName() {
 		let newName = changeNameValue.current?.value;
-		fetch(`/api/edit/display-name`, {
+		await fetch(`/api/edit/display-name`, {
 			body: JSON.stringify({
 				macAddress: macAddress,
 				displayName: newName
@@ -272,9 +272,9 @@ function ChangeIndexPopUp({
 	let router = useRouter();
 	const changeIndexValue = useRef<HTMLInputElement>(null);
 	let setChangeIndexModal = useRef<HTMLDialogElement>(null);
-	function changeIndex() {
+	async function changeIndex() {
 		let newIndex = changeIndexValue.current?.value;
-		fetch(`/api/edit/change-index`, {
+		await fetch(`/api/edit/change-index`, {
 			body: JSON.stringify({
 				macAddress: macAddress,
 				index: newIndex
@@ -337,8 +337,8 @@ function DeleteDevicePopUp({
 }) {
 	let router = useRouter();
 	let deleteDeviceModal = useRef<HTMLDialogElement>(null);
-	function deleteDevice() {
-		fetch(`/api/edit/delete-user`, {
+	async function deleteDevice() {
+		await fetch(`/api/edit/delete-user`, {
 			body: JSON.stringify({
 				macAddress: macAddress
 			}),
@@ -393,8 +393,8 @@ function IconChangePopUp({
 }) {
 	let router = useRouter();
 	let changeIconModal = useRef<HTMLDialogElement>(null);
-	function changeIcon(icon: string) {
-		fetch(`/api/edit/device-type`, {
+	async function changeIcon(icon: string) {
+		await fetch(`/api/edit/device-type`, {
 			body: JSON.stringify({
 				macAddress: macAddress,
 				deviceType: icon
