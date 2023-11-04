@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { allConnectionStatusType } from './Dashboard.server';
 import DashboardCardBase from './DashboardBase.server';
+import Image from 'next/image';
 
 export default function DashboardCardTotalDisconnectTime({
 	allConnectionStatus,
@@ -15,6 +16,14 @@ export default function DashboardCardTotalDisconnectTime({
 	const [backgroundColor, setBackgroundColor] = useState(
 		dashboardColor(allConnectionStatus)
 	);
+	let connectionLogsListModalRef = useRef<HTMLDialogElement>(null);
+	function toggleConnectionLogsListModal() {
+		if (connectionLogsListModalRef.current?.open) {
+			connectionLogsListModalRef.current.close();
+		} else {
+			connectionLogsListModalRef.current?.showModal();
+		}
+	}
 	useEffect(() => {
 		setFinalText(
 			parseAllConnectionStatus(allConnectionStatus, isWithinTimeFrame)
@@ -24,9 +33,86 @@ export default function DashboardCardTotalDisconnectTime({
 	return (
 		<>
 			<DashboardCardBase backgroundColor={backgroundColor}>
-				<div className="text-xl font-bold">{finalText}</div>
+				<div className="text-xl font-bold">
+					{finalText}
+					<Image
+						onClick={toggleConnectionLogsListModal}
+						className="ml-3 inline cursor-pointer"
+						src="/expand.svg"
+						alt="Open Details"
+						width={20}
+						height={20}
+					/>
+				</div>
 			</DashboardCardBase>
+			<ConnectionLogsListModal
+				toggleConnectionLogsListModal={toggleConnectionLogsListModal}
+				connectionLogsListModalRef={connectionLogsListModalRef}
+				connectionLogsList={allConnectionStatus}
+			/>
 		</>
+	);
+}
+
+function ConnectionLogsListModal({
+	toggleConnectionLogsListModal,
+	connectionLogsListModalRef,
+	connectionLogsList
+}: {
+	toggleConnectionLogsListModal: () => void;
+	connectionLogsListModalRef: React.RefObject<HTMLDialogElement>;
+	connectionLogsList: allConnectionStatusType;
+}) {
+	return (
+		<dialog ref={connectionLogsListModalRef} className="modal">
+			<div className="modal-box bg-zinc-900">
+				<h3 className="pb-5 text-lg font-bold">Connection Logs</h3>
+				<ConnectionLogsList connectionLogsList={connectionLogsList} />
+				<button
+					onClick={toggleConnectionLogsListModal}
+					className="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
+				>
+					✕
+				</button>
+			</div>
+			<div className="modal-backdrop bg-zinc-700 opacity-30">
+				<button onClick={toggleConnectionLogsListModal}>close</button>
+			</div>
+		</dialog>
+	);
+}
+
+function ConnectionLogsList({
+	connectionLogsList
+}: {
+	connectionLogsList: allConnectionStatusType;
+}) {
+	let listBody = () => {
+		return connectionLogsList.map((status) => {
+			return (
+				<tr className="border-slate-300 border-opacity-30" key={status.id}>
+					<th>{status.id}</th>
+					<td>
+						{status.status === 'connected' ? 'Connected' : 'Disconnected'}
+					</td>
+					<td>{new Date(status.time).toLocaleString()}</td>
+				</tr>
+			);
+		});
+	};
+	return (
+		<div className="overflow-x-auto">
+			<table className="table table-zebra">
+				<thead className="text-slate-300 ">
+					<tr className="border-slate-300 border-opacity-30">
+						<th></th>
+						<th>Status</th>
+						<th>Time</th>
+					</tr>
+				</thead>
+				<tbody>{listBody()}</tbody>
+			</table>
+		</div>
 	);
 }
 
