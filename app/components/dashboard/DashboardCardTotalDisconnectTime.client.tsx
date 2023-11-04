@@ -87,9 +87,13 @@ function ConnectionLogsList({
 }: {
 	connectionLogsList: allConnectionStatusType;
 }) {
-	let listBody = () => {
-		return connectionLogsList.map((status) => {
-			return (
+	const [connectionLogsListBody, setConnectionLogsListBody] = useState<
+		JSX.Element[]
+	>([]);
+	let listBody: JSX.Element[] = [];
+	useEffect(() => {
+		connectionLogsList.forEach((status) => {
+			listBody.push(
 				<tr className="border-slate-300 border-opacity-30" key={status.id}>
 					<th>{status.id}</th>
 					<td>
@@ -99,7 +103,8 @@ function ConnectionLogsList({
 				</tr>
 			);
 		});
-	};
+		setConnectionLogsListBody(listBody);
+	}, []);
 	return (
 		<div className="overflow-x-auto">
 			<table className="table table-zebra">
@@ -110,7 +115,7 @@ function ConnectionLogsList({
 						<th>Time</th>
 					</tr>
 				</thead>
-				<tbody>{listBody()}</tbody>
+				<tbody>{connectionLogsListBody}</tbody>
 			</table>
 		</div>
 	);
