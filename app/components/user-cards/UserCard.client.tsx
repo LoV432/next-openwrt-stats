@@ -230,7 +230,9 @@ function NameChangePopUp({
 		(async () => {
 			await new Promise((resolve) => setTimeout(resolve, 10));
 			changeNameModal.current?.showModal();
-			changeNameValue.current?.focus();
+			if ('ontouchstart' in window) {
+				changeNameValue.current?.focus();
+			}
 		})();
 	}, []);
 	return (
@@ -296,7 +298,9 @@ function ChangeIndexPopUp({
 		(async () => {
 			await new Promise((resolve) => setTimeout(resolve, 10));
 			setChangeIndexModal.current?.showModal();
-			changeIndexValue.current?.focus();
+			if ('ontouchstart' in window) {
+				changeIndexValue.current?.focus();
+			}
 		})();
 	}, []);
 	return (
