@@ -229,7 +229,7 @@ function NameChangePopUp({
 	useEffect(() => {
 		(async () => {
 			await new Promise((resolve) => setTimeout(resolve, 10));
-			changeNameModal.current?.showModal();
+			changeNameModal.current?.setAttribute('open', 'true'); // This is to prevent auto focus
 			if (!('ontouchstart' in window)) {
 				changeNameValue.current?.focus();
 			}
@@ -297,7 +297,7 @@ function ChangeIndexPopUp({
 	useEffect(() => {
 		(async () => {
 			await new Promise((resolve) => setTimeout(resolve, 10));
-			setChangeIndexModal.current?.showModal();
+			setChangeIndexModal.current?.setAttribute('open', 'true'); // This is to prevent auto focus
 			if (!('ontouchstart' in window)) {
 				changeIndexValue.current?.focus();
 			}
