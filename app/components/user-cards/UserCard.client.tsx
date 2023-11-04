@@ -227,14 +227,17 @@ function NameChangePopUp({
 		setChangeNamemodalIsOpen(false);
 	}
 	useEffect(() => {
-		changeNameModal.current?.showModal();
+		(async () => {
+			await new Promise((resolve) => setTimeout(resolve, 10));
+			changeNameModal.current?.showModal();
+			changeNameValue.current?.focus();
+		})();
 	}, []);
 	return (
 		<dialog ref={changeNameModal} className="modal">
 			<div className="modal-box bg-zinc-900">
 				<h3 className="pb-5 text-lg font-bold">Enter New Name</h3>
 				<input
-					autoFocus
 					onKeyDown={(e) => {
 						if (e.key === 'Enter') {
 							changeName();
@@ -291,8 +294,9 @@ function ChangeIndexPopUp({
 	}
 	useEffect(() => {
 		(async () => {
-			await new Promise((resolve) => setTimeout(resolve, 1));
+			await new Promise((resolve) => setTimeout(resolve, 10));
 			setChangeIndexModal.current?.showModal();
+			changeIndexValue.current?.focus();
 		})();
 	}, []);
 	return (
@@ -300,7 +304,6 @@ function ChangeIndexPopUp({
 			<div className="modal-box bg-zinc-900">
 				<h3 className="pb-5 text-lg font-bold">Enter New Index</h3>
 				<input
-					autoFocus
 					onKeyDown={(e) => {
 						if (e.key === 'Enter') {
 							changeIndex();
@@ -355,7 +358,7 @@ function DeleteDevicePopUp({
 
 	useEffect(() => {
 		(async () => {
-			await new Promise((resolve) => setTimeout(resolve, 1));
+			await new Promise((resolve) => setTimeout(resolve, 10));
 			deleteDeviceModal.current?.showModal();
 		})();
 	}, []);
@@ -411,7 +414,7 @@ function IconChangePopUp({
 	}
 	useEffect(() => {
 		(async () => {
-			await new Promise((resolve) => setTimeout(resolve, 1));
+			await new Promise((resolve) => setTimeout(resolve, 10));
 			changeIconModal.current?.showModal();
 		})();
 	}, []);
