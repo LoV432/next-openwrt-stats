@@ -150,7 +150,12 @@ function parseAllConnectionStatus(
 		) {
 			return `Bro it be dead since - ${new Date(
 				allConnectionStatus[allConnectionStatus.length - 1].time
-			).toLocaleString()}`;
+			).toLocaleString('en-US', {
+				day: '2-digit',
+				month: 'short',
+				hour: 'numeric',
+				minute: '2-digit'
+			})}`;
 		}
 		return 'No Disconnects in the last 24 hours';
 	}
