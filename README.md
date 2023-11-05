@@ -10,6 +10,13 @@ This is a simple dashboard for OpenWrt that does the following things:
 
 `*Note: Device tracking uses DHCP, so devices using static IP addresses will not show up.`
 
+
+![Openwrt Stats Rounded](https://github.com/LoV432/next-openwrt-stats/assets/60856741/a0413b49-6ca9-4eaf-a128-7c836df9cd52)
+
+![Openwrt Stats Phone Rounded](https://github.com/LoV432/next-openwrt-stats/assets/60856741/a16f40d3-09c6-4426-9875-eb181eed9239)
+
+
+
 # Installation
 
 The installation process have two main parts:
