@@ -151,7 +151,8 @@ function dashboardColor(allConnectionStatus: allConnectionStatusType) {
 
 function parseAllConnectionStatus(
 	allConnectionStatus: allConnectionStatusType,
-	isWithinTimeFrame: boolean
+	isWithinTimeFrame: boolean,
+	totalDays = 1
 ) {
 	allConnectionStatus = allConnectionStatus.reverse();
 	if (!isWithinTimeFrame) {
@@ -181,6 +182,13 @@ function parseAllConnectionStatus(
 	let totalDisconnectedTime = 0;
 	let isConnected = false;
 	let lastStatusChangeTime = 0;
+
+	// If the first status is connected, add time from start of total days to until first connect
+	if (allConnectionStatus[0].status === 'connected') {
+		const totalDaysInMS = totalDays * 86400000;
+		const startTime = Date.now() - totalDaysInMS; // This basically creates a virtual disconnect at the start of the list
+		totalDisconnectedTime += allConnectionStatus[0].time - startTime;
+	}
 
 	allConnectionStatus.forEach((status) => {
 		if (status.status === 'disconnected' && !isConnected) {
