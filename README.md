@@ -49,7 +49,7 @@ services:
 
 After running this configuration, the WebUI will be accessible at `http://localhost:3000`.
 
-## OpenWrt Setup Script
+## OpenWrt Setup
 
 ### Warning
 
