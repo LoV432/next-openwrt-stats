@@ -96,10 +96,18 @@ function ConnectionLogsList({
 			listBody.push(
 				<tr className="border-slate-300 border-opacity-30" key={status.id}>
 					<th>{status.id}</th>
-					<td>
+					<td className="font-semibold">
 						{status.status === 'connected' ? 'Connected' : 'Disconnected'}
 					</td>
-					<td>{new Date(status.time).toLocaleString()}</td>
+					<td className="font-semibold">
+						{new Date(status.time).toLocaleString('en-US', {
+							day: '2-digit',
+							month: 'short',
+							hour: 'numeric',
+							minute: '2-digit',
+							second: '2-digit'
+						})}
+					</td>
 				</tr>
 			);
 		});
@@ -107,10 +115,10 @@ function ConnectionLogsList({
 	}, []);
 	return (
 		<div className="overflow-x-auto">
-			<table className="table table-zebra">
+			<table className="table">
 				<thead className="text-slate-300 ">
 					<tr className="border-slate-300 border-opacity-30">
-						<th></th>
+						<th>ID</th>
 						<th>Status</th>
 						<th>Time</th>
 					</tr>
