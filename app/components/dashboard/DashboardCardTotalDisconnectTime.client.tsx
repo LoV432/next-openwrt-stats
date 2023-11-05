@@ -34,7 +34,7 @@ export default function DashboardCardTotalDisconnectTime({
 		<>
 			<DashboardCardBase backgroundColor={backgroundColor}>
 				<div className="text-xl font-bold">
-					{finalText}
+					{finalText} in 24 hours
 					<Image
 						onClick={toggleConnectionLogsListModal}
 						className="ml-3 inline cursor-pointer"
@@ -169,7 +169,7 @@ function parseAllConnectionStatus(
 				minute: '2-digit'
 			})}`;
 		}
-		return 'No Disconnects in the last 24 hours';
+		return 'No Disconnects';
 	}
 
 	let totalDisconnects = 0;
@@ -208,13 +208,11 @@ function parseAllConnectionStatus(
 	}
 
 	if (totalDisconnects === 0) {
-		return 'No Disconnects in the last 24 hours';
+		return 'No Disconnects';
 	}
 	return `${totalDisconnectsToString(
 		totalDisconnects
-	)} with ${millisecondsToReadableTime(
-		totalDisconnectedTime
-	)} of downtime in 24 hours`;
+	)} with ${millisecondsToReadableTime(totalDisconnectedTime)} of downtime`;
 }
 
 function totalDisconnectsToString(totalDisconnects: number) {
