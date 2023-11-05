@@ -44,6 +44,9 @@ export default function UserCard({ user }: { user: userReturnType }) {
 							<h2 className="card-title border-b border-white border-opacity-30 pb-2">
 								{localUpdateTime || user.last_updated}
 							</h2>
+							<h2 className="card-title border-b border-white border-opacity-30 pb-2">
+								{user.last_event_type.toUpperCase()}
+							</h2>
 						</>
 					) : (
 						<></>
