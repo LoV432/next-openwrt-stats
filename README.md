@@ -1,6 +1,25 @@
-# OpenWrt Stats WebUI Setup
+# Overview
 
-`docker-compose.yml`
+This is a simple dashboard for OpenWrt that does the following things:
+
+1. Displays router uptime.
+2. Keeps track of all PPPoE disconnects.
+3. Monitors all devices that connect to the router*.
+4. Shows real-time total bandwidth usage.
+5. Provides real-time per-user bandwidth usage.
+
+`*Note: Device tracking uses DHCP, so devices using static IP addresses will not show up.`
+
+# Installation
+
+The installation process have two main parts:
+
+1. Install the WebUI.
+2. Configure your OpenWrt router.
+
+## WebUI Setup
+
+Setting up the WebUI is pretty simple if you are familiar with [Docker](https://docs.docker.com/get-docker/) and [docker-compose](https://docs.docker.com/compose/). Just create a `docker-compose.yml` file as shown below, configure the environment variables, and run the container.
 
 ```yaml
 ---
@@ -14,21 +33,27 @@ services:
     ports:
       - 3000:3000
     environment:
-      - PASSWORD= # Password given by router_setup.sh. You can keep it empty if you haven't setup the router yet
+      - PASSWORD= # Password provided by router_setup.sh. Leave it empty if you haven't set up the router yet.
       - ROUTER_URL=http://192.168.1.1 # URL of your router
-      - MAX_UPLOAD_SPEED=20 # Max upload speed in Mbps
-      - MAX_DOWNLOAD_SPEED=20 # Max download speed in Mbps
+      - MAX_UPLOAD_SPEED=20 # Maximum upload speed in Mbps
+      - MAX_DOWNLOAD_SPEED=20 # Maximum download speed in Mbps
     restart: unless-stopped
 ```
 
-# Router Setup Script
+After running this configuration, the WebUI will be accessible at `http://localhost:3000`.
 
-## Prerequisites
+## OpenWrt Setup Script
+
+### Warning
+
+**Before proceeding, you should probably very definitely take a backup of your router.**
+
+### Prerequisites
 
 Before running the script, make sure you have the following dependencies installed on your OpenWrt router:
 
 1. **curl**:
-   To install curl:
+   You can install curl with the following commands:
 
    ```shell
    opkg update
@@ -44,9 +69,9 @@ Before running the script, make sure you have the following dependencies install
    ```
 
 3. **wrtbwmon**:
-   You can install the wrtbwmon package by uploading the .ipk file via OpenWrt's LuCI interface. Navigate to "System > Software," then use the "Upload Package" feature to install it. You can find the package at [https://github.com/pyrovski/wrtbwmon](https://github.com/pyrovski/wrtbwmon).
+   You can install the wrtbwmon package by uploading the .ipk file via OpenWrt's LuCI interface. Navigate to "System > Software" and use the "Upload Package" feature to install it. You can find the package at [https://github.com/pyrovski/wrtbwmon](https://github.com/pyrovski/wrtbwmon).
 
-## Enabling wrtbwmon
+### Enabling wrtbwmon
 
 Before proceeding, you need to enable the `wrtbwmon` service. Run the following commands to start and enable it:
 
@@ -55,7 +80,7 @@ Before proceeding, you need to enable the `wrtbwmon` service. Run the following 
 /etc/init.d/wrtbwmon enable
 ```
 
-## Setup Script
+### Setup Script
 
 1. Download the setup script to your router using curl:
 
@@ -69,16 +94,16 @@ curl -LO https://raw.githubusercontent.com/LoV432/next-openwrt-stats/master/rout
 chmod +x router_setup.sh
 ```
 
-## Running the Script
+### Running the Script
 
-To execute the setup script, you need to provide your WebUI URL. Ensure that there are no trailing slashes in the URL. Replace `https://webui.example.com` with your actual WebUI URL.
+To run the setup script, you need to provide your WebUI URL. Ensure that there are no trailing slashes in the URL. Replace `https://webui.example.com` with your actual WebUI URL.
 
 ```shell
 ./router_setup.sh https://webui.example.com
 ```
 
-The script will generate a password, which you'll need to add to your `docker-compose.yml` file.
+The script will generate a password, which you'll need to add to your `docker-compose.yml` file. After adding the password, recreate the container.
 
-## Additional Configuration
+### Additional Configuration
 
 In some cases, you might need to disable DNS rebind protection. You can do this from the "Network > DHCP and DNS" settings in your OpenWrt router's configuration.
