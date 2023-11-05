@@ -140,7 +140,9 @@ function parseAllConnectionStatus(
 			allConnectionStatus[allConnectionStatus.length - 1].status ===
 			'disconnected'
 		) {
-			return 'Bro it be dead';
+			return `Bro it be dead since - ${new Date(
+				allConnectionStatus[allConnectionStatus.length - 1].time
+			).toLocaleString()}`;
 		}
 		return 'No Disconnects in the last 24 hours';
 	}
@@ -178,7 +180,9 @@ function parseAllConnectionStatus(
 	}
 	return `${totalDisconnectsToString(
 		totalDisconnects
-	)} with ${millisecondsToReadableTime(totalDisconnectedTime)} in 24 hours`;
+	)} with ${millisecondsToReadableTime(
+		totalDisconnectedTime
+	)} of downtime in 24 hours`;
 }
 
 function totalDisconnectsToString(totalDisconnects: number) {
@@ -231,5 +235,5 @@ function millisecondsToReadableTime(milliseconds: number) {
 	}
 
 	// Join the formatted time parts into a human-readable string
-	return parts.join(' ');
+	return parts.join(', ');
 }
