@@ -48,7 +48,6 @@ export default function DashboardCardTotalDisconnectTime({
 			<ConnectionLogsListModal
 				toggleConnectionLogsListModal={toggleConnectionLogsListModal}
 				connectionLogsListModalRef={connectionLogsListModalRef}
-				connectionLogsList={allConnectionStatus}
 			/>
 		</>
 	);
@@ -56,18 +55,26 @@ export default function DashboardCardTotalDisconnectTime({
 
 function ConnectionLogsListModal({
 	toggleConnectionLogsListModal,
-	connectionLogsListModalRef,
-	connectionLogsList
+	connectionLogsListModalRef
 }: {
 	toggleConnectionLogsListModal: () => void;
 	connectionLogsListModalRef: React.RefObject<HTMLDialogElement>;
-	connectionLogsList: allConnectionStatusType;
 }) {
+	const [days, setDays] = useState(1);
 	return (
 		<dialog ref={connectionLogsListModalRef} className="modal">
 			<div className="modal-box bg-zinc-900">
 				<h3 className="pb-5 text-lg font-bold">Connection Logs</h3>
-				<ConnectionLogsList connectionLogsList={connectionLogsList} />
+				<p className="pb-5">Number of days to show: {days}</p>
+				<input
+					type="range"
+					min="0"
+					max="7"
+					className="range range-secondary"
+					value={days}
+					onChange={(e) => setDays(parseInt(e.target.value))}
+				/>
+				<ConnectionLogsList days={days} />
 				<button
 					onClick={toggleConnectionLogsListModal}
 					className="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
@@ -82,17 +89,17 @@ function ConnectionLogsListModal({
 	);
 }
 
-function ConnectionLogsList({
-	connectionLogsList
-}: {
-	connectionLogsList: allConnectionStatusType;
-}) {
+function ConnectionLogsList({ days }: { days: number }) {
 	const [connectionLogsListBody, setConnectionLogsListBody] = useState<
 		JSX.Element[]
 	>([]);
 	let listBody: JSX.Element[] = [];
-	useEffect(() => {
-		connectionLogsList.toReversed().forEach((status) => {
+
+	async function updateLogsList(days: number) {
+		const connectionLogsList = (await (
+			await fetch(`/api/get-connection-logs?days=${days}`)
+		).json()) as allConnectionStatusType;
+		connectionLogsList.forEach((status) => {
 			listBody.push(
 				<tr className="border-slate-300 border-opacity-30" key={status.id}>
 					<th>{status.id}</th>
@@ -112,7 +119,10 @@ function ConnectionLogsList({
 			);
 		});
 		setConnectionLogsListBody(listBody);
-	}, []);
+	}
+	useEffect(() => {
+		updateLogsList(days);
+	}, [days]);
 	return (
 		<div className="overflow-x-auto">
 			<table className="table">
