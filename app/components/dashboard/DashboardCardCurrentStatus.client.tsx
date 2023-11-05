@@ -8,7 +8,7 @@ export function DashboardCardCurrentStatus({
 	allConnectionStatus: allConnectionStatusType;
 }) {
 	const [isConnected, setIsConnected] = useState(false);
-	let lastStatus = allConnectionStatus[allConnectionStatus.length - 1];
+	let lastStatus = allConnectionStatus[0];
 	useMemo(() => {
 		setIsConnected(returnStatusBool(lastStatus));
 	}, []);

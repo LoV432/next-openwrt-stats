@@ -153,6 +153,7 @@ function parseAllConnectionStatus(
 	allConnectionStatus: allConnectionStatusType,
 	isWithinTimeFrame: boolean
 ) {
+	allConnectionStatus = allConnectionStatus.reverse();
 	if (!isWithinTimeFrame) {
 		if (
 			allConnectionStatus[allConnectionStatus.length - 1].status ===

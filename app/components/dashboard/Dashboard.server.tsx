@@ -15,7 +15,7 @@ export default function Dashboard() {
 	let yesterday = now - 86400000;
 	let isWithinTimeFrame = true;
 	let allConnectionStatus = db
-		.prepare('SELECT * FROM connectionlogs WHERE time > ?')
+		.prepare('SELECT * FROM connectionlogs WHERE time > ? ORDER BY id DESC')
 		.all(yesterday) as allConnectionStatusType;
 	if (allConnectionStatus.length === 0) {
 		allConnectionStatus = db
