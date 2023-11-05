@@ -1,6 +1,5 @@
 import { db } from '@/lib/db';
 import { DashboardCardCurrentStatus } from './DashboardCardCurrentStatus.client';
-import DashboardCardBase from './DashboardBase.server';
 import DashboardUptime from './DashboardUptime.client';
 import DashboardCardTotalDisconnectTime from './DashboardCardTotalDisconnectTime.client';
 import SpeedMeter from './SpeedMeter.client';
