@@ -92,7 +92,7 @@ function ConnectionLogsList({
 	>([]);
 	let listBody: JSX.Element[] = [];
 	useEffect(() => {
-		connectionLogsList.forEach((status) => {
+		connectionLogsList.toReversed().forEach((status) => {
 			listBody.push(
 				<tr className="border-slate-300 border-opacity-30" key={status.id}>
 					<th>{status.id}</th>
