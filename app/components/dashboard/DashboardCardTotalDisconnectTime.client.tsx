@@ -12,7 +12,8 @@ export default function DashboardCardTotalDisconnectTime({
 	allConnectionStatus: allConnectionStatusType;
 	isWithinTimeFrame: boolean;
 }) {
-	const [finalText, setFinalText] = useState('Loading...');
+	const [totalDisconnectedTime, setTotalDisconnectedTime] =
+		useState('Loading...');
 	const [backgroundColor, setBackgroundColor] = useState(
 		dashboardColor(allConnectionStatus)
 	);
@@ -25,7 +26,7 @@ export default function DashboardCardTotalDisconnectTime({
 		}
 	}
 	useEffect(() => {
-		setFinalText(
+		setTotalDisconnectedTime(
 			parseAllConnectionStatus(allConnectionStatus, isWithinTimeFrame)
 		);
 		setBackgroundColor(dashboardColor(allConnectionStatus));
@@ -34,7 +35,7 @@ export default function DashboardCardTotalDisconnectTime({
 		<>
 			<DashboardCardBase backgroundColor={backgroundColor}>
 				<div className="text-xl font-bold">
-					{finalText} in 24 hours
+					{totalDisconnectedTime} in 24 hours
 					<Image
 						onClick={toggleConnectionLogsListModal}
 						className="ml-3 inline cursor-pointer"
@@ -93,6 +94,7 @@ function ConnectionLogsList({ days }: { days: number }) {
 	const [connectionLogsListBody, setConnectionLogsListBody] = useState<
 		JSX.Element[]
 	>([]);
+	const [totalDisconnectedTime, setTotalDisconnectedTime] = useState('');
 	let listBody: JSX.Element[] = [];
 
 	async function updateLogsList(days: number) {
@@ -119,12 +121,20 @@ function ConnectionLogsList({ days }: { days: number }) {
 			);
 		});
 		setConnectionLogsListBody(listBody);
+		setTotalDisconnectedTime(
+			parseAllConnectionStatus(connectionLogsList, true, days)
+		);
 	}
 	useEffect(() => {
 		updateLogsList(days);
 	}, [days]);
 	return (
 		<div className="overflow-x-auto">
+			{totalDisconnectedTime !== 'No Disconnects' ? (
+				<div className="badge badge-error h-fit gap-2">
+					{totalDisconnectedTime}
+				</div>
+			) : null}
 			<table className="table">
 				<thead className="text-slate-300 ">
 					<tr className="border-slate-300 border-opacity-30">
@@ -154,6 +164,9 @@ function parseAllConnectionStatus(
 	isWithinTimeFrame: boolean,
 	totalDays = 1
 ) {
+	if (allConnectionStatus.length === 0) {
+		return 'No Disconnects';
+	}
 	allConnectionStatus = allConnectionStatus.reverse();
 	if (!isWithinTimeFrame) {
 		if (
@@ -185,9 +198,11 @@ function parseAllConnectionStatus(
 
 	// If the first status is connected, add time from start of total days to until first connect
 	if (allConnectionStatus[0].status === 'connected') {
-		const totalDaysInMS = totalDays * 86400000;
-		const startTime = Date.now() - totalDaysInMS; // This basically creates a virtual disconnect at the start of the list
-		totalDisconnectedTime += allConnectionStatus[0].time - startTime;
+		if (allConnectionStatus[0].id !== 1) {
+			const totalDaysInMS = totalDays * 86400000;
+			const startTime = Date.now() - totalDaysInMS; // This basically creates a virtual disconnect at the start of the list
+			totalDisconnectedTime += allConnectionStatus[0].time - startTime;
+		}
 	}
 
 	allConnectionStatus.forEach((status) => {
