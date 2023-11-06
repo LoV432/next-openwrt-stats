@@ -12,7 +12,7 @@ export default function ConnectionLogsListModal({
 	const [days, setDays] = useState(1);
 	return (
 		<dialog ref={connectionLogsListModalRef} className="modal">
-			<div className="modal-box bg-zinc-900">
+			<div className="modal-box h-3/4 bg-zinc-900">
 				<h3 className="pb-5 text-lg font-bold">Connection Logs</h3>
 				<p className="pb-5">Number of days to show: {days}</p>
 				<input
