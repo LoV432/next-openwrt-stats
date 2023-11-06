@@ -1,14 +1,21 @@
 # Overview
 
-This is a simple dashboard for OpenWrt that does the following things:
+This is a simple dashboard for [OpenWrt](https://openwrt.org/) that does the following things:
 
 1. Displays router uptime.
 2. Keeps track of all PPPoE disconnects.
 3. Monitors all devices that connect to the router*.
 4. Shows real-time total bandwidth usage.
-5. Provides real-time per-user bandwidth usage.
+5. Shows real-time per-user bandwidth usage.
 
 `*Note: Device tracking uses DHCP, so devices using static IP addresses will not show up.`
+
+
+![Openwrt Stats Rounded](https://github.com/LoV432/next-openwrt-stats/assets/60856741/a0413b49-6ca9-4eaf-a128-7c836df9cd52)
+
+![Openwrt Stats Phone Rounded](https://github.com/LoV432/next-openwrt-stats/assets/60856741/a16f40d3-09c6-4426-9875-eb181eed9239)
+
+
 
 # Installation
 
@@ -40,9 +47,9 @@ services:
     restart: unless-stopped
 ```
 
-After running this configuration, the WebUI will be accessible at `http://localhost:3000`.
+After running this container, the WebUI will be accessible at `http://localhost:3000`.
 
-## OpenWrt Setup Script
+## OpenWrt Setup
 
 ### Warning
 
@@ -106,4 +113,4 @@ The script will generate a password, which you'll need to add to your `docker-co
 
 ### Additional Configuration
 
-In some cases, you might need to disable DNS rebind protection. You can do this from the "Network > DHCP and DNS" settings in your OpenWrt router's configuration.
+In some cases, you might need to disable DNS rebind protection. You can do this from the "Network > DHCP and DNS" settings in your OpenWrt router's web interface.
