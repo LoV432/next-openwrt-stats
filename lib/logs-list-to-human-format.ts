@@ -72,8 +72,12 @@ export function connectionLogsListToHumanFormat(
 		totalDowntimeInMS += Date.now() - lastStatusChangeTime;
 	}
 
-	// This will happen when there is no disconnect within the time frame of totalDays but there is a downtime
 	if (totalDisconnects === 0 && totalDowntimeInMS === 0) {
+		return 'No Disconnects';
+	}
+
+	// This will happen when there is no disconnect within the time frame of totalDays but there is a downtime
+	if (totalDisconnects === 0 && totalDowntimeInMS !== 0) {
 		totalDisconnects = 1;
 	}
 	const totalDisconnectsString = totalDisconnectsToString(totalDisconnects);
