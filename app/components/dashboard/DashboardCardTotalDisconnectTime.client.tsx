@@ -35,7 +35,7 @@ export default function DashboardCardTotalDisconnectTime({
 		<>
 			<DashboardCardBase backgroundColor={backgroundColor}>
 				<div className="text-xl font-bold">
-					{humanReadableDisconnectedTime} in 24 hours
+					{humanReadableDisconnectedTime}
 					<Image
 						onClick={toggleConnectionLogsListModal}
 						className="ml-3 inline cursor-pointer"

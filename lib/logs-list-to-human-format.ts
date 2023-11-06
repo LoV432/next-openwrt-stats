@@ -4,8 +4,12 @@ export function connectionLogsListToHumanFormat(
 	allConnectionLogs: connectionLogsList,
 	totalDays = 1
 ) {
+	const totalDaysString =
+		totalDays > 1 ? `last ${totalDays} days` : `past 24 hours`;
+
+	const noDisconnectsReturnString = `No Disconnects in ${totalDaysString}`;
 	if (allConnectionLogs.length === 0) {
-		return 'No Disconnects';
+		return noDisconnectsReturnString;
 	}
 	allConnectionLogs = allConnectionLogs.reverse();
 
@@ -32,7 +36,7 @@ export function connectionLogsListToHumanFormat(
 				minute: '2-digit'
 			})}`;
 		}
-		return 'No Disconnects';
+		return noDisconnectsReturnString;
 	}
 
 	let totalDisconnects = 0;
@@ -73,7 +77,7 @@ export function connectionLogsListToHumanFormat(
 	}
 
 	if (totalDisconnects === 0 && totalDowntimeInMS === 0) {
-		return 'No Disconnects';
+		return noDisconnectsReturnString;
 	}
 
 	// This will happen when there is no disconnect within the time frame of totalDays but there is a downtime
@@ -83,7 +87,7 @@ export function connectionLogsListToHumanFormat(
 	const totalDisconnectsString = totalDisconnectsToString(totalDisconnects);
 	const totalDowntimeString = millisecondsToReadableTime(totalDowntimeInMS);
 
-	return `${totalDisconnectsString} with ${totalDowntimeString} of downtime`;
+	return `${totalDisconnectsString} with ${totalDowntimeString} of downtime in ${totalDaysString}`;
 }
 
 function totalDisconnectsToString(totalDisconnects: number) {

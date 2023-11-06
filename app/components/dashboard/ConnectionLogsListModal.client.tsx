@@ -79,8 +79,8 @@ function ConnectionLogsList({ days }: { days: number }) {
 	}, [days]);
 	return (
 		<div className="overflow-x-auto">
-			{humanReadableDisconnectedTime !== 'No Disconnects' ? (
-				<div className="badge badge-error h-fit gap-2">
+			{!humanReadableDisconnectedTime.includes('No Disconnects') ? (
+				<div className="h-fit gap-2 text-error">
 					{humanReadableDisconnectedTime}
 				</div>
 			) : null}
