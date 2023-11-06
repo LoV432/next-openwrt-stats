@@ -1,11 +1,11 @@
 'use client';
 import DashboardCardBase from './DashboardBase.server';
-import { allConnectionStatusType } from './Dashboard.server';
+import { connectionLogsList } from './Dashboard.server';
 import { useEffect, useMemo, useState } from 'react';
 export function DashboardCardCurrentStatus({
 	allConnectionStatus
 }: {
-	allConnectionStatus: allConnectionStatusType;
+	allConnectionStatus: connectionLogsList;
 }) {
 	const [isConnected, setIsConnected] = useState(false);
 	let lastStatus = allConnectionStatus[0];
@@ -29,7 +29,7 @@ export function DashboardCardCurrentStatus({
 	);
 }
 
-function returnStatusBool(status: allConnectionStatusType[0]) {
+function returnStatusBool(status: connectionLogsList[0]) {
 	if (!status) {
 		return false;
 	} else {

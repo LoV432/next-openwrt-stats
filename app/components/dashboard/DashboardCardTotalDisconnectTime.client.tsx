@@ -1,21 +1,21 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { allConnectionStatusType } from './Dashboard.server';
+import { connectionLogsList } from './Dashboard.server';
 import DashboardCardBase from './DashboardBase.server';
+import ConnectionLogsListModal from './ConnectionLogsListModal.client';
 import Image from 'next/image';
+import { connectionLogsListToHumanFormat } from '@/lib/logs-list-to-human-format';
 
 export default function DashboardCardTotalDisconnectTime({
-	allConnectionStatus,
-	isWithinTimeFrame
+	allConnectionLogs
 }: {
-	allConnectionStatus: allConnectionStatusType;
-	isWithinTimeFrame: boolean;
+	allConnectionLogs: connectionLogsList;
 }) {
-	const [totalDisconnectedTime, setTotalDisconnectedTime] =
+	const [humanReadableDisconnectedTime, setHumanReadableDisconnectedTime] =
 		useState('Loading...');
 	const [backgroundColor, setBackgroundColor] = useState(
-		dashboardColor(allConnectionStatus)
+		dashboardColor(allConnectionLogs)
 	);
 	let connectionLogsListModalRef = useRef<HTMLDialogElement>(null);
 	function toggleConnectionLogsListModal() {
@@ -26,16 +26,16 @@ export default function DashboardCardTotalDisconnectTime({
 		}
 	}
 	useEffect(() => {
-		setTotalDisconnectedTime(
-			parseAllConnectionStatus(allConnectionStatus, isWithinTimeFrame)
+		setHumanReadableDisconnectedTime(
+			connectionLogsListToHumanFormat(allConnectionLogs)
 		);
-		setBackgroundColor(dashboardColor(allConnectionStatus));
+		setBackgroundColor(dashboardColor(allConnectionLogs));
 	}, []);
 	return (
 		<>
 			<DashboardCardBase backgroundColor={backgroundColor}>
 				<div className="text-xl font-bold">
-					{totalDisconnectedTime} in 24 hours
+					{humanReadableDisconnectedTime} in 24 hours
 					<Image
 						onClick={toggleConnectionLogsListModal}
 						className="ml-3 inline cursor-pointer"
@@ -54,231 +54,12 @@ export default function DashboardCardTotalDisconnectTime({
 	);
 }
 
-function ConnectionLogsListModal({
-	toggleConnectionLogsListModal,
-	connectionLogsListModalRef
-}: {
-	toggleConnectionLogsListModal: () => void;
-	connectionLogsListModalRef: React.RefObject<HTMLDialogElement>;
-}) {
-	const [days, setDays] = useState(1);
-	return (
-		<dialog ref={connectionLogsListModalRef} className="modal">
-			<div className="modal-box bg-zinc-900">
-				<h3 className="pb-5 text-lg font-bold">Connection Logs</h3>
-				<p className="pb-5">Number of days to show: {days}</p>
-				<input
-					type="range"
-					min="0"
-					max="7"
-					className="range range-secondary"
-					value={days}
-					onChange={(e) => setDays(parseInt(e.target.value))}
-				/>
-				<ConnectionLogsList days={days} />
-				<button
-					onClick={toggleConnectionLogsListModal}
-					className="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
-				>
-					✕
-				</button>
-			</div>
-			<div className="modal-backdrop bg-zinc-700 opacity-30">
-				<button onClick={toggleConnectionLogsListModal}>close</button>
-			</div>
-		</dialog>
-	);
-}
-
-function ConnectionLogsList({ days }: { days: number }) {
-	const [connectionLogsListBody, setConnectionLogsListBody] = useState<
-		JSX.Element[]
-	>([]);
-	const [totalDisconnectedTime, setTotalDisconnectedTime] = useState('');
-	let listBody: JSX.Element[] = [];
-
-	async function updateLogsList(days: number) {
-		const connectionLogsList = (await (
-			await fetch(`/api/get-connection-logs?days=${days}`)
-		).json()) as allConnectionStatusType;
-		connectionLogsList.forEach((status) => {
-			listBody.push(
-				<tr className="border-slate-300 border-opacity-30" key={status.id}>
-					<th>{status.id}</th>
-					<td className="font-semibold">
-						{status.status === 'connected' ? 'Connected' : 'Disconnected'}
-					</td>
-					<td className="font-semibold">
-						{new Date(status.time).toLocaleString('en-US', {
-							day: '2-digit',
-							month: 'short',
-							hour: 'numeric',
-							minute: '2-digit',
-							second: '2-digit'
-						})}
-					</td>
-				</tr>
-			);
-		});
-		setConnectionLogsListBody(listBody);
-		setTotalDisconnectedTime(
-			parseAllConnectionStatus(connectionLogsList, true, days)
-		);
-	}
-	useEffect(() => {
-		updateLogsList(days);
-	}, [days]);
-	return (
-		<div className="overflow-x-auto">
-			{totalDisconnectedTime !== 'No Disconnects' ? (
-				<div className="badge badge-error h-fit gap-2">
-					{totalDisconnectedTime}
-				</div>
-			) : null}
-			<table className="table">
-				<thead className="text-slate-300 ">
-					<tr className="border-slate-300 border-opacity-30">
-						<th>ID</th>
-						<th>Status</th>
-						<th>Time</th>
-					</tr>
-				</thead>
-				<tbody>{connectionLogsListBody}</tbody>
-			</table>
-		</div>
-	);
-}
-
-function dashboardColor(allConnectionStatus: allConnectionStatusType) {
+function dashboardColor(allConnectionLogs: connectionLogsList) {
 	let backgroundColor = 'bg-emerald-700';
-	allConnectionStatus.forEach((status) => {
+	allConnectionLogs.forEach((status) => {
 		if (status.status === 'disconnected') {
 			backgroundColor = 'bg-red-800';
 		}
 	});
 	return backgroundColor;
-}
-
-function parseAllConnectionStatus(
-	allConnectionStatus: allConnectionStatusType,
-	isWithinTimeFrame: boolean,
-	totalDays = 1
-) {
-	if (allConnectionStatus.length === 0) {
-		return 'No Disconnects';
-	}
-	allConnectionStatus = allConnectionStatus.reverse();
-	if (!isWithinTimeFrame) {
-		if (
-			allConnectionStatus[allConnectionStatus.length - 1].status ===
-			'disconnected'
-		) {
-			return `Bro it be dead since - ${new Date(
-				allConnectionStatus[allConnectionStatus.length - 1].time
-			).toLocaleString('en-US', {
-				day: '2-digit',
-				month: 'short',
-				hour: 'numeric',
-				minute: '2-digit'
-			})}`;
-		}
-		return 'No Disconnects';
-	}
-
-	let totalDisconnects = 0;
-	for (let i = 0; i < allConnectionStatus.length; i++) {
-		if (allConnectionStatus[i].status === 'disconnected') {
-			totalDisconnects++;
-		}
-	}
-
-	let totalDisconnectedTime = 0;
-	let isConnected = false;
-	let lastStatusChangeTime = 0;
-
-	// If the first status is connected, add time from start of total days to until first connect
-	if (allConnectionStatus[0].status === 'connected') {
-		if (allConnectionStatus[0].id !== 1) {
-			const totalDaysInMS = totalDays * 86400000;
-			const startTime = Date.now() - totalDaysInMS; // This basically creates a virtual disconnect at the start of the list
-			totalDisconnectedTime += allConnectionStatus[0].time - startTime;
-		}
-	}
-
-	allConnectionStatus.forEach((status) => {
-		if (status.status === 'disconnected' && !isConnected) {
-			// Mark the start of a disconnected period
-			lastStatusChangeTime = status.time;
-			isConnected = true;
-		} else if (status.status === 'connected' && isConnected) {
-			// Calculate and accumulate disconnected time
-			totalDisconnectedTime += status.time - lastStatusChangeTime;
-			isConnected = false;
-		}
-	});
-
-	// If the last status was disconnected, add the time until now
-	if (isConnected) {
-		totalDisconnectedTime += Date.now() - lastStatusChangeTime;
-	}
-
-	if (totalDisconnects === 0) {
-		return 'No Disconnects';
-	}
-	return `${totalDisconnectsToString(
-		totalDisconnects
-	)} with ${millisecondsToReadableTime(totalDisconnectedTime)} of downtime`;
-}
-
-function totalDisconnectsToString(totalDisconnects: number) {
-	if (totalDisconnects > 1) {
-		return `Disconnected ${totalDisconnects} times`;
-	} else if (totalDisconnects === 1) {
-		return `Disconnected 1 time`;
-	}
-}
-
-function millisecondsToReadableTime(milliseconds: number) {
-	// Define constants for time units in milliseconds
-	const msPerSecond = 1000;
-	const msPerMinute = 60 * msPerSecond;
-	const msPerHour = msPerMinute * 60;
-	const msPerDay = msPerHour * 24;
-
-	// Calculate the number of days, hours, minutes, and seconds
-	const days = Math.floor(milliseconds / msPerDay);
-	milliseconds %= msPerDay;
-	const hours = Math.floor(milliseconds / msPerHour);
-	milliseconds %= msPerHour;
-	const minutes = Math.floor(milliseconds / msPerMinute);
-	milliseconds %= msPerMinute;
-	const seconds = Math.floor(milliseconds / msPerSecond);
-
-	// Format a unit with "s" when plural
-	const formatUnit = (value: number, unit: string) => {
-		if (value === 1) {
-			return `${value} ${unit}`;
-		}
-		return `${value} ${unit}s`;
-	};
-
-	// Initialize an array to store the formatted time parts
-	const parts = [];
-
-	// Add units to the array as needed, pluralized when appropriate
-	if (days > 0) {
-		parts.push(formatUnit(days, 'day'));
-	}
-	if (hours > 0) {
-		parts.push(formatUnit(hours, 'hour'));
-	}
-	if (minutes > 0) {
-		parts.push(formatUnit(minutes, 'minute'));
-	}
-	if (seconds > 0) {
-		parts.push(formatUnit(seconds, 'second'));
-	}
-
-	// Join the formatted time parts into a human-readable string
-	return parts.join(', ');
 }

@@ -5,7 +5,7 @@ import DashboardCardTotalDisconnectTime from './DashboardCardTotalDisconnectTime
 import SpeedMeter from './SpeedMeter.client';
 import { getUptime } from '@/lib/get-uptime';
 
-export type allConnectionStatusType = {
+export type connectionLogsList = {
 	id: number;
 	status: string;
 	time: number;
@@ -13,23 +13,22 @@ export type allConnectionStatusType = {
 export default function Dashboard() {
 	let now = Date.now();
 	let yesterday = now - 86400000;
-	let isWithinTimeFrame = true;
-	let allConnectionStatus = db
+	let allConnectionLogsFromServer = db
 		.prepare('SELECT * FROM connectionlogs WHERE time > ? ORDER BY id DESC')
-		.all(yesterday) as allConnectionStatusType;
-	if (allConnectionStatus.length === 0) {
-		allConnectionStatus = db
+		.all(yesterday) as connectionLogsList;
+	if (allConnectionLogsFromServer.length === 0) {
+		allConnectionLogsFromServer = db
 			.prepare('SELECT * FROM connectionlogs ORDER BY id DESC LIMIT 1')
-			.all() as allConnectionStatusType;
-		isWithinTimeFrame = false;
+			.all() as connectionLogsList;
 	}
 	return (
 		<>
 			<DashboardCardNetWork />
-			<DashboardCardCurrentStatus allConnectionStatus={allConnectionStatus} />
+			<DashboardCardCurrentStatus
+				allConnectionStatus={allConnectionLogsFromServer}
+			/>
 			<DashboardCardTotalDisconnectTime
-				allConnectionStatus={allConnectionStatus}
-				isWithinTimeFrame={isWithinTimeFrame}
+				allConnectionLogs={allConnectionLogsFromServer}
 			/>
 		</>
 	);

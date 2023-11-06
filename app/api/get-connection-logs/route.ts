@@ -1,4 +1,4 @@
-import { allConnectionStatusType } from '@/app/components/dashboard/Dashboard.server';
+import { connectionLogsList } from '@/app/components/dashboard/Dashboard.server';
 import { db } from '@/lib/db';
 
 export async function GET(request: Request) {
@@ -7,10 +7,10 @@ export async function GET(request: Request) {
 
 	if (!daysParam || daysParam === '' || isNaN(parseInt(daysParam))) {
 		const yesterday = Date.now() - 86400000;
-		const allConnectionStatus = db
+		const requestedConnectionLogs = db
 			.prepare('SELECT * FROM connectionlogs WHERE time > ? ORDER BY id DESC')
-			.all(yesterday) as allConnectionStatusType;
-		return new Response(JSON.stringify(allConnectionStatus), {
+			.all(yesterday) as connectionLogsList;
+		return new Response(JSON.stringify(requestedConnectionLogs), {
 			status: 200,
 			headers: {
 				'Content-Type': 'application/json'
@@ -21,11 +21,11 @@ export async function GET(request: Request) {
 	const days = parseInt(daysParam);
 	const daysInEpoch = days * 86400000;
 	const daysToSearch = Date.now() - daysInEpoch;
-	const allConnectionStatus = db
+	const requestedConnectionLogs = db
 		.prepare(`SELECT * FROM connectionlogs WHERE time > ? ORDER BY id DESC`)
-		.all(daysToSearch) as allConnectionStatusType;
+		.all(daysToSearch) as connectionLogsList;
 
-	return new Response(JSON.stringify(allConnectionStatus), {
+	return new Response(JSON.stringify(requestedConnectionLogs), {
 		status: 200,
 		headers: {
 			'Content-Type': 'application/json'
