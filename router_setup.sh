@@ -22,28 +22,34 @@ password_hash=$(uhttpd -m $password)
 
 # Add user to rcpd config
 #############################
-config_data="config login
-        option username 'readstats'
-        option password '$password_hash'
-        list read 'readstats'
-        list write 'readstats'
-"
-echo "" >> "/etc/config/rpcd"
-echo "$config_data" >> "/etc/config/rpcd"
-echo "Added user 'readstats' to /etc/config/rpcd"
+
+file="/etc/config/rpcd"
+search_string="option username 'readstats'"
+
+if grep -q "$search_string" "$file"; then
+  echo "User already exists. Skipping user creation."
+else
+  config_data="config login
+          option username 'readstats'
+          option password '$password_hash'
+          list read 'readstats'
+          list write 'readstats'
+  "
+  echo "" >> "/etc/config/rpcd"
+  echo "$config_data" >> "/etc/config/rpcd"
+  echo "Added user 'readstats' to /etc/config/rpcd"
+  echo "*****************************"
+  echo ""
+
+  echo "Password is $password"
+  echo "Please save this in a safe place. You will need it when setting up WebUI."
+
+  echo ""
+  echo "*****************************"
+fi
+echo ""
+echo ""
 #############################
-
-
-echo "*****************************"
-echo ""
-
-echo "Password is $password"
-echo "Please save this in a safe place. You will need it when setting up WebUI."
-
-echo ""
-echo "*****************************"
-echo ""
-echo ""
 
 
 # Create permissions file
