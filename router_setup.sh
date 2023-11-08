@@ -1,14 +1,37 @@
 #!/bin/ash
 
 if [ -z "$1" ]; then
-    echo "Please provide the URL of where you will host the WebUI as parameter"
-    echo "Examples:"
-    echo "./router_setup.sh https://example.com"
-    echo "./router_setup.sh http://192.168.1.30:8080"
-    echo "./router_setup.sh https://openwrtstats.example.com"
-    echo "Dont add any trailing slash"
-    echo "It's fine if you don't have WebUI installed yet. Just make sure that when you install the WebUI, The router will be able to reach the WebUI using the URL"
-    exit 1
+  echo ""
+  echo ""
+  echo "Please provide the URL of your OpenWrt Stats WebUI and the name of your pppoe interface as parameter"
+  echo "You can find the name of your pppoe interface from your OpenWrt WebUI in the 'Network > Interfaces' tab"
+  echo "./router_setup.sh <url> <interface>"
+  echo "Examples:"
+  echo "./router_setup.sh https://example.com wan"
+  echo "./router_setup.sh http://192.168.1.30:8080 pppoe-wan"
+  echo "./router_setup.sh https://openwrtstats.example.com mickymouse"
+  echo "Dont add any trailing slash to the URL"
+  echo "It's fine if you don't have WebUI installed yet. Just make sure that when you install the WebUI, The router will be able to reach the WebUI using the URL"
+  echo ""
+  echo ""
+  exit 1
+fi
+
+if [ -z "$2" ]; then
+  echo ""
+  echo ""
+  echo "Please provide the URL of your OpenWrt Stats WebUI and the name of your pppoe interface as parameter"
+  echo "You can find the name of your pppoe interface from your OpenWrt LuCi WebUI in the 'Network > Interfaces' tab"
+  echo "./router_setup.sh <url> <interface>"
+  echo "Examples:"
+  echo "./router_setup.sh https://example.com wan"
+  echo "./router_setup.sh http://192.168.1.30:8080 pppoe-wan"
+  echo "./router_setup.sh https://openwrtstats.example.com mickymouse"
+  echo "Dont add any trailing slash to the URL"
+  echo "It's fine if you don't have WebUI installed yet. Just make sure that when you install the WebUI, The router will be able to reach the WebUI using the URL"
+  echo ""
+  echo ""
+  exit 1
 fi
 
 # Function to generate a random password
@@ -98,14 +121,15 @@ echo "Script created /etc/hotplug.d/dhcp/99-dhcp-trigger"
 #############################
 content='#!/bin/ash
 
-if [[ "$INTERFACE" == "pppoe" && "$ACTION" == "ifup" ]]; then
+if [[ "$INTERFACE" == "INTERFACE_HERE" && "$ACTION" == "ifup" ]]; then
 	curl -d '{"status":"connected"}' -X POST URL_HERE/api/connection-event
 
-elif [[ "$INTERFACE" == "pppoe" && "$ACTION" == "ifdown" ]]; then
+elif [[ "$INTERFACE" == "INTERFACE_HERE" && "$ACTION" == "ifdown" ]]; then
 	curl -d '{"status":"disconnected"}' -X POST URL_HERE/api/connection-event
 fi
 '
 content="${content//URL_HERE/$1}"
+content="${content//INTERFACE_HERE/$2}"
 
 echo "$content" > /etc/hotplug.d/iface/99-pppoe-trigger
 echo "Script created /etc/hotplug.d/iface/99-pppoe-trigger"
