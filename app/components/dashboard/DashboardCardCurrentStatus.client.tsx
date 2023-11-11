@@ -21,7 +21,7 @@ export function DashboardCardCurrentStatus({
 				backgroundColor={isConnected ? 'bg-emerald-700' : 'bg-red-800'}
 			>
 				<div className="text-2xl font-bold">
-					<h1>Current Stauts:</h1>
+					<h1>Current Status:</h1>
 					<h1>{isConnected ? 'Connected' : 'Disconnected'}</h1>
 				</div>
 			</DashboardCardBase>
