@@ -103,10 +103,12 @@ chmod +x router_setup.sh
 
 ### Running the Script
 
-To run the setup script, you need to provide your WebUI URL. Ensure that there are no trailing slashes in the URL. Replace `https://webui.example.com` with your actual WebUI URL.
+To run the setup script, you need to provide your WebUI URL and the PPPoE interface name. Ensure that there are no trailing slashes in the URL. You can find the PPPoE interface name under "Network > Interfaces" on OpenWrt LuCi
+
+![interface name](https://github.com/LoV432/next-openwrt-stats/assets/60856741/3e5552fa-2bc6-43fd-adc3-d2db53872157)
 
 ```shell
-./router_setup.sh https://webui.example.com
+./router_setup.sh https://webui.example.com wan
 ```
 
 The script will generate a password, which you'll need to add to your `docker-compose.yml` file. After adding the password, recreate the container.
