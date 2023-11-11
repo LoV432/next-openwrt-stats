@@ -52,7 +52,7 @@ export default function UserCard({ user }: { user: userReturnType }) {
 						<></>
 					)}
 					<div
-						className="text-right text-sm font-semibold text-zinc-500 hover:cursor-pointer"
+						className="text-right text-sm font-semibold text-gray-400 opacity-80 hover:cursor-pointer"
 						onClick={() => setShowDetails(!showDetails)}
 					>
 						{showDetails ? 'Hide Details' : 'Show Details'}

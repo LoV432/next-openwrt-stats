@@ -13,7 +13,7 @@ export default function ConnectionLogsListModal({
 	return (
 		<dialog ref={connectionLogsListModalRef} className="modal">
 			<div className="modal-box h-3/4 bg-zinc-900">
-				<h3 className="pb-5 text-lg font-bold">Connection Logs</h3>
+				<p className="pb-5 text-lg font-bold">Connection Logs</p>
 				<p className="pb-5">Number of days to show: {days}</p>
 				<input
 					type="range"
@@ -22,6 +22,7 @@ export default function ConnectionLogsListModal({
 					className="range range-secondary"
 					value={days}
 					onChange={(e) => setDays(parseInt(e.target.value))}
+					aria-label="Days to show"
 				/>
 				<ConnectionLogsList days={days} />
 				<button
