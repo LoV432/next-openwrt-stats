@@ -8,14 +8,14 @@ import Image from 'next/image';
 import { connectionLogsListToHumanFormat } from '@/lib/logs-list-to-human-format';
 
 export default function DashboardCardTotalDisconnectTime({
-	allConnectionLogs
+	humanReadableDisconnectedTimePrerender
 }: {
-	allConnectionLogs: connectionLogsList;
+	humanReadableDisconnectedTimePrerender: string;
 }) {
 	const [humanReadableDisconnectedTime, setHumanReadableDisconnectedTime] =
-		useState('Loading...');
+		useState(humanReadableDisconnectedTimePrerender);
 	const [backgroundColor, setBackgroundColor] = useState(
-		dashboardColor(allConnectionLogs)
+		dashboardColor(humanReadableDisconnectedTimePrerender)
 	);
 	let connectionLogsListModalRef = useRef<HTMLDialogElement>(null);
 	function toggleConnectionLogsListModal() {
@@ -25,12 +25,6 @@ export default function DashboardCardTotalDisconnectTime({
 			connectionLogsListModalRef.current?.showModal();
 		}
 	}
-	useEffect(() => {
-		setHumanReadableDisconnectedTime(
-			connectionLogsListToHumanFormat(allConnectionLogs)
-		);
-		setBackgroundColor(dashboardColor(allConnectionLogs));
-	}, []);
 	return (
 		<>
 			<DashboardCardBase backgroundColor={backgroundColor}>
@@ -54,12 +48,10 @@ export default function DashboardCardTotalDisconnectTime({
 	);
 }
 
-function dashboardColor(allConnectionLogs: connectionLogsList) {
-	let backgroundColor = 'bg-emerald-700';
-	allConnectionLogs.forEach((status) => {
-		if (status.status === 'disconnected') {
-			backgroundColor = 'bg-red-800';
-		}
-	});
+function dashboardColor(humanReadableDisconnectedTime: string) {
+	let backgroundColor = 'bg-red-800';
+	if (humanReadableDisconnectedTime.includes('No Disconnects')) {
+		backgroundColor = 'bg-emerald-700';
+	}
 	return backgroundColor;
 }

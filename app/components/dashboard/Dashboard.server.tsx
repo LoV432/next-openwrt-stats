@@ -4,6 +4,7 @@ import DashboardUptime from './DashboardUptime.client';
 import DashboardCardTotalDisconnectTime from './DashboardCardTotalDisconnectTime.client';
 import SpeedMeter from './SpeedMeter.client';
 import { getUptime } from '@/lib/get-uptime';
+import { connectionLogsListToHumanFormat } from '@/lib/logs-list-to-human-format';
 
 export type connectionLogsList = {
 	id: number;
@@ -21,14 +22,20 @@ export default function Dashboard() {
 			.prepare('SELECT * FROM connectionlogs ORDER BY id DESC LIMIT 1')
 			.all() as connectionLogsList;
 	}
+	let humanReadableDisconnectedTimePrerender = connectionLogsListToHumanFormat(
+		allConnectionLogsFromServer
+	);
+	let currentStatusPrerender = allConnectionLogsFromServer[0].status;
 	return (
 		<>
 			<DashboardCardNetWork />
 			<DashboardCardCurrentStatus
-				allConnectionStatus={allConnectionLogsFromServer}
+				currentStatusPrerender={currentStatusPrerender}
 			/>
 			<DashboardCardTotalDisconnectTime
-				allConnectionLogs={allConnectionLogsFromServer}
+				humanReadableDisconnectedTimePrerender={
+					humanReadableDisconnectedTimePrerender
+				}
 			/>
 		</>
 	);
