@@ -11,7 +11,7 @@ export function connectionLogsListToHumanFormat(
 	if (allConnectionLogs.length === 0) {
 		return noDisconnectsReturnString;
 	}
-	allConnectionLogs = allConnectionLogs.reverse();
+	allConnectionLogs = allConnectionLogs.slice().reverse();
 
 	// Get the last log and check if its within the time frame of totalDays
 	let isWithinTimeFrame = false;
