@@ -25,6 +25,21 @@ export default function DashboardCardTotalDisconnectTime({
 			connectionLogsListModalRef.current?.showModal();
 		}
 	}
+
+	useEffect(() => {
+		const interval = setInterval(() => {
+			const getNewLogs = fetch('/api/get-connection-logs');
+			getNewLogs
+				.then((response) => response.json())
+				.then((data: connectionLogsList) => {
+					setHumanReadableDisconnectedTime(
+						connectionLogsListToHumanFormat(data)
+					);
+					setBackgroundColor(dashboardColor(humanReadableDisconnectedTime));
+				});
+		}, 3000);
+		return () => clearInterval(interval);
+	}, []);
 	return (
 		<>
 			<DashboardCardBase backgroundColor={backgroundColor}>
