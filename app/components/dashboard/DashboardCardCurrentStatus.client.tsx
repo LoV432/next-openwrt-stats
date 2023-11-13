@@ -10,6 +10,21 @@ export function DashboardCardCurrentStatus({
 	const [isConnected, setIsConnected] = useState(
 		returnStatusBool(currentStatusPrerender)
 	);
+	useEffect(() => {
+		const interval = setInterval(() => {
+			const getNewStatus = fetch('/api/get-connection-logs?days=-1');
+			getNewStatus
+				.then((response) => response.json())
+				.then((data: connectionLogsList) => {
+					if (data[0].status === 'connected') {
+						setIsConnected(true);
+					} else {
+						setIsConnected(false);
+					}
+				});
+		}, 3000);
+		return () => clearInterval(interval);
+	}, []);
 	return (
 		<>
 			<DashboardCardBase

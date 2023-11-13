@@ -18,6 +18,18 @@ export async function GET(request: Request) {
 		});
 	}
 
+	if (daysParam === '-1') {
+		const lastConnectionLog = db
+			.prepare('SELECT * FROM connectionlogs ORDER BY id DESC LIMIT 1')
+			.all() as connectionLogsList;
+		return new Response(JSON.stringify(lastConnectionLog), {
+			status: 200,
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+	}
+
 	const days = parseInt(daysParam);
 	const daysInEpoch = days * 86400000;
 	const daysToSearch = Date.now() - daysInEpoch;
