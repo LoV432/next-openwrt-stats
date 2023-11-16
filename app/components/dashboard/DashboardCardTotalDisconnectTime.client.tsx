@@ -32,10 +32,10 @@ export default function DashboardCardTotalDisconnectTime({
 			getNewLogs
 				.then((response) => response.json())
 				.then((data: connectionLogsList) => {
-					setHumanReadableDisconnectedTime(
-						connectionLogsListToHumanFormat(data)
-					);
-					setBackgroundColor(dashboardColor(humanReadableDisconnectedTime));
+					const newHumanReadableDisconnectedTime =
+						connectionLogsListToHumanFormat(data);
+					setHumanReadableDisconnectedTime(newHumanReadableDisconnectedTime);
+					setBackgroundColor(dashboardColor(newHumanReadableDisconnectedTime));
 				});
 		}, 3000);
 		return () => clearInterval(interval);

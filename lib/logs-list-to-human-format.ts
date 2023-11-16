@@ -4,8 +4,7 @@ export function connectionLogsListToHumanFormat(
 	allConnectionLogs: connectionLogsList,
 	totalDays = 1
 ) {
-	const totalDaysString =
-		totalDays > 1 ? `last ${totalDays} days` : `past 24 hours`;
+	const totalDaysString = totalDays > 1 ? `last ${totalDays} days` : `24 hours`;
 
 	const noDisconnectsReturnString = `No Disconnects in ${totalDaysString}`;
 	if (allConnectionLogs.length === 0) {
