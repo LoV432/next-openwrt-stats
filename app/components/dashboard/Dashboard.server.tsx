@@ -5,13 +5,15 @@ import DashboardCardTotalDisconnectTime from './DashboardCardTotalDisconnectTime
 import SpeedMeter from './SpeedMeter.client';
 import { getUptime } from '@/lib/get-uptime';
 import { connectionLogsListToHumanFormat } from '@/lib/logs-list-to-human-format';
+import { getPppoeStatus } from '@/lib/get-pppoe-status';
+import { formatUpTime } from '@/lib/format-uptime';
 
 export type connectionLogsList = {
 	id: number;
 	status: string;
 	time: number;
 }[];
-export default function Dashboard() {
+export default async function Dashboard() {
 	let now = Date.now();
 	let yesterday = now - 86400000;
 	let allConnectionLogsFromServer = db
@@ -26,11 +28,25 @@ export default function Dashboard() {
 		allConnectionLogsFromServer
 	);
 	let currentStatusPrerender = allConnectionLogsFromServer[0].status;
+
+	const pppoeStatus = await getPppoeStatus();
+	let ip: string;
+	let pppoeUptime: string;
+	if ('up' in pppoeStatus && pppoeStatus.up) {
+		ip = pppoeStatus['ipv4-address'][0].address;
+		pppoeUptime = formatUpTime(pppoeStatus.uptime);
+	} else {
+		ip = 'N/A';
+		pppoeUptime = 'N/A';
+	}
+
 	return (
 		<>
 			<DashboardCardNetWork />
 			<DashboardCardCurrentStatus
 				currentStatusPrerender={currentStatusPrerender}
+				ip={ip}
+				pppoeUptime={pppoeUptime}
 			/>
 			<DashboardCardTotalDisconnectTime
 				humanReadableDisconnectedTimePrerender={

@@ -87,7 +87,8 @@ json_content='{
     "write": {
       "file": {
         "/etc/wrtbwmon-update": ["exec"],
-        "/proc/uptime": ["read"]
+        "/proc/uptime": ["read"],
+        "/etc/pppoe-status": ["exec"]
       }
     }
   }
@@ -145,4 +146,18 @@ content='#!/bin/ash
 echo "$content" > /etc/wrtbwmon-update
 chmod 755 /etc/wrtbwmon-update
 echo "Script created /etc/wrtbwmon-update"
+#############################
+
+
+
+# Create ppppoe status script
+#############################
+content='#!/bin/ash
+ubus call network.interface.INTERFACE_HERE status
+'
+content="${content//INTERFACE_HERE/$2}"
+
+echo "$content" > /etc/pppoe-status
+chmod 755 /etc/pppoe-status
+echo "Script created /etc/pppoe-status"
 #############################

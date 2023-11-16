@@ -1,11 +1,14 @@
 'use client';
-import DashboardCardBase from './DashboardBase.server';
 import { connectionLogsList } from './Dashboard.server';
 import { useEffect, useState } from 'react';
 export function DashboardCardCurrentStatus({
-	currentStatusPrerender
+	currentStatusPrerender,
+	ip,
+	pppoeUptime
 }: {
 	currentStatusPrerender: string;
+	ip: string;
+	pppoeUptime: string;
 }) {
 	const [isConnected, setIsConnected] = useState(
 		returnStatusBool(currentStatusPrerender)
@@ -27,14 +30,27 @@ export function DashboardCardCurrentStatus({
 	}, []);
 	return (
 		<>
-			<DashboardCardBase
-				backgroundColor={isConnected ? 'bg-emerald-700' : 'bg-red-800'}
+			<div
+				className={`card w-full justify-center sm:w-96 ${
+					isConnected ? 'bg-emerald-700' : 'bg-red-800'
+				}`}
 			>
-				<div className="text-2xl font-bold">
-					<h1>Current Status:</h1>
-					<h1>{isConnected ? 'Connected' : 'Disconnected'}</h1>
+				<div className="card-body w-fit flex-grow-0 justify-center gap-5">
+					<p className="border-b border-white border-opacity-50 pb-1 text-xl font-semibold">
+						Status: {isConnected ? 'Connected' : 'Disconnected'}
+					</p>
+					{isConnected ? (
+						<>
+							<p className="border-b border-white border-opacity-50 pb-1 text-lg font-semibold">
+								IP: {ip}
+							</p>
+							<p className="border-b border-white border-opacity-50 pb-1 text-lg font-semibold">
+								Uptime: {pppoeUptime}
+							</p>
+						</>
+					) : null}
 				</div>
-			</DashboardCardBase>
+			</div>
 		</>
 	);
 }
