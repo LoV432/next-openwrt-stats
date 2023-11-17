@@ -5,18 +5,25 @@ type pppoeResponseReturnType = {
 	result?: [0, { stdout: string }?];
 };
 
-export type isConnectedJsonType = {
+type isConnectedJsonType = {
 	up: true;
 	uptime: number;
 	'ipv4-address': [{ address: string }];
 };
 
-export type isNotConnectedJsonType = {
+type isNotConnectedJsonType = {
 	up: false;
 };
 
-type pppoeStatusReturnType = isConnectedJsonType | isNotConnectedJsonType;
+type pppoeStatusReturnTypeFromRouter =
+	| isConnectedJsonType
+	| isNotConnectedJsonType;
 
+export type pppoeStatusReturnType = {
+	up: boolean;
+	uptime: number;
+	ip: string;
+};
 export async function getPppoeStatus() {
 	let token = (await getToken()) as string;
 	let pppoeResponse = await makeRequest(token);
@@ -33,8 +40,25 @@ export async function getPppoeStatus() {
 		}
 	}
 	const pppoeStatus = pppoeResponse.result[1].stdout;
-	const pppoeStatusJson = JSON.parse(pppoeStatus) as pppoeStatusReturnType;
-	return pppoeStatusJson;
+	const pppoeStatusJson = JSON.parse(
+		pppoeStatus
+	) as pppoeStatusReturnTypeFromRouter;
+
+	let pppoeStatusFormatted: pppoeStatusReturnType;
+	if ('up' in pppoeStatusJson && pppoeStatusJson.up) {
+		pppoeStatusFormatted = {
+			up: pppoeStatusJson.up,
+			uptime: pppoeStatusJson.uptime,
+			ip: pppoeStatusJson['ipv4-address'][0].address
+		};
+	} else {
+		pppoeStatusFormatted = {
+			up: pppoeStatusJson.up,
+			uptime: 0,
+			ip: ''
+		};
+	}
+	return pppoeStatusFormatted;
 }
 
 async function makeRequest(token: string) {

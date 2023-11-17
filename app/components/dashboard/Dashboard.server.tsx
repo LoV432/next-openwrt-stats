@@ -2,8 +2,7 @@ import { db } from '@/lib/db';
 import { DashboardCardCurrentStatus } from './DashboardCardCurrentStatus/DashboardCardCurrentStatus.client';
 import DashboardCardTotalDisconnectTime from './DashboardCardTotalDisconnectTime/DashboardCardTotalDisconnectTime.client';
 import { connectionLogsListToHumanFormat } from '@/lib/logs-list-to-human-format';
-import { getPppoeStatus } from '@/lib/get-pppoe-status';
-import { formatUpTime } from '@/lib/format-uptime';
+import { getPppoeStatus, pppoeStatusReturnType } from '@/lib/get-pppoe-status';
 import DashboardCardNetWork from './DashboardCardNetwork/DashboardCardNetwork.server';
 
 export type connectionLogsList = {
@@ -12,40 +11,30 @@ export type connectionLogsList = {
 	time: number;
 }[];
 export default async function Dashboard() {
-	let now = Date.now();
-	let yesterday = now - 86400000;
-	let allConnectionLogsFromServer = db
+	const now = Date.now();
+	const yesterday = now - 86400000;
+	const allConnectionLogsFromServer = db
 		.prepare('SELECT * FROM connectionlogs WHERE time > ? ORDER BY id DESC')
 		.all(yesterday) as connectionLogsList;
-	if (allConnectionLogsFromServer.length === 0) {
-		allConnectionLogsFromServer = db
-			.prepare('SELECT * FROM connectionlogs ORDER BY id DESC LIMIT 1')
-			.all() as connectionLogsList;
-	}
-	let humanReadableDisconnectedTimePrerender = connectionLogsListToHumanFormat(
-		allConnectionLogsFromServer
-	);
-	let currentStatusPrerender = allConnectionLogsFromServer[0].status;
+	const humanReadableDisconnectedTimePrerender =
+		connectionLogsListToHumanFormat(allConnectionLogsFromServer);
 
 	const pppoeStatus = await getPppoeStatus();
-	let ip: string;
-	let pppoeUptime: string;
-	if ('up' in pppoeStatus && pppoeStatus.up) {
-		ip = pppoeStatus['ipv4-address'][0].address;
-		pppoeUptime = formatUpTime(pppoeStatus.uptime);
+	let pppoeStatusPrerender: pppoeStatusReturnType;
+	if ('up' in pppoeStatus) {
+		pppoeStatusPrerender = pppoeStatus;
 	} else {
-		ip = 'N/A';
-		pppoeUptime = 'N/A';
+		pppoeStatusPrerender = {
+			up: false,
+			ip: '',
+			uptime: 0
+		};
 	}
 
 	return (
 		<>
 			<DashboardCardNetWork />
-			<DashboardCardCurrentStatus
-				currentStatusPrerender={currentStatusPrerender}
-				ip={ip}
-				pppoeUptime={pppoeUptime}
-			/>
+			<DashboardCardCurrentStatus pppoeStatusPrerender={pppoeStatusPrerender} />
 			<DashboardCardTotalDisconnectTime
 				humanReadableDisconnectedTimePrerender={
 					humanReadableDisconnectedTimePrerender

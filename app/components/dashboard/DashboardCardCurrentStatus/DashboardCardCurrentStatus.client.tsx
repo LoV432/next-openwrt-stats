@@ -1,22 +1,17 @@
 'use client';
-import { connectionLogsList } from '../Dashboard.server';
 import { useEffect, useState } from 'react';
+import { pppoeStatusReturnType } from '@/lib/get-pppoe-status';
+import { formatUpTime } from '@/lib/format-uptime';
 export function DashboardCardCurrentStatus({
-	currentStatusPrerender,
-	ip,
-	pppoeUptime
+	pppoeStatusPrerender
 }: {
-	currentStatusPrerender: string;
-	ip: string;
-	pppoeUptime: string;
+	pppoeStatusPrerender: pppoeStatusReturnType;
 }) {
-	const [isConnected, setIsConnected] = useState(
-		returnStatusBool(currentStatusPrerender)
-	);
+	const [pppoeStatus, setPppoeStatus] = useState(pppoeStatusPrerender);
 	const [showToast, setShowToast] = useState(false);
 
 	function copyToClipboard() {
-		navigator.clipboard.writeText(ip);
+		navigator.clipboard.writeText(pppoeStatus.ip);
 		setShowToast(true);
 		setTimeout(() => {
 			setShowToast(false);
@@ -25,15 +20,11 @@ export function DashboardCardCurrentStatus({
 
 	useEffect(() => {
 		const interval = setInterval(() => {
-			const getNewStatus = fetch('/api/get-connection-logs?days=-1');
-			getNewStatus
+			const getNewPppoeStatus = fetch('/api/get-pppoe-status');
+			getNewPppoeStatus
 				.then((response) => response.json())
-				.then((data: connectionLogsList) => {
-					if (data[0].status === 'connected') {
-						setIsConnected(true);
-					} else {
-						setIsConnected(false);
-					}
+				.then((data: pppoeStatusReturnType) => {
+					setPppoeStatus(data);
 				});
 		}, 3000);
 		return () => clearInterval(interval);
@@ -42,23 +33,23 @@ export function DashboardCardCurrentStatus({
 		<>
 			<div
 				className={`card w-full justify-center sm:w-96 ${
-					isConnected ? 'bg-emerald-700' : 'bg-red-800'
+					pppoeStatus.up ? 'bg-emerald-700' : 'bg-red-800'
 				}`}
 			>
 				<div className="card-body w-fit flex-grow-0 justify-center gap-5">
 					<p className="border-b-2 border-white border-opacity-40 pb-1 text-xl font-semibold">
-						Status: {isConnected ? 'Connected' : 'Disconnected'}
+						Status: {pppoeStatus.up ? 'Connected' : 'Disconnected'}
 					</p>
-					{isConnected ? (
+					{pppoeStatus.up ? (
 						<>
 							<p
 								onClick={copyToClipboard}
 								className="cursor-pointer border-b-2 border-white border-opacity-40 pb-1 text-lg font-semibold"
 							>
-								IP: {ip}
+								IP: {pppoeStatus.ip}
 							</p>
 							<p className="border-b-2 border-white border-opacity-40 pb-1 text-lg font-semibold">
-								Uptime: {pppoeUptime}
+								Uptime: {formatUpTime(pppoeStatus.uptime)}
 							</p>
 						</>
 					) : null}
