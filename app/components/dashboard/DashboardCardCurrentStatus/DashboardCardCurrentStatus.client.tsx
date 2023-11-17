@@ -20,7 +20,7 @@ export function DashboardCardCurrentStatus({
 		setShowToast(true);
 		setTimeout(() => {
 			setShowToast(false);
-		}, 2000);
+		}, 3000);
 	}
 
 	useEffect(() => {
