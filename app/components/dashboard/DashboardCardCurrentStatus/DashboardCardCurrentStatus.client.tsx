@@ -1,6 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { pppoeStatusReturnType } from '@/lib/get-pppoe-status';
+import type {
+	getPppoeStatus,
+	pppoeStatusReturnType
+} from '@/lib/get-pppoe-status';
 import { formatUpTime } from '@/lib/format-uptime';
 export function DashboardCardCurrentStatus({
 	pppoeStatusPrerender
@@ -23,8 +26,16 @@ export function DashboardCardCurrentStatus({
 			const getNewPppoeStatus = fetch('/api/get-pppoe-status');
 			getNewPppoeStatus
 				.then((response) => response.json())
-				.then((data: pppoeStatusReturnType) => {
-					setPppoeStatus(data);
+				.then((data: Awaited<ReturnType<typeof getPppoeStatus>>) => {
+					if ('up' in data) {
+						setPppoeStatus(data);
+					} else {
+						setPppoeStatus({
+							up: false,
+							ip: '',
+							uptime: 0
+						});
+					}
 				});
 		}, 3000);
 		return () => clearInterval(interval);
