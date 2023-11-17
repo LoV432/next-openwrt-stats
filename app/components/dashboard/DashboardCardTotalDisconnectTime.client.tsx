@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { connectionLogsList } from './Dashboard.server';
-import DashboardCardBase from './DashboardBase.server';
 import ConnectionLogsListModal from './ConnectionLogsListModal.client';
 import Image from 'next/image';
 import { connectionLogsListToHumanFormat } from '@/lib/logs-list-to-human-format';
@@ -42,19 +41,21 @@ export default function DashboardCardTotalDisconnectTime({
 	}, []);
 	return (
 		<>
-			<DashboardCardBase backgroundColor={backgroundColor}>
-				<div className="text-xl font-bold">
-					{humanReadableDisconnectedTime}
-					<Image
-						onClick={toggleConnectionLogsListModal}
-						className="ml-3 inline cursor-pointer"
-						src="/expand.svg"
-						alt="Open Details"
-						width={20}
-						height={20}
-					/>
+			<div className={`card w-full sm:w-96 ${backgroundColor}`}>
+				<div className="card-body justify-center">
+					<div className="text-xl font-bold">
+						{humanReadableDisconnectedTime}
+						<Image
+							onClick={toggleConnectionLogsListModal}
+							className="ml-3 inline cursor-pointer"
+							src="/expand.svg"
+							alt="Open Details"
+							width={20}
+							height={20}
+						/>
+					</div>
 				</div>
-			</DashboardCardBase>
+			</div>
 			<ConnectionLogsListModal
 				toggleConnectionLogsListModal={toggleConnectionLogsListModal}
 				connectionLogsListModalRef={connectionLogsListModalRef}
