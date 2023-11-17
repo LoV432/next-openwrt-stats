@@ -1,6 +1,5 @@
 import { getUptime } from '@/lib/get-uptime';
-
-export async function POST() {}
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
 	let uptime = await getUptime();

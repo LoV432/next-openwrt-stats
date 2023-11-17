@@ -1,10 +1,10 @@
 import { getToken } from '@/lib/get-token';
+export const dynamic = 'force-dynamic';
 
 type speedReturnType = {
 	id: number;
 	result?: [0, { code: string; stdout: string }?];
 };
-export async function POST() {}
 
 export async function GET() {
 	let speed = await getSpeed();

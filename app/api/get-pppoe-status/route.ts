@@ -1,5 +1,5 @@
 import { getPppoeStatus } from '@/lib/get-pppoe-status';
-
+export const dynamic = 'force-dynamic';
 export async function GET() {
 	const pppoeStatus = await getPppoeStatus();
 
