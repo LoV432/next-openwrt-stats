@@ -1,19 +1,20 @@
 'use client';
 
-import { useMemo, useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { formatUpTime } from '@/lib/format-uptime';
 
 export default function DashboardUptime({ uptime }: { uptime: string }) {
-	let uptimeInt = parseInt(uptime.split(' ')[0]);
-	const [humanReadableUptime, setHumanReadableUptime] = useState('');
-	useMemo(() => {
-		setHumanReadableUptime(formatUpTime(uptimeInt));
-	}, []);
+	const uptimeInt = useRef(parseInt(uptime.split(' ')[0]));
+	const [humanReadableUptime, setHumanReadableUptime] = useState(
+		formatUpTime(uptimeInt.current)
+	);
 	useEffect(() => {
-		setInterval(() => {
-			uptimeInt = uptimeInt + 1;
-			setHumanReadableUptime(formatUpTime(uptimeInt));
+		const interval = setInterval(() => {
+			uptimeInt.current = uptimeInt.current + 60;
+			setHumanReadableUptime(formatUpTime(uptimeInt.current));
 		}, 60000);
+
+		return () => clearInterval(interval);
 	}, []);
 
 	return <>Uptime: {humanReadableUptime}</>;
