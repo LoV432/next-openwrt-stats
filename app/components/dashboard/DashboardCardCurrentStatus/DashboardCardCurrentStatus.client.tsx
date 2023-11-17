@@ -13,6 +13,16 @@ export function DashboardCardCurrentStatus({
 	const [isConnected, setIsConnected] = useState(
 		returnStatusBool(currentStatusPrerender)
 	);
+	const [showToast, setShowToast] = useState(false);
+
+	function copyToClipboard() {
+		navigator.clipboard.writeText(ip);
+		setShowToast(true);
+		setTimeout(() => {
+			setShowToast(false);
+		}, 2000);
+	}
+
 	useEffect(() => {
 		const interval = setInterval(() => {
 			const getNewStatus = fetch('/api/get-connection-logs?days=-1');
@@ -41,7 +51,10 @@ export function DashboardCardCurrentStatus({
 					</p>
 					{isConnected ? (
 						<>
-							<p className="border-b-2 border-white border-opacity-40 pb-1 text-lg font-semibold">
+							<p
+								onClick={copyToClipboard}
+								className="cursor-pointer border-b-2 border-white border-opacity-40 pb-1 text-lg font-semibold"
+							>
 								IP: {ip}
 							</p>
 							<p className="border-b-2 border-white border-opacity-40 pb-1 text-lg font-semibold">
@@ -51,6 +64,8 @@ export function DashboardCardCurrentStatus({
 					) : null}
 				</div>
 			</div>
+
+			{showToast ? <CopyToast /> : null}
 		</>
 	);
 }
@@ -63,4 +78,14 @@ function returnStatusBool(status: string) {
 		if (status === 'disconnected') return false;
 	}
 	return false;
+}
+
+function CopyToast() {
+	return (
+		<div className="toast toast-end toast-top z-50">
+			<div className="alert alert-success border-2 border-green-900 text-lg font-semibold">
+				<span>IP address copied to clipboard.</span>
+			</div>
+		</div>
+	);
 }
