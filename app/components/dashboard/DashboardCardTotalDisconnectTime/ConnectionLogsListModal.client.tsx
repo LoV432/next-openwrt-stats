@@ -1,6 +1,6 @@
 import { connectionLogsListToHumanFormat } from '@/lib/logs-list-to-human-format';
 import { useState, useEffect } from 'react';
-import { connectionLogsList } from './Dashboard.server';
+import { connectionLogsList } from '../Dashboard.server';
 
 export default function ConnectionLogsListModal({
 	toggleConnectionLogsListModal,

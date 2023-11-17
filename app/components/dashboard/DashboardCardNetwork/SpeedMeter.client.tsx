@@ -1,6 +1,6 @@
 'use client';
 import { useRecoilState } from 'recoil';
-import { allSpeedStates } from '../boundaries/SpeedBoundarie.client';
+import { allSpeedStates } from '../../boundaries/SpeedBoundarie.client';
 import { useEffect, useState } from 'react';
 import { useSpring, animated } from '@react-spring/web';
 

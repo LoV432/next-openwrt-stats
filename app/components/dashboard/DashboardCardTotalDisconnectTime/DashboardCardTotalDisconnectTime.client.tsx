@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { connectionLogsList } from './Dashboard.server';
+import { connectionLogsList } from '../Dashboard.server';
 import ConnectionLogsListModal from './ConnectionLogsListModal.client';
 import Image from 'next/image';
 import { connectionLogsListToHumanFormat } from '@/lib/logs-list-to-human-format';

@@ -1,5 +1,5 @@
 'use client';
-import { connectionLogsList } from './Dashboard.server';
+import { connectionLogsList } from '../Dashboard.server';
 import { useEffect, useState } from 'react';
 export function DashboardCardCurrentStatus({
 	currentStatusPrerender,
