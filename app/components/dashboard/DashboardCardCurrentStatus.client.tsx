@@ -36,15 +36,15 @@ export function DashboardCardCurrentStatus({
 				}`}
 			>
 				<div className="card-body w-fit flex-grow-0 justify-center gap-5">
-					<p className="border-b border-white border-opacity-50 pb-1 text-xl font-semibold">
+					<p className="border-b-2 border-white border-opacity-40 pb-1 text-xl font-semibold">
 						Status: {isConnected ? 'Connected' : 'Disconnected'}
 					</p>
 					{isConnected ? (
 						<>
-							<p className="border-b border-white border-opacity-50 pb-1 text-lg font-semibold">
+							<p className="border-b-2 border-white border-opacity-40 pb-1 text-lg font-semibold">
 								IP: {ip}
 							</p>
-							<p className="border-b border-white border-opacity-50 pb-1 text-lg font-semibold">
+							<p className="border-b-2 border-white border-opacity-40 pb-1 text-lg font-semibold">
 								Uptime: {pppoeUptime}
 							</p>
 						</>
