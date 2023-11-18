@@ -7,38 +7,42 @@ type speedReturnType = {
 };
 
 export async function GET() {
+	let speed = await getSpeed();
+	if (speed === 'Token not found') {
+		return new Response(JSON.stringify({ error: 'Token not found' }), {
+			status: 400
+		});
+	}
+	if (speed === 'Something went wrong') {
+		return new Response(JSON.stringify({ error: 'Something went wrong' }), {
+			status: 400
+		});
+	}
+	return new Response(speed, {
+		status: 200,
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	});
+}
+async function getSpeed() {
 	let token = (await getToken()) as string;
 	let speedResponse = await makeRequest(token);
 	if (!speedResponse.result || !speedResponse.result[1]) {
 		let newToken = await getToken(true);
 		if (!newToken) {
 			console.log('getSpeed: Token not found');
-			return new Response(JSON.stringify({ error: 'Token not found' }), {
-				status: 400,
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			});
+			return 'Token not found';
 		}
 		speedResponse = await makeRequest(newToken);
 		if (!speedResponse.result || !speedResponse.result[1]) {
 			console.log('getSpeed: Something went wrong');
-			return new Response(JSON.stringify({ error: 'Something went wrong' }), {
-				status: 400,
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			});
+			return 'Something went wrong';
 		}
 	}
-	let speed = speedResponse.result[1].stdout;
+	let speed = speedResponse.result[1].stdout as string;
 	let formattedSpeed = formatSpeedOutput(speed);
-	return new Response(JSON.stringify(formattedSpeed), {
-		status: 200,
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	});
+	return formattedSpeed;
 }
 
 async function makeRequest(token: string) {
@@ -85,5 +89,5 @@ function formatSpeedOutput(speed: string) {
 		}
 		result.push(rowData);
 	}
-	return JSON.parse(JSON.stringify(result));
+	return JSON.stringify(result);
 }
