@@ -1,4 +1,5 @@
 import { db } from '@/lib/db';
+import { getSpeed } from '../get-speed/route';
 
 type dhcpEventType = {
 	hostname: string;
@@ -37,6 +38,8 @@ export async function POST(request: Request) {
 		});
 	}
 
+	await syncWithGetSpeedUsers();
+
 	let existingMacAddress = db
 		.prepare('SELECT * FROM users WHERE mac_address = ?')
 		.get(body.mac) as userReturnType | undefined;
@@ -51,24 +54,75 @@ export async function POST(request: Request) {
 			status: 200
 		});
 	} else {
-		let highestIndex = db
-			.prepare('SELECT MAX(index_number) FROM users')
-			.get() as { 'MAX(index_number)': number };
-		let insertDevice = db
-			.prepare(
-				'INSERT INTO users (index_number, name, ip, mac_address, last_updated, device_type, last_event_type) VALUES (?, ?, ?, ?, ?, ?, ?)'
-			)
-			.run(
-				highestIndex['MAX(index_number)'] + 1,
-				body.hostname,
-				body.ip,
-				body.mac,
-				Date.now(),
-				'generic',
-				body.type
-			);
+		let insertDevice = addNewUser({ user: body });
 		return new Response(JSON.stringify(insertDevice), {
 			status: 200
 		});
 	}
+}
+
+async function syncWithGetSpeedUsers() {
+	const allMacsFromDB = db.prepare('SELECT mac_address FROM users').all() as {
+		mac_address: string;
+	}[];
+
+	const getSpeedUsers = await getSpeed();
+
+	// If no users in getSpeed, exit
+	if ('error' in getSpeedUsers) {
+		return false;
+	}
+
+	// If users in getSpeed
+	const usersSpeed = JSON.parse(getSpeedUsers.data) as [
+		{ mac: string; ip: string; in: string; out: string }
+	];
+
+	// Extract all macs and ips from userspeed
+	const allUsersFromUsersSpeed = usersSpeed.map((user) => {
+		return {
+			mac_address: user.mac,
+			ip: user.ip
+		};
+	});
+
+	// Add all macs that are not in the database to the database
+	allUsersFromUsersSpeed.forEach((userFromUsersSpeed) => {
+		if (
+			!allMacsFromDB.find(
+				(macFromDB) => macFromDB.mac_address === userFromUsersSpeed.mac_address
+			)
+		) {
+			addNewUser({
+				user: {
+					hostname: 'Unknown',
+					ip: userFromUsersSpeed.ip,
+					mac: userFromUsersSpeed.mac_address,
+					type: 'GET_SPEED'
+				}
+			});
+		}
+	});
+	return true;
+}
+
+function addNewUser({ user }: { user: dhcpEventType }) {
+	let highestIndex = db
+		.prepare('SELECT MAX(index_number) FROM users')
+		.get() as { 'MAX(index_number)': number };
+	let insertDevice = db
+		.prepare(
+			'INSERT INTO users (index_number, name, ip, mac_address, last_updated, device_type, last_event_type) VALUES (?, ?, ?, ?, ?, ?, ?)'
+		)
+		.run(
+			highestIndex['MAX(index_number)'] + 1,
+			user.hostname,
+			user.ip,
+			user.mac,
+			Date.now(),
+			'generic',
+			user.type
+		);
+
+	return insertDevice;
 }

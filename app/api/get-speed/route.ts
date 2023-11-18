@@ -8,41 +8,38 @@ type speedReturnType = {
 
 export async function GET() {
 	let speed = await getSpeed();
-	if (speed === 'Token not found') {
-		return new Response(JSON.stringify({ error: 'Token not found' }), {
+	if ('error' in speed) {
+		return new Response(JSON.stringify({ error: speed.error }), {
 			status: 400
 		});
 	}
-	if (speed === 'Something went wrong') {
-		return new Response(JSON.stringify({ error: 'Something went wrong' }), {
-			status: 400
-		});
-	}
-	return new Response(speed, {
+	return new Response(speed.data, {
 		status: 200,
 		headers: {
 			'Content-Type': 'application/json'
 		}
 	});
 }
-async function getSpeed() {
+export async function getSpeed(): Promise<
+	{ data: string } | { error: string }
+> {
 	let token = (await getToken()) as string;
 	let speedResponse = await makeRequest(token);
 	if (!speedResponse.result || !speedResponse.result[1]) {
 		let newToken = await getToken(true);
 		if (!newToken) {
 			console.log('getSpeed: Token not found');
-			return 'Token not found';
+			return { error: 'Token not found' };
 		}
 		speedResponse = await makeRequest(newToken);
 		if (!speedResponse.result || !speedResponse.result[1]) {
 			console.log('getSpeed: Something went wrong');
-			return 'Something went wrong';
+			return { error: 'Something went wrong' };
 		}
 	}
 	let speed = speedResponse.result[1].stdout as string;
 	let formattedSpeed = formatSpeedOutput(speed);
-	return formattedSpeed;
+	return { data: formattedSpeed };
 }
 
 async function makeRequest(token: string) {
