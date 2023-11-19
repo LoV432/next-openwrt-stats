@@ -148,7 +148,7 @@ function DropDown({
 									}}
 									className="flex h-12 justify-center"
 								>
-									Change Index
+									Change Position
 								</p>
 							</li>
 							<li>
@@ -309,7 +309,7 @@ function ChangeIndexPopUp({
 	return (
 		<dialog ref={setChangeIndexModal} className="modal">
 			<div className="modal-box bg-zinc-900">
-				<h3 className="pb-5 text-lg font-bold">Enter New Index</h3>
+				<h3 className="pb-5 text-lg font-bold">Enter New Position</h3>
 				<input
 					onKeyDown={(e) => {
 						if (e.key === 'Enter') {

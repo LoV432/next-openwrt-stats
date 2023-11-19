@@ -11,6 +11,7 @@ export async function POST(request: Request) {
 	if (
 		!body.index ||
 		body.index === '' ||
+		isNaN(parseInt(body.index)) ||
 		!body.macAddress ||
 		body.macAddress === ''
 	) {
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
 		});
 	}
 
-	let currentUser = db
+	const currentUser = db
 		.prepare('SELECT * FROM users WHERE mac_address = ?')
 		.get(body.macAddress) as userReturnType | undefined;
 	if (!currentUser) {
@@ -31,40 +32,44 @@ export async function POST(request: Request) {
 		);
 	}
 
-	let conflictingUser = db
-		.prepare('SELECT * FROM users WHERE index_number = ?')
-		.get(body.index) as userReturnType | undefined;
-	if (!conflictingUser) {
-		let updateIndex = db
-			.prepare('UPDATE users SET index_number = ? WHERE mac_address = ?')
-			.run(body.index, body.macAddress);
-		return new Response(JSON.stringify(updateIndex), {
-			status: 200
+	const transaction = db.transaction(() => {
+		const selectedUser = db.prepare(
+			'UPDATE users SET index_number = ? WHERE mac_address = ?'
+		);
+
+		const newIndex = currentUser.index_number;
+
+		if (newIndex > parseInt(body.index)) {
+			selectedUser.run(parseInt(body.index) - 0.5, body.macAddress);
+		} else {
+			selectedUser.run(parseInt(body.index) + 0.5, body.macAddress);
+		}
+
+		let index = 1;
+		const allUsers = db
+			.prepare('SELECT * FROM users ORDER BY index_number ASC')
+			.all() as userReturnType[];
+
+		allUsers.forEach((user) => {
+			db.prepare('UPDATE users SET index_number = ? WHERE id = ?').run(
+				index,
+				user.id
+			);
+			index++;
+		});
+
+		return true;
+	})();
+
+	if (!transaction) {
+		return new Response(JSON.stringify({ error: 'Failed to update index' }), {
+			status: 400
 		});
 	}
-
-	let updateIndex = db.prepare(
-		'UPDATE users SET index_number = @index WHERE mac_address = @mac'
-	);
-
-	let updateMany = db.transaction((users: { index: number; mac: string }[]) => {
-		users.forEach((user) => {
-			updateIndex.run(user);
-		});
-	});
-
-	let updateIndexMany = updateMany([
+	return new Response(
+		JSON.stringify({ success: 'Index updated successfully' }),
 		{
-			index: parseInt(body.index),
-			mac: body.macAddress
-		},
-		{
-			index: currentUser.index_number,
-			mac: conflictingUser.mac_address
+			status: 200
 		}
-	]);
-
-	return new Response(JSON.stringify(updateIndexMany), {
-		status: 200
-	});
+	);
 }
