@@ -27,6 +27,7 @@ export default function UserCard({ user }: { user: userReturnType }) {
 					<DropDown
 						mac_address={user.mac_address}
 						device_type={user.device_type}
+						index_number={user.index_number}
 					/>
 				</figure>
 				<div className="card-body w-2/3 p-4">
@@ -88,10 +89,12 @@ function UserSpeed({ ip }: { ip: string }) {
 
 function DropDown({
 	mac_address,
-	device_type
+	device_type,
+	index_number
 }: {
 	mac_address: string;
 	device_type: string;
+	index_number: number;
 }) {
 	const [dropDownIsOpen, SetDropDownIsOpen] = useState(false);
 	const [macAddress] = useState(mac_address);
@@ -194,6 +197,7 @@ function DropDown({
 				<ChangeIndexPopUp
 					macAddress={macAddress}
 					setChangeIndexModalIsOpen={setChangeIndexModalIsOpen}
+					index_number={index_number}
 				/>
 			)}
 		</>
@@ -272,9 +276,11 @@ function NameChangePopUp({
 
 function ChangeIndexPopUp({
 	macAddress,
+	index_number,
 	setChangeIndexModalIsOpen
 }: {
 	macAddress: string;
+	index_number: number;
 	setChangeIndexModalIsOpen: (value: boolean) => void;
 }) {
 	let router = useRouter();
@@ -318,7 +324,7 @@ function ChangeIndexPopUp({
 					}}
 					ref={changeIndexValue}
 					type="text"
-					placeholder="Index"
+					placeholder={`Current Position: ${index_number}`}
 					className="input input-bordered w-full bg-zinc-900"
 				/>
 				<button onClick={changeIndex} className="btn btn-primary mt-5 w-full">
