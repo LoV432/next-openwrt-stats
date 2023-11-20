@@ -517,6 +517,24 @@ function IconChangePopUp({
 						height={80}
 						className="cursor-pointer transition-transform hover:scale-125"
 					/>
+					<Image
+						onClick={() => changeIcon('router')}
+						id="router"
+						src="router.svg"
+						alt="Router Icon"
+						width={80}
+						height={80}
+						className="cursor-pointer transition-transform hover:scale-125"
+					/>
+					<Image
+						onClick={() => changeIcon('repeater')}
+						id="repeater"
+						src="repeater.svg"
+						alt="Repeater Icon"
+						width={80}
+						height={80}
+						className="cursor-pointer transition-transform hover:scale-125"
+					/>
 				</div>
 				<button
 					onClick={closePopUp}
