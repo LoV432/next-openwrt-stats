@@ -47,9 +47,9 @@ export async function POST(request: Request) {
 		let userID = existingMacAddress.id;
 		let updateDevice = db
 			.prepare(
-				'UPDATE users SET ip = ?, last_updated = ?, last_event_type = ? WHERE id = ?'
+				'UPDATE users SET ip = ?, last_updated = ?, last_event_type = ?, name = ? WHERE id = ?'
 			)
-			.run(body.ip, Date.now(), body.type, userID);
+			.run(body.ip, Date.now(), body.type, body.hostname, userID);
 		return new Response(JSON.stringify(updateDevice), {
 			status: 200
 		});
