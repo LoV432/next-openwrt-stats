@@ -123,10 +123,10 @@ echo "Script created /etc/hotplug.d/dhcp/99-dhcp-trigger"
 content='#!/bin/ash
 
 if [[ "$INTERFACE" == "INTERFACE_HERE" && "$ACTION" == "ifup" ]]; then
-	curl -d '{"status":"connected"}' -X POST URL_HERE/api/connection-event
+	curl -d '"'"'{"status":"connected"}'"'"' -X POST URL_HERE/api/connection-event
 
 elif [[ "$INTERFACE" == "INTERFACE_HERE" && "$ACTION" == "ifdown" ]]; then
-	curl -d '{"status":"disconnected"}' -X POST URL_HERE/api/connection-event
+	curl -d '"'"'{"status":"disconnected"}'"'"' -X POST URL_HERE/api/connection-event
 fi
 '
 content="${content//URL_HERE/$1}"
