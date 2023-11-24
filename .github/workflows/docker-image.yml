@@ -33,4 +33,4 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm/v7
           push: true
-          tags: lov432/openwrt-stats:latest
+          tags: lov432/openwrt-stats:latest, lov432/openwrt-stats:${{ github.ref_name }}-${{ github.sha }}

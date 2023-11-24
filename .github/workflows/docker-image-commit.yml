@@ -2,6 +2,9 @@ name: Build & Publish Docker Image Of Commit to Docker Hub
 
 on:
   push:
+    branches-ignore:
+      - master
+      - dev
 
 jobs:
   deploy:
