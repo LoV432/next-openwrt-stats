@@ -161,3 +161,29 @@ echo "$content" > /etc/pppoe-status
 chmod 755 /etc/pppoe-status
 echo "Script created /etc/pppoe-status"
 #############################
+
+
+# Create cron task to refresh wrtbwmon
+#############################
+crontab_file="/etc/crontabs/root"
+cron_entry="# Reset wrtbwmon everyday\n0 0 * * * rm /tmp/usage.db && /etc/wrtbwmon-update"
+cron_check="# Reset wrtbwmon everyday"
+
+# Check if the crontab file exists
+if [ -e "$crontab_file" ]; then
+    # Check if the cron entry exists in the crontab file
+    if ! grep -qF "$cron_check" "$crontab_file"; then
+        # If not, add the cron entry
+        echo -e "\n$cron_entry" >> "$crontab_file"
+        echo "Cron entry added to $crontab_file"
+        service cron restart
+    else
+        echo "Cron entry already exists in $crontab_file"
+    fi
+else
+    # If the crontab file doesn't exist, create it and add the cron entry
+    echo -e "$cron_entry" > "$crontab_file"
+    echo "Crontab file created at $crontab_file with the cron entry"
+    service cron restart
+fi
+#############################
