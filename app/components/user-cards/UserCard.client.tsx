@@ -21,7 +21,7 @@ export default function UserCard({ user }: { user: userReturnType }) {
 	}, []);
 	return (
 		<>
-			<div className="card card-side m-5 h-fit w-full bg-zinc-900 p-2 shadow-xl sm:w-[300px]">
+			<div className="card card-side m-5 h-fit w-full bg-zinc-900 p-2 shadow-xl last:mb-[4.5rem] sm:w-[300px]">
 				<UserSpeed ip={user.ip} />
 				<figure className="relative flex w-1/4 items-center justify-center overflow-visible px-1 py-4">
 					<DropDown
