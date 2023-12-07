@@ -31,7 +31,11 @@ export default function UserCard({ user }: { user: userReturnType }) {
 					/>
 				</figure>
 				<div className="card-body w-2/3 p-4">
-					<h2 className="card-title border-b border-white border-opacity-30 pb-2">
+					<h2
+						className={`card-title ${
+							!showDetails ? 'line-clamp-1' : ''
+						} border-b border-white border-opacity-30 pb-2`}
+					>
 						{user.display_name || user.name}
 					</h2>
 					<h2 className="card-title border-b border-white border-opacity-30 pb-2">
@@ -39,7 +43,7 @@ export default function UserCard({ user }: { user: userReturnType }) {
 					</h2>
 					{showDetails ? (
 						<>
-							<h2 className="card-title line-clamp-1 border-b border-white border-opacity-30 pb-2">
+							<h2 className="card-title border-b border-white border-opacity-30 pb-2">
 								{user.mac_address.toUpperCase()}
 							</h2>
 							<h2 className="card-title border-b border-white border-opacity-30 pb-2">
