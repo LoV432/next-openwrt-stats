@@ -32,11 +32,11 @@ export default function UserCard({ user }: { user: userReturnType }) {
 				</figure>
 				<div className="card-body w-2/3 p-4">
 					<h2
-						className={`card-title ${
-							!showDetails ? 'line-clamp-1' : ''
-						} border-b border-white border-opacity-30 pb-2`}
+						className={`card-title border-b border-white border-opacity-30 pb-2`}
 					>
-						{user.display_name || user.name}
+						<p className={!showDetails ? 'line-clamp-1' : ''}>
+							{user.display_name || user.name}
+						</p>
 					</h2>
 					<h2 className="card-title border-b border-white border-opacity-30 pb-2">
 						{user.ip}
