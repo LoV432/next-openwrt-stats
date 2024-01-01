@@ -6,9 +6,21 @@ import { allSpeedStates } from '../boundaries/SpeedBoundarie.client';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { userReturnType } from '@/app/api/dhcp-event/route';
+import CopyToast from '../misc/CopyToast';
 export default function UserCard({ user }: { user: userReturnType }) {
 	const [localUpdateTime, setLocalUpdateTime] = useState('');
 	const [showDetails, setShowDetails] = useState(false);
+	const [showToast, setShowToast] = useState(false);
+
+	function copyText(text: string) {
+		// TODO: This whole copy/toast logic is duplicate of DashboardCardCurrentStatus.client.tsx. Find a way to merge?
+		navigator.clipboard.writeText(text);
+		setShowToast(true);
+		setTimeout(() => {
+			setShowToast(false);
+		}, 3000);
+	}
+
 	useEffect(() => {
 		setLocalUpdateTime(
 			new Date(user.last_updated).toLocaleString('en-US', {
@@ -38,12 +50,22 @@ export default function UserCard({ user }: { user: userReturnType }) {
 							{user.display_name || user.name}
 						</p>
 					</h2>
-					<h2 className="card-title border-b border-white border-opacity-30 pb-2">
+					<h2
+						onClick={() => {
+							copyText(user.ip);
+						}}
+						className="card-title cursor-pointer border-b border-white border-opacity-30 pb-2"
+					>
 						{user.ip}
 					</h2>
 					{showDetails ? (
 						<>
-							<h2 className="card-title border-b border-white border-opacity-30 pb-2">
+							<h2
+								onClick={() => {
+									copyText(user.mac_address);
+								}}
+								className="card-title cursor-pointer border-b border-white border-opacity-30 pb-2"
+							>
 								{user.mac_address.toUpperCase()}
 							</h2>
 							<h2 className="card-title border-b border-white border-opacity-30 pb-2">
@@ -64,6 +86,7 @@ export default function UserCard({ user }: { user: userReturnType }) {
 					</div>
 				</div>
 			</div>
+			{showToast ? <CopyToast /> : null}
 		</>
 	);
 }
