@@ -13,7 +13,7 @@ export default function ConnectionLogsListModal({
 	const [days, setDays] = useState(1);
 	return (
 		<dialog ref={connectionLogsListModalRef} className="modal">
-			<div className="modal-box flex h-3/4 flex-col bg-zinc-900">
+			<div className="modal-box relative h-3/4 bg-zinc-900">
 				<p className="pb-5 text-lg font-bold">Connection Logs</p>
 				<p className="pb-5">Number of days to show: {days}</p>
 				<input
@@ -113,13 +113,15 @@ function EasterGif() {
 	return (
 		<>
 			{showEaster ? (
-				<Image
-					src={'/easter.gif'}
-					width={350}
-					height={350}
-					alt={'easter'}
-					className="mx-auto mt-auto"
-				></Image>
+				<div className="flex place-content-center">
+					<Image
+						src={'/easter.gif'}
+						width={350}
+						height={350}
+						alt={'easter'}
+						className="absolute bottom-0"
+					></Image>
+				</div>
 			) : null}
 		</>
 	);
