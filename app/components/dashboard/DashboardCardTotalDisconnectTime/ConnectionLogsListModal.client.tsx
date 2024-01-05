@@ -1,6 +1,7 @@
 import { connectionLogsListToHumanFormat } from '@/lib/logs-list-to-human-format';
 import { useState, useEffect } from 'react';
 import { connectionLogsList } from '../Dashboard.server';
+import Image from 'next/image';
 
 export default function ConnectionLogsListModal({
 	toggleConnectionLogsListModal,
@@ -12,7 +13,7 @@ export default function ConnectionLogsListModal({
 	const [days, setDays] = useState(1);
 	return (
 		<dialog ref={connectionLogsListModalRef} className="modal">
-			<div className="modal-box h-3/4 bg-zinc-900">
+			<div className="modal-box flex h-3/4 flex-col bg-zinc-900">
 				<p className="pb-5 text-lg font-bold">Connection Logs</p>
 				<p className="pb-5">Number of days to show: {days}</p>
 				<input
@@ -79,22 +80,49 @@ function ConnectionLogsList({ days }: { days: number }) {
 		updateLogsList(days);
 	}, [days]);
 	return (
-		<div className="overflow-x-auto">
-			{!humanReadableDisconnectedTime.includes('No Disconnects') ? (
-				<div className="h-fit gap-2 text-error">
-					{humanReadableDisconnectedTime}
+		<>
+			{connectionLogsListBody.length ? (
+				<div className="overflow-x-auto">
+					{!humanReadableDisconnectedTime.includes('No Disconnects') ? (
+						<div className="h-fit gap-2 text-error">
+							{humanReadableDisconnectedTime}
+						</div>
+					) : null}
+					<table className="table">
+						<thead className="text-slate-300 ">
+							<tr className="border-slate-300 border-opacity-30">
+								<th>ID</th>
+								<th>Status</th>
+								<th>Time</th>
+							</tr>
+						</thead>
+						<tbody>{connectionLogsListBody}</tbody>
+					</table>
 				</div>
+			) : (
+				<div className="mx-auto mt-auto">
+					<EasterGif />
+				</div>
+			)}
+		</>
+	);
+}
+
+function EasterGif() {
+	const [showEaster, setShowEaster] = useState(false);
+	useEffect(() => {
+		setShowEaster(Math.random() > 0.99);
+	}, []);
+	return (
+		<>
+			{showEaster ? (
+				<Image
+					src={'/easter.gif'}
+					width={350}
+					height={350}
+					alt={'easter'}
+				></Image>
 			) : null}
-			<table className="table">
-				<thead className="text-slate-300 ">
-					<tr className="border-slate-300 border-opacity-30">
-						<th>ID</th>
-						<th>Status</th>
-						<th>Time</th>
-					</tr>
-				</thead>
-				<tbody>{connectionLogsListBody}</tbody>
-			</table>
-		</div>
+		</>
 	);
 }
