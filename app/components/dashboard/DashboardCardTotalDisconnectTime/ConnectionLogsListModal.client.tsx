@@ -81,29 +81,26 @@ function ConnectionLogsList({ days }: { days: number }) {
 	}, [days]);
 	return (
 		<>
-			{connectionLogsListBody.length ? (
-				<div className="overflow-x-auto">
-					{!humanReadableDisconnectedTime.includes('No Disconnects') ? (
-						<div className="h-fit gap-2 text-error">
-							{humanReadableDisconnectedTime}
-						</div>
-					) : null}
-					<table className="table">
-						<thead className="text-slate-300 ">
-							<tr className="border-slate-300 border-opacity-30">
-								<th>ID</th>
-								<th>Status</th>
-								<th>Time</th>
-							</tr>
-						</thead>
-						<tbody>{connectionLogsListBody}</tbody>
-					</table>
-				</div>
-			) : (
-				<div className="mx-auto mt-auto">
-					<EasterGif />
-				</div>
-			)}
+			<div className="overflow-x-auto">
+				{!humanReadableDisconnectedTime.includes('No Disconnects') ? (
+					<div className="h-fit gap-2 text-error">
+						{humanReadableDisconnectedTime}
+					</div>
+				) : null}
+				<table className="table">
+					<thead className="text-slate-300 ">
+						<tr className="border-slate-300 border-opacity-30">
+							<th>ID</th>
+							<th>Status</th>
+							<th>Time</th>
+						</tr>
+					</thead>
+					<tbody>
+						{connectionLogsListBody.length ? connectionLogsListBody : null}
+					</tbody>
+				</table>
+			</div>
+			{connectionLogsListBody.length ? null : <EasterGif />}
 		</>
 	);
 }
@@ -121,6 +118,7 @@ function EasterGif() {
 					width={350}
 					height={350}
 					alt={'easter'}
+					className="mx-auto mt-auto"
 				></Image>
 			) : null}
 		</>
