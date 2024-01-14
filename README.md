@@ -4,16 +4,17 @@ This is a simple dashboard for [OpenWrt](https://openwrt.org/) that does the fol
 
 1. Displays router uptime.
 2. Keeps track of all PPPoE disconnects.
-3. Monitors all devices that connect to the router*.
-4. Shows real-time total bandwidth usage.
-5. Shows real-time per-user bandwidth usage.
+3. Displays PPPoE IP and uptime.
+4. Monitors all devices that connect to the router.
+5. Shows real-time total bandwidth usage.
+6. Shows real-time per-user bandwidth usage.
 
-`*Note: Device tracking uses DHCP, so devices using static IP addresses will not show up.`
+`Note: Most stuff only works with IPv4`
 
 
-![Openwrt Stats Rounded](https://github.com/LoV432/next-openwrt-stats/assets/60856741/a0413b49-6ca9-4eaf-a128-7c836df9cd52)
+![Openwrt Stats Big Screen](https://github.com/LoV432/next-openwrt-stats/assets/60856741/2f934ed9-58fa-4d80-9eb2-086a2af54855)
 
-![Openwrt Stats Phone Rounded](https://github.com/LoV432/next-openwrt-stats/assets/60856741/a16f40d3-09c6-4426-9875-eb181eed9239)
+![Openwrt Stats Small Screen](https://github.com/LoV432/next-openwrt-stats/assets/60856741/bc9517c0-7d20-4b7e-a557-206c9aa68808)
 
 
 
