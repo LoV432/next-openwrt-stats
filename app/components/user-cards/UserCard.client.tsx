@@ -7,6 +7,10 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { userReturnType } from '@/app/api/dhcp-event/route';
 import CopyToast from '../misc/CopyToast';
+import {
+	blockDevice as blockUser,
+	unblockDevice as unblockUser
+} from '@/lib/block-user-script.server';
 export default function UserCard({ user }: { user: userReturnType }) {
 	const [localUpdateTime, setLocalUpdateTime] = useState('');
 	const [showDetails, setShowDetails] = useState(false);
@@ -128,6 +132,9 @@ function DropDown({
 	const [changeNameModalIsOpen, setChangeNamemodalIsOpen] = useState(false);
 	const [iconModalIsOpen, setIconModalIsOpen] = useState(false);
 	const [deleteDeviceModalIsOpen, setDeleteDeviceModalIsOpen] = useState(false);
+	const [blockDeviceModalIsOpen, setBlockDeviceModalIsOpen] = useState(false);
+	const [unblockDeviceModalIsOpen, setUnblockDeviceModalIsOpen] =
+		useState(false);
 	const [changeIndexModalIsOpen, setChangeIndexModalIsOpen] = useState(false);
 
 	return (
@@ -148,6 +155,28 @@ function DropDown({
 				<>
 					<div className="absolute left-0 top-0 z-30 h-20">
 						<ul className="menu rounded-box w-48 border border-white border-opacity-20 bg-zinc-900 text-lg font-semibold">
+							<li>
+								<p
+									onClick={() => {
+										setBlockDeviceModalIsOpen(true);
+										SetDropDownIsOpen(false);
+									}}
+									className="flex h-12 justify-center hover:!bg-error hover:!text-black focus:!bg-error focus:!text-black active:!bg-error active:!text-black"
+								>
+									Block Internet
+								</p>
+							</li>
+							<li>
+								<p
+									onClick={() => {
+										setUnblockDeviceModalIsOpen(true);
+										SetDropDownIsOpen(false);
+									}}
+									className="flex h-12 justify-center hover:!bg-error hover:!text-black focus:!bg-error focus:!text-black active:!bg-error active:!text-black"
+								>
+									Unblock Internet
+								</p>
+							</li>
 							<li>
 								<p
 									className="flex h-12 justify-center"
@@ -225,6 +254,18 @@ function DropDown({
 					macAddress={macAddress}
 					setChangeIndexModalIsOpen={setChangeIndexModalIsOpen}
 					index_number={index_number}
+				/>
+			)}
+			{blockDeviceModalIsOpen && (
+				<BlockDevicePopUp
+					macAddress={macAddress}
+					setBlockDeviceModalIsOpen={setBlockDeviceModalIsOpen}
+				/>
+			)}
+			{unblockDeviceModalIsOpen && (
+				<UnblockDevicePopUp
+					macAddress={macAddress}
+					setUnblockDeviceModalIsOpen={setUnblockDeviceModalIsOpen}
 				/>
 			)}
 		</>
@@ -409,6 +450,108 @@ function DeleteDevicePopUp({
 				<p>Are you sure you want to delete this device?</p>
 				<button onClick={deleteDevice} className="btn btn-error mt-5 w-full">
 					Delete
+				</button>
+				<button onClick={closePopUp} className="btn btn-ghost mt-5 w-full">
+					Cancel
+				</button>
+				<button
+					onClick={closePopUp}
+					className="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
+				>
+					✕
+				</button>
+			</div>
+			<div className="modal-backdrop bg-zinc-700 opacity-30">
+				<button onClick={closePopUp}>close</button>
+			</div>
+		</dialog>
+	);
+}
+
+function BlockDevicePopUp({
+	macAddress,
+	setBlockDeviceModalIsOpen
+}: {
+	macAddress: string;
+	setBlockDeviceModalIsOpen: (value: boolean) => void;
+}) {
+	let router = useRouter();
+	let blockDeviceModal = useRef<HTMLDialogElement>(null);
+	async function blockDevice() {
+		blockUser(macAddress);
+		closePopUp();
+		router.refresh();
+	}
+	async function closePopUp() {
+		blockDeviceModal.current?.close();
+		await new Promise((resolve) => setTimeout(resolve, 100));
+		setBlockDeviceModalIsOpen(false);
+	}
+
+	useEffect(() => {
+		(async () => {
+			await new Promise((resolve) => setTimeout(resolve, 10));
+			blockDeviceModal.current?.showModal();
+		})();
+	}, []);
+	return (
+		<dialog ref={blockDeviceModal} className="modal">
+			<div className="modal-box bg-zinc-900">
+				<h3 className="pb-5 text-lg font-bold">Block Device</h3>
+				<p>Are you sure you want to block this device internet access?</p>
+				<button onClick={blockDevice} className="btn btn-error mt-5 w-full">
+					Block
+				</button>
+				<button onClick={closePopUp} className="btn btn-ghost mt-5 w-full">
+					Cancel
+				</button>
+				<button
+					onClick={closePopUp}
+					className="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
+				>
+					✕
+				</button>
+			</div>
+			<div className="modal-backdrop bg-zinc-700 opacity-30">
+				<button onClick={closePopUp}>close</button>
+			</div>
+		</dialog>
+	);
+}
+
+function UnblockDevicePopUp({
+	macAddress,
+	setUnblockDeviceModalIsOpen
+}: {
+	macAddress: string;
+	setUnblockDeviceModalIsOpen: (value: boolean) => void;
+}) {
+	let router = useRouter();
+	let unblockDeviceModal = useRef<HTMLDialogElement>(null);
+	async function unblockDevice() {
+		unblockUser(macAddress);
+		closePopUp();
+		router.refresh();
+	}
+	async function closePopUp() {
+		unblockDeviceModal.current?.close();
+		await new Promise((resolve) => setTimeout(resolve, 100));
+		setUnblockDeviceModalIsOpen(false);
+	}
+
+	useEffect(() => {
+		(async () => {
+			await new Promise((resolve) => setTimeout(resolve, 10));
+			unblockDeviceModal.current?.showModal();
+		})();
+	}, []);
+	return (
+		<dialog ref={unblockDeviceModal} className="modal">
+			<div className="modal-box bg-zinc-900">
+				<h3 className="pb-5 text-lg font-bold">Unblock Device</h3>
+				<p>Are you sure you want to Unblock this device internet access?</p>
+				<button onClick={unblockDevice} className="btn btn-error mt-5 w-full">
+					Unblock
 				</button>
 				<button onClick={closePopUp} className="btn btn-ghost mt-5 w-full">
 					Cancel
