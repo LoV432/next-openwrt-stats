@@ -88,7 +88,8 @@ json_content='{
       "file": {
         "/etc/wrtbwmon-update": ["exec"],
         "/proc/uptime": ["read"],
-        "/etc/pppoe-status": ["exec"]
+        "/etc/pppoe-status": ["exec"],
+        "/etc/block-device": ["exec"]
       }
     }
   }
@@ -146,6 +147,88 @@ content='#!/bin/ash
 echo "$content" > /etc/wrtbwmon-update
 chmod 755 /etc/wrtbwmon-update
 echo "Script created /etc/wrtbwmon-update"
+#############################
+
+
+
+# Create user block script
+#############################
+content=$(cat <<'END_SCRIPT'
+#!/bin/sh
+
+# Check if device MAC address is provided as argument
+if [ -z "$1" ]; then
+    echo "Usage: $0 <device_MAC_address>"
+    echo "To delete a rule: $0 -d <device_MAC_address>"
+    echo "To retrieve all rules: $0 -r"
+    exit 1
+fi
+
+# Check if user wants to delete a rule
+if [ "$1" = "-d" ]; then
+    if [ -z "$2" ]; then
+        echo "Please provide the MAC address to delete."
+        exit 1
+    fi
+    RULE_NAME="$2"
+    # Delete the rule
+    uci delete firewall.@rule[$(uci show firewall | grep -E "firewall.@rule\[[0-9]+\].name='Block_Device_$RULE_NAME'" | sed -n 's/.*\[//;s/\].*//p')]
+    uci commit firewall
+    /etc/init.d/firewall restart
+    echo "MAC address $RULE_NAME deleted."
+    exit 0
+fi
+
+# Check if user wants to retrieve all the blocks
+if [ "$1" = "-r" ]; then
+        # Retrieve rule numbers for rules matching pattern Block_Device_*
+        RULE_NUMBERS=$(uci show firewall | grep -E "firewall.@rule\[[0-9]+\].name='Block_Device_*" | sed -n 's/.*\[//;s/\].*//p')
+
+        # Check if there are any rules matching the pattern
+        if [ -z "$RULE_NUMBERS" ]; then
+                #echo "No rules matching pattern Block_Device_ found."
+                exit 0
+        fi
+
+        # Retrieve source MAC addresses for the matching rules
+        for RULE_NUMBER in $RULE_NUMBERS; do
+        SOURCE_MAC=$(uci get firewall.@rule["$RULE_NUMBER"].src_mac)
+        echo "$SOURCE_MAC"
+        done
+
+        exit 0
+fi
+
+
+# Set the device MAC address
+DEVICE_MAC="$1"
+
+# Define the rule name including the MAC address
+RULE_NAME="Block_Device_${DEVICE_MAC}"
+
+# Block the device by adding a firewall rule
+uci add firewall rule
+uci set firewall.@rule[-1].name="$RULE_NAME"
+uci set firewall.@rule[-1].src='lan'
+uci set firewall.@rule[-1].proto='all'
+uci set firewall.@rule[-1].src_mac="$DEVICE_MAC"
+uci set firewall.@rule[-1].dest='wan'
+uci set firewall.@rule[-1].target='REJECT'
+
+# Commit the changes
+uci commit firewall
+
+# Restart firewall to apply changes
+/etc/init.d/firewall restart
+
+echo "Device with MAC address $DEVICE_MAC is now blocked from accessing the internet."
+#echo "Rule name: $RULE_NAME"
+END_SCRIPT
+)
+
+echo "$content" > /etc/block-device
+chmod 755 /etc/block-device
+echo "Script created /etc/block-device"
 #############################
 
 
