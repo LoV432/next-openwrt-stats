@@ -170,12 +170,12 @@ if [ "$1" = "-d" ]; then
         echo "Please provide the MAC address to delete."
         exit 1
     fi
-    RULE_NAME="$2"
+    DEVICE_MAC="$2"
     # Delete the rule
-    uci delete firewall.@rule[$(uci show firewall | grep -E "firewall.@rule\[[0-9]+\].name='Block_Device_$RULE_NAME'" | sed -n 's/.*\[//;s/\].*//p')]
+    uci delete firewall.@rule[$(uci show firewall | grep -E "firewall.@rule\[[0-9]+\].name='Block_Device_$DEVICE_MAC'" | sed -n 's/.*\[//;s/\].*//p')]
     uci commit firewall
     /etc/init.d/firewall restart
-    echo "MAC address $RULE_NAME deleted."
+    echo "MAC address $DEVICE_MAC deleted."
     exit 0
 fi
 
@@ -186,14 +186,16 @@ if [ "$1" = "-r" ]; then
 
         # Check if there are any rules matching the pattern
         if [ -z "$RULE_NUMBERS" ]; then
+                echo ""
                 #echo "No rules matching pattern Block_Device_ found."
                 exit 0
         fi
 
         # Retrieve source MAC addresses for the matching rules
+        echo ""
         for RULE_NUMBER in $RULE_NUMBERS; do
-        SOURCE_MAC=$(uci get firewall.@rule["$RULE_NUMBER"].src_mac)
-        echo "$SOURCE_MAC"
+          SOURCE_MAC=$(uci get firewall.@rule["$RULE_NUMBER"].src_mac)
+          echo "$SOURCE_MAC"
         done
 
         exit 0
@@ -202,6 +204,14 @@ fi
 
 # Set the device MAC address
 DEVICE_MAC="$1"
+
+RULE_NUMBER=$(uci show firewall | grep -E "firewall.@rule\[[0-9]+\].name='Block_Device_$DEVICE_MAC" | sed -n 's/.*\[//;s/\].*//p')
+
+# Check if there are any rules matching the pattern
+if [ -n "$RULE_NUMBER" ]; then
+        #echo "Matching pattern Block_Device_ found."
+        exit 0
+fi
 
 # Define the rule name including the MAC address
 RULE_NAME="Block_Device_${DEVICE_MAC}"
