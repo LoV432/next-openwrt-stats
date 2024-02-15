@@ -17,6 +17,8 @@ export default function UserCard({ user }: { user: userReturnType }) {
 	const [localUpdateTime, setLocalUpdateTime] = useState('');
 	const [showDetails, setShowDetails] = useState(false);
 	const [showToast, setShowToast] = useState(false);
+	const allBlockedDevices = useAtomValue(allBlockedDevicesState);
+	const isBlocked = allBlockedDevices.includes(user.mac_address);
 
 	function copyText(text: string) {
 		// TODO: This whole copy/toast logic is duplicate of DashboardCardCurrentStatus.client.tsx. Find a way to merge?
@@ -40,7 +42,9 @@ export default function UserCard({ user }: { user: userReturnType }) {
 	return (
 		<>
 			{/*TODO: Need to find a better way to handle overflow of dropdown in last row*/}
-			<div className="card card-side m-5 h-fit w-full bg-zinc-900 p-2 shadow-xl last:mb-[7rem] sm:w-[300px]">
+			<div
+				className={`card card-side m-5 h-fit w-full bg-zinc-900 p-2 shadow-xl last:mb-[7rem] sm:w-[300px] ${isBlocked ? 'text-error' : ''}`}
+			>
 				<UserSpeed ip={user.ip} />
 				<figure className="relative flex w-1/4 items-center justify-center overflow-visible px-1 py-4">
 					<DropDown
@@ -153,7 +157,7 @@ function DropDown({
 					alt="Android Icon"
 					width={25}
 					height={25}
-					className={`w-full cursor-pointer transition-transform hover:scale-125 ${isBlocked ? 'grayscale' : ''}`}
+					className={`w-full cursor-pointer transition-transform hover:scale-125`}
 				/>
 			</button>
 			{dropDownIsOpen && (
