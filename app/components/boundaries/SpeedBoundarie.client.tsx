@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { SetterOrUpdater, atom, useRecoilState } from 'recoil';
+import { useSetAtom, atom } from 'jotai';
 
 type allUsersSpeedType = {
 	ip: string;
@@ -14,31 +14,25 @@ export default function SpeedWrapper({
 }: {
 	children: React.ReactNode;
 }) {
-	const [speed, setSpeed] = useRecoilState(allSpeedStates);
+	const setSpeed = useSetAtom(allSpeedStates);
 	useEffect(() => {
 		fetchDataAndCalculateMbps(setSpeed);
 	}, []);
 	return <>{children}</>; // Everything inside this child will have access to allSpeedStates
 }
 
-export const allSpeedStates = atom({
-	key: 'speed',
-	default: [{}, {}] as [
-		allUsersSpeedType,
-		{ totalMbpsUpload: string; totalMbpsDownload: string }
-	]
-});
+export const allSpeedStates = atom([{}, {}] as [
+	allUsersSpeedType,
+	{ totalMbpsUpload: string; totalMbpsDownload: string }
+]);
 
 async function fetchDataAndCalculateMbps(
-	setSpeed: SetterOrUpdater<
-		[
+	setSpeed: (
+		speed: [
 			allUsersSpeedType,
-			{
-				totalMbpsUpload: string;
-				totalMbpsDownload: string;
-			}
+			{ totalMbpsUpload: string; totalMbpsDownload: string }
 		]
-	>
+	) => void
 ) {
 	const response = await fetch('/api/get-speed', { cache: 'no-cache' });
 	let lastFetchTime = Date.now();

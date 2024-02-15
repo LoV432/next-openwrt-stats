@@ -1,5 +1,5 @@
 'use client';
-import { useRecoilState } from 'recoil';
+import { useAtomValue } from 'jotai';
 import { allSpeedStates } from '../../boundaries/SpeedBoundarie.client';
 import { useEffect, useState } from 'react';
 import { useSpring, animated } from '@react-spring/web';
@@ -14,7 +14,7 @@ export default function SpeedMeter({
 	const [springPercentage, setSpringPercentage] = useSpring(() => ({
 		from: { '--percentage': 1 }
 	}));
-	const [speed] = useRecoilState(allSpeedStates);
+	const speed = useAtomValue(allSpeedStates);
 	const [precentage, setPrecentage] = useState(0);
 	const [mbpsInNumber, setMbpsInNumber] = useState(0);
 	useEffect(() => {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import { useSetAtom, useAtomValue } from 'jotai';
 import { allSpeedStates } from '../boundaries/SpeedBoundarie.client';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -96,7 +96,7 @@ export default function UserCard({ user }: { user: userReturnType }) {
 }
 
 function UserSpeed({ ip }: { ip: string }) {
-	const [allSpeeds] = useRecoilState(allSpeedStates);
+	const allSpeeds = useAtomValue(allSpeedStates);
 	const [speed, setSpeed] = useState({ upload: '', download: '' });
 	useEffect(() => {
 		if (!allSpeeds[0].length) return;
