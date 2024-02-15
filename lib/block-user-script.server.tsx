@@ -90,3 +90,54 @@ async function unblockDeviceReuqest(token: string, macAddress: string) {
 
 	return (await makeRequest.json()) as blockDeviceResponseType;
 }
+
+export async function getAllBlockedDevices() {
+	let token = (await getToken()) as string;
+	let getAllBlockedDevicesResponse = await getAllBlockedDevicesReuqest(token);
+	if (
+		!getAllBlockedDevicesResponse.result ||
+		!getAllBlockedDevicesResponse.result[1]
+	) {
+		let newToken = await getToken(true);
+		if (!newToken) {
+			console.log('getAllBlockedDevices: Token not found');
+			return { error: 'Token not found' };
+		}
+		getAllBlockedDevicesResponse = await getAllBlockedDevicesReuqest(newToken);
+		if (
+			!getAllBlockedDevicesResponse.result ||
+			!getAllBlockedDevicesResponse.result[1]
+		) {
+			console.log('getAllBlockedDevices: Something went wrong');
+			return { error: 'Something went wrong' };
+		}
+	}
+	const allBlockedDevices =
+		getAllBlockedDevicesResponse.result[1].stdout.split('\n');
+	return allBlockedDevices;
+}
+
+async function getAllBlockedDevicesReuqest(token: string) {
+	let requestBody = {
+		jsonrpc: '2.0',
+		id: 1,
+		method: 'call',
+		params: [
+			token,
+			'file',
+			'exec',
+			{ command: '/etc/block-device', params: ['-r'] }
+		]
+	};
+
+	let makeRequest = await fetch(`${process.env.ROUTER_URL}/ubus`, {
+		method: 'POST',
+		body: JSON.stringify(requestBody),
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		cache: 'no-cache'
+	});
+
+	return (await makeRequest.json()) as blockDeviceResponseType;
+}

@@ -9,8 +9,10 @@ import { userReturnType } from '@/app/api/dhcp-event/route';
 import CopyToast from '../misc/CopyToast';
 import {
 	blockDevice as blockUser,
+	getAllBlockedDevices,
 	unblockDevice as unblockUser
 } from '@/lib/block-user-script.server';
+import { allBlockedDevices as allBlockedDevicesState } from '../boundaries/BlockedDevicesBoundarie.client';
 export default function UserCard({ user }: { user: userReturnType }) {
 	const [localUpdateTime, setLocalUpdateTime] = useState('');
 	const [showDetails, setShowDetails] = useState(false);
@@ -136,6 +138,8 @@ function DropDown({
 	const [unblockDeviceModalIsOpen, setUnblockDeviceModalIsOpen] =
 		useState(false);
 	const [changeIndexModalIsOpen, setChangeIndexModalIsOpen] = useState(false);
+	const allBlockedDevices = useAtomValue(allBlockedDevicesState);
+	const isBlocked = allBlockedDevices.includes(mac_address);
 
 	return (
 		<>
@@ -148,35 +152,38 @@ function DropDown({
 					alt="Android Icon"
 					width={25}
 					height={25}
-					className="w-full cursor-pointer transition-transform hover:scale-125"
+					className={`w-full cursor-pointer transition-transform hover:scale-125 ${isBlocked ? 'grayscale' : ''}`}
 				/>
 			</button>
 			{dropDownIsOpen && (
 				<>
 					<div className="absolute left-0 top-0 z-30 h-20">
 						<ul className="menu rounded-box w-48 border border-white border-opacity-20 bg-zinc-900 text-lg font-semibold">
-							<li>
-								<p
-									onClick={() => {
-										setBlockDeviceModalIsOpen(true);
-										SetDropDownIsOpen(false);
-									}}
-									className="flex h-12 justify-center hover:!bg-error hover:!text-black focus:!bg-error focus:!text-black active:!bg-error active:!text-black"
-								>
-									Block Internet
-								</p>
-							</li>
-							<li>
-								<p
-									onClick={() => {
-										setUnblockDeviceModalIsOpen(true);
-										SetDropDownIsOpen(false);
-									}}
-									className="flex h-12 justify-center hover:!bg-error hover:!text-black focus:!bg-error focus:!text-black active:!bg-error active:!text-black"
-								>
-									Unblock Internet
-								</p>
-							</li>
+							{!isBlocked ? (
+								<li>
+									<p
+										onClick={() => {
+											setBlockDeviceModalIsOpen(true);
+											SetDropDownIsOpen(false);
+										}}
+										className="flex h-12 justify-center hover:!bg-error hover:!text-black focus:!bg-error focus:!text-black active:!bg-error active:!text-black"
+									>
+										Block Internet
+									</p>
+								</li>
+							) : (
+								<li>
+									<p
+										onClick={() => {
+											setUnblockDeviceModalIsOpen(true);
+											SetDropDownIsOpen(false);
+										}}
+										className="flex h-12 justify-center hover:!bg-error hover:!text-black focus:!bg-error focus:!text-black active:!bg-error active:!text-black"
+									>
+										Unblock Internet
+									</p>
+								</li>
+							)}
 							<li>
 								<p
 									className="flex h-12 justify-center"
@@ -477,8 +484,14 @@ function BlockDevicePopUp({
 }) {
 	let router = useRouter();
 	let blockDeviceModal = useRef<HTMLDialogElement>(null);
+	const setBlockedDevices = useSetAtom(allBlockedDevicesState);
 	async function blockDevice() {
-		blockUser(macAddress);
+		(async () => {
+			blockUser(macAddress);
+			setBlockedDevices((prev) => [...prev, macAddress]);
+			const allBlockedDevices = await getAllBlockedDevices();
+			if (!('error' in allBlockedDevices)) setBlockedDevices(allBlockedDevices);
+		})();
 		closePopUp();
 		router.refresh();
 	}
@@ -528,8 +541,16 @@ function UnblockDevicePopUp({
 }) {
 	let router = useRouter();
 	let unblockDeviceModal = useRef<HTMLDialogElement>(null);
+	const setBlockedDevices = useSetAtom(allBlockedDevicesState);
 	async function unblockDevice() {
-		unblockUser(macAddress);
+		(async () => {
+			unblockUser(macAddress);
+			setBlockedDevices((prev) =>
+				prev.filter((device) => device !== macAddress)
+			);
+			const allBlockedDevices = await getAllBlockedDevices();
+			if (!('error' in allBlockedDevices)) setBlockedDevices(allBlockedDevices);
+		})();
 		closePopUp();
 		router.refresh();
 	}
