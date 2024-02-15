@@ -192,7 +192,6 @@ if [ "$1" = "-r" ]; then
         fi
 
         # Retrieve source MAC addresses for the matching rules
-        echo ""
         for RULE_NUMBER in $RULE_NUMBERS; do
           SOURCE_MAC=$(uci get firewall.@rule["$RULE_NUMBER"].src_mac)
           echo "$SOURCE_MAC"
