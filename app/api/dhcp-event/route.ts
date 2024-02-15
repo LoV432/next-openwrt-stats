@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { getSpeed } from '../get-speed/route';
+import { getSpeed } from '@/lib/get-speed';
 
 type dhcpEventType = {
 	hostname: string;
