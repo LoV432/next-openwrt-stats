@@ -84,12 +84,15 @@ function PerUserSpeedDetailsPopUp({
 			</>
 		);
 	const ipToName = allSpeeds[0].map((user) => {
-		const name = allUsers.filter((u) => u.ip === user.ip)[0];
-		if (!name) return;
+		const userDetails = allUsers.filter((u) => u.ip === user.ip)[0];
+		if (!userDetails) return;
 		if (Number(user.in) <= 0 && Number(user.out) <= 0) return;
+		let userName =
+			userDetails.display_name ||
+			(userDetails.name != 'Unknown' ? userDetails.name : user.ip);
 		return {
-			index_number: name.index_number,
-			name: name.name == 'Unknown' ? name.display_name : name.name,
+			index_number: userDetails.index_number,
+			name: userName,
 			in: user.in,
 			out: user.out
 		};
