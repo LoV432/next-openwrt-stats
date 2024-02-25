@@ -1,4 +1,4 @@
-FROM node:18 AS base
+FROM node:21 AS base
 
 ARG TARGETPLATFORM
 
@@ -11,9 +11,9 @@ WORKDIR /app
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json ./
 RUN npm ci
-RUN if [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
-    npm install -D @swc/cli @swc/core-linux-arm-gnueabihf @next/swc-linux-arm-gnueabihf ; \
-    fi
+# RUN if [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
+#     npm install -D @swc/cli @swc/core-linux-arm-gnueabihf @next/swc-linux-arm-gnueabihf ; \
+#     fi
 
 
 # Rebuild the source code only when needed
