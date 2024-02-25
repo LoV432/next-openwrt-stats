@@ -9,7 +9,7 @@ WORKDIR /app
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json ./
 RUN npm ci
-RUN npm install -D @swc/cli @swc/core
+RUN npm install next --force
 
 
 # Rebuild the source code only when needed
