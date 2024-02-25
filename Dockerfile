@@ -12,7 +12,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 RUN if [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
-    npm install -D @swc/cli @swc/core-linux-arm-gnueabihf @next/swc-linux-arm-gnueabihf \
+    npm install -D @swc/cli @swc/core-linux-arm-gnueabihf @next/swc-linux-arm-gnueabihf ; \
     fi
 
 
