@@ -9,7 +9,7 @@ WORKDIR /app
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json ./
 RUN npm ci
-RUN npm install next --force
+RUN npm install -D @swc/cli @swc/core-linux-arm-gnueabihf @next/swc-linux-arm-gnueabihf
 
 
 # Rebuild the source code only when needed
