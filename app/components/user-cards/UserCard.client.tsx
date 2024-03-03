@@ -487,20 +487,28 @@ function BlockDevicePopUp({
 	macAddress: string;
 	setBlockDeviceModalIsOpen: (value: boolean) => void;
 }) {
-	let router = useRouter();
-	let blockDeviceModal = useRef<HTMLDialogElement>(null);
+	const router = useRouter();
+	const blockDeviceModal = useRef<HTMLDialogElement>(null);
+	const buttonRef = useRef<HTMLButtonElement>(null);
+	const isRunning = useRef(false);
 	const setBlockedDevices = useSetAtom(allBlockedDevicesState);
 	async function blockDevice() {
-		(async () => {
-			blockUser(macAddress);
-			setBlockedDevices((prev) => [...prev, macAddress]);
-			const allBlockedDevices = await getAllBlockedDevices();
-			if (!('error' in allBlockedDevices)) setBlockedDevices(allBlockedDevices);
-		})();
+		isRunning.current = true;
+		if (!buttonRef.current) return;
+		buttonRef.current.setAttribute('disabled', 'true');
+		buttonRef.current.classList.add('after:loading');
+		buttonRef.current.innerText = '';
+		await blockUser(macAddress);
+		const allBlockedDevices = await getAllBlockedDevices();
+		if (!('error' in allBlockedDevices)) setBlockedDevices(allBlockedDevices);
+		buttonRef.current.classList.remove('after:loading');
+		buttonRef.current.removeAttribute('disabled');
+		isRunning.current = false;
 		closePopUp();
 		router.refresh();
 	}
 	async function closePopUp() {
+		if (isRunning.current) return;
 		blockDeviceModal.current?.close();
 		await new Promise((resolve) => setTimeout(resolve, 100));
 		setBlockDeviceModalIsOpen(false);
@@ -517,7 +525,11 @@ function BlockDevicePopUp({
 			<div className="modal-box bg-zinc-900">
 				<h3 className="pb-5 text-lg font-bold">Block Device</h3>
 				<p>Are you sure you want to block this device internet access?</p>
-				<button onClick={blockDevice} className="btn btn-error mt-5 w-full">
+				<button
+					ref={buttonRef}
+					onClick={blockDevice}
+					className="btn btn-error mt-5 w-full"
+				>
 					Block
 				</button>
 				<button onClick={closePopUp} className="btn btn-ghost mt-5 w-full">
@@ -544,22 +556,28 @@ function UnblockDevicePopUp({
 	macAddress: string;
 	setUnblockDeviceModalIsOpen: (value: boolean) => void;
 }) {
-	let router = useRouter();
-	let unblockDeviceModal = useRef<HTMLDialogElement>(null);
+	const router = useRouter();
+	const unblockDeviceModal = useRef<HTMLDialogElement>(null);
+	const buttonRef = useRef<HTMLButtonElement>(null);
+	const isRunning = useRef(false);
 	const setBlockedDevices = useSetAtom(allBlockedDevicesState);
 	async function unblockDevice() {
-		(async () => {
-			unblockUser(macAddress);
-			setBlockedDevices((prev) =>
-				prev.filter((device) => device !== macAddress)
-			);
-			const allBlockedDevices = await getAllBlockedDevices();
-			if (!('error' in allBlockedDevices)) setBlockedDevices(allBlockedDevices);
-		})();
+		isRunning.current = true;
+		if (!buttonRef.current) return;
+		buttonRef.current.setAttribute('disabled', 'true');
+		buttonRef.current.classList.add('after:loading');
+		buttonRef.current.innerText = '';
+		await unblockUser(macAddress);
+		const allBlockedDevices = await getAllBlockedDevices();
+		if (!('error' in allBlockedDevices)) setBlockedDevices(allBlockedDevices);
+		buttonRef.current.classList.remove('after:loading');
+		buttonRef.current.removeAttribute('disabled');
+		isRunning.current = false;
 		closePopUp();
 		router.refresh();
 	}
 	async function closePopUp() {
+		if (isRunning.current) return;
 		unblockDeviceModal.current?.close();
 		await new Promise((resolve) => setTimeout(resolve, 100));
 		setUnblockDeviceModalIsOpen(false);
@@ -576,7 +594,11 @@ function UnblockDevicePopUp({
 			<div className="modal-box bg-zinc-900">
 				<h3 className="pb-5 text-lg font-bold">Unblock Device</h3>
 				<p>Are you sure you want to Unblock this device internet access?</p>
-				<button onClick={unblockDevice} className="btn btn-error mt-5 w-full">
+				<button
+					ref={buttonRef}
+					onClick={unblockDevice}
+					className="btn btn-error mt-5 w-full"
+				>
 					Unblock
 				</button>
 				<button onClick={closePopUp} className="btn btn-ghost mt-5 w-full">
