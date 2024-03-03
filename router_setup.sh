@@ -89,7 +89,8 @@ json_content='{
         "/etc/wrtbwmon-update": ["exec"],
         "/proc/uptime": ["read"],
         "/etc/pppoe-status": ["exec"],
-        "/etc/block-device": ["exec"]
+        "/etc/block-device": ["exec"],
+        "/etc/neigh-probe": ["exec"]
       }
     }
   }
@@ -149,6 +150,19 @@ chmod 755 /etc/wrtbwmon-update
 echo "Script created /etc/wrtbwmon-update"
 #############################
 
+
+# Create connected device script
+#############################
+content=$(cat <<'END_SCRIPT'
+#!/bin/sh
+
+ip -4 neigh show nud reachable nud stale nud permanent nud delay
+END_SCRIPT
+)
+echo "$content" > /etc/neigh-probe
+chmod 755 /etc/neigh-probe
+echo "Script created /etc/neigh-probe"
+#############################
 
 
 # Create user block script

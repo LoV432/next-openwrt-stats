@@ -13,12 +13,15 @@ import {
 	unblockDevice as unblockUser
 } from '@/lib/block-user-script.server';
 import { allBlockedDevices as allBlockedDevicesState } from '../boundaries/BlockedDevices/BlockedDevicesBoundarie.client';
+import { allConnectedDevices as allConnectedDevicesState } from '../boundaries/ConnectedDevices/ConnectedDevicesBoundarie.client';
 export default function UserCard({ user }: { user: userReturnType }) {
 	const [localUpdateTime, setLocalUpdateTime] = useState('');
 	const [showDetails, setShowDetails] = useState(false);
 	const [showToast, setShowToast] = useState(false);
 	const allBlockedDevices = useAtomValue(allBlockedDevicesState);
 	const isBlocked = allBlockedDevices.includes(user.mac_address);
+	const allConnectedDevices = useAtomValue(allConnectedDevicesState);
+	const isConnected = allConnectedDevices.includes(user.mac_address);
 
 	function copyText(text: string) {
 		// TODO: This whole copy/toast logic is duplicate of DashboardCardCurrentStatus.client.tsx. Find a way to merge?
@@ -45,6 +48,11 @@ export default function UserCard({ user }: { user: userReturnType }) {
 			<div
 				className={`card card-side m-5 h-fit w-full bg-zinc-900 p-2 shadow-xl last:mb-[7rem] sm:w-[300px] ${isBlocked ? 'text-error' : ''}`}
 			>
+				<div className="absolute right-0 top-0">
+					{isConnected && (
+						<span className="badge indicator-item badge-success badge-sm absolute -right-1 -top-1"></span>
+					)}
+				</div>
 				<UserSpeed ip={user.ip} />
 				<figure className="relative flex w-1/4 items-center justify-center overflow-visible px-1 py-4">
 					<DropDown

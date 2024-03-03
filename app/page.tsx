@@ -2,6 +2,7 @@ import Dashboard from './components/dashboard/Dashboard.server';
 import UserCards from './components/user-cards/UserCards.server';
 import SpeedBoundarie from './components/boundaries/SpeedBoundarie.client';
 import BlockedDevicesBoundarie from './components/boundaries/BlockedDevices/BlockedDevicesBoundarie.server';
+import ConnectedDevicesBoundarie from './components/boundaries/ConnectedDevices/ConnectedDevicesBoundarie.server';
 import { Provider } from 'jotai';
 export const dynamic = 'force-dynamic';
 export default function Home() {
@@ -14,9 +15,11 @@ export default function Home() {
 							<Dashboard />
 						</div>
 						<div className="flex flex-row flex-wrap justify-evenly">
-							<BlockedDevicesBoundarie>
-								<UserCards />
-							</BlockedDevicesBoundarie>
+							<ConnectedDevicesBoundarie>
+								<BlockedDevicesBoundarie>
+									<UserCards />
+								</BlockedDevicesBoundarie>
+							</ConnectedDevicesBoundarie>
 						</div>
 					</SpeedBoundarie>
 				</Provider>
