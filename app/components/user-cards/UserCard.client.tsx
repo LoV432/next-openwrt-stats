@@ -12,7 +12,7 @@ import {
 	getAllBlockedDevices,
 	unblockDevice as unblockUser
 } from '@/lib/block-user-script.server';
-import { allBlockedDevices as allBlockedDevicesState } from '../boundaries/BlockedDevicesBoundarie.client';
+import { allBlockedDevices as allBlockedDevicesState } from '../boundaries/BlockedDevices/BlockedDevicesBoundarie.client';
 export default function UserCard({ user }: { user: userReturnType }) {
 	const [localUpdateTime, setLocalUpdateTime] = useState('');
 	const [showDetails, setShowDetails] = useState(false);

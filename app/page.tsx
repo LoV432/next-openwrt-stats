@@ -1,7 +1,7 @@
 import Dashboard from './components/dashboard/Dashboard.server';
 import UserCards from './components/user-cards/UserCards.server';
 import SpeedBoundarie from './components/boundaries/SpeedBoundarie.client';
-import BlockedDevicesBoundarie from './components/boundaries/BlockedDevicesBoundarie.server';
+import BlockedDevicesBoundarie from './components/boundaries/BlockedDevices/BlockedDevicesBoundarie.server';
 import { Provider } from 'jotai';
 export const dynamic = 'force-dynamic';
 export default function Home() {
