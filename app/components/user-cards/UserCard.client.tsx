@@ -12,13 +12,16 @@ import {
 	getAllBlockedDevices,
 	unblockDevice as unblockUser
 } from '@/lib/block-user-script.server';
-import { allBlockedDevices as allBlockedDevicesState } from '../boundaries/BlockedDevicesBoundarie.client';
+import { allBlockedDevices as allBlockedDevicesState } from '../boundaries/BlockedDevices/BlockedDevicesBoundarie.client';
+import { allConnectedDevices as allConnectedDevicesState } from '../boundaries/ConnectedDevices/ConnectedDevicesBoundarie.client';
 export default function UserCard({ user }: { user: userReturnType }) {
 	const [localUpdateTime, setLocalUpdateTime] = useState('');
 	const [showDetails, setShowDetails] = useState(false);
 	const [showToast, setShowToast] = useState(false);
 	const allBlockedDevices = useAtomValue(allBlockedDevicesState);
 	const isBlocked = allBlockedDevices.includes(user.mac_address);
+	const allConnectedDevices = useAtomValue(allConnectedDevicesState);
+	const isConnected = allConnectedDevices.includes(user.mac_address);
 
 	function copyText(text: string) {
 		// TODO: This whole copy/toast logic is duplicate of DashboardCardCurrentStatus.client.tsx. Find a way to merge?
@@ -45,6 +48,11 @@ export default function UserCard({ user }: { user: userReturnType }) {
 			<div
 				className={`card card-side m-5 h-fit w-full bg-zinc-900 p-2 shadow-xl last:mb-[7rem] sm:w-[300px] ${isBlocked ? 'text-error' : ''}`}
 			>
+				<div className="absolute right-0 top-0">
+					{isConnected && (
+						<span className="badge indicator-item badge-success badge-sm absolute -right-1 -top-1"></span>
+					)}
+				</div>
 				<UserSpeed ip={user.ip} />
 				<figure className="relative flex w-1/4 items-center justify-center overflow-visible px-1 py-4">
 					<DropDown
@@ -487,20 +495,28 @@ function BlockDevicePopUp({
 	macAddress: string;
 	setBlockDeviceModalIsOpen: (value: boolean) => void;
 }) {
-	let router = useRouter();
-	let blockDeviceModal = useRef<HTMLDialogElement>(null);
+	const router = useRouter();
+	const blockDeviceModal = useRef<HTMLDialogElement>(null);
+	const buttonRef = useRef<HTMLButtonElement>(null);
+	const isRunning = useRef(false);
 	const setBlockedDevices = useSetAtom(allBlockedDevicesState);
 	async function blockDevice() {
-		(async () => {
-			blockUser(macAddress);
-			setBlockedDevices((prev) => [...prev, macAddress]);
-			const allBlockedDevices = await getAllBlockedDevices();
-			if (!('error' in allBlockedDevices)) setBlockedDevices(allBlockedDevices);
-		})();
+		isRunning.current = true;
+		if (!buttonRef.current) return;
+		buttonRef.current.setAttribute('disabled', 'true');
+		buttonRef.current.classList.add('after:loading');
+		buttonRef.current.innerText = '';
+		await blockUser(macAddress);
+		const allBlockedDevices = await getAllBlockedDevices();
+		if (!('error' in allBlockedDevices)) setBlockedDevices(allBlockedDevices);
+		buttonRef.current.classList.remove('after:loading');
+		buttonRef.current.removeAttribute('disabled');
+		isRunning.current = false;
 		closePopUp();
 		router.refresh();
 	}
 	async function closePopUp() {
+		if (isRunning.current) return;
 		blockDeviceModal.current?.close();
 		await new Promise((resolve) => setTimeout(resolve, 100));
 		setBlockDeviceModalIsOpen(false);
@@ -517,7 +533,11 @@ function BlockDevicePopUp({
 			<div className="modal-box bg-zinc-900">
 				<h3 className="pb-5 text-lg font-bold">Block Device</h3>
 				<p>Are you sure you want to block this device internet access?</p>
-				<button onClick={blockDevice} className="btn btn-error mt-5 w-full">
+				<button
+					ref={buttonRef}
+					onClick={blockDevice}
+					className="btn btn-error mt-5 w-full"
+				>
 					Block
 				</button>
 				<button onClick={closePopUp} className="btn btn-ghost mt-5 w-full">
@@ -544,22 +564,28 @@ function UnblockDevicePopUp({
 	macAddress: string;
 	setUnblockDeviceModalIsOpen: (value: boolean) => void;
 }) {
-	let router = useRouter();
-	let unblockDeviceModal = useRef<HTMLDialogElement>(null);
+	const router = useRouter();
+	const unblockDeviceModal = useRef<HTMLDialogElement>(null);
+	const buttonRef = useRef<HTMLButtonElement>(null);
+	const isRunning = useRef(false);
 	const setBlockedDevices = useSetAtom(allBlockedDevicesState);
 	async function unblockDevice() {
-		(async () => {
-			unblockUser(macAddress);
-			setBlockedDevices((prev) =>
-				prev.filter((device) => device !== macAddress)
-			);
-			const allBlockedDevices = await getAllBlockedDevices();
-			if (!('error' in allBlockedDevices)) setBlockedDevices(allBlockedDevices);
-		})();
+		isRunning.current = true;
+		if (!buttonRef.current) return;
+		buttonRef.current.setAttribute('disabled', 'true');
+		buttonRef.current.classList.add('after:loading');
+		buttonRef.current.innerText = '';
+		await unblockUser(macAddress);
+		const allBlockedDevices = await getAllBlockedDevices();
+		if (!('error' in allBlockedDevices)) setBlockedDevices(allBlockedDevices);
+		buttonRef.current.classList.remove('after:loading');
+		buttonRef.current.removeAttribute('disabled');
+		isRunning.current = false;
 		closePopUp();
 		router.refresh();
 	}
 	async function closePopUp() {
+		if (isRunning.current) return;
 		unblockDeviceModal.current?.close();
 		await new Promise((resolve) => setTimeout(resolve, 100));
 		setUnblockDeviceModalIsOpen(false);
@@ -576,7 +602,11 @@ function UnblockDevicePopUp({
 			<div className="modal-box bg-zinc-900">
 				<h3 className="pb-5 text-lg font-bold">Unblock Device</h3>
 				<p>Are you sure you want to Unblock this device internet access?</p>
-				<button onClick={unblockDevice} className="btn btn-error mt-5 w-full">
+				<button
+					ref={buttonRef}
+					onClick={unblockDevice}
+					className="btn btn-error mt-5 w-full"
+				>
 					Unblock
 				</button>
 				<button onClick={closePopUp} className="btn btn-ghost mt-5 w-full">
