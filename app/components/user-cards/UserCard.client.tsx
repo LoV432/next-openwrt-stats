@@ -761,6 +761,15 @@ function IconChangePopUp({
 						height={80}
 						className="cursor-pointer transition-transform hover:scale-125"
 					/>
+					<Image
+						onClick={() => changeIcon('iot')}
+						id="iot"
+						src="iot.svg"
+						alt="iot Icon"
+						width={80}
+						height={80}
+						className="cursor-pointer transition-transform hover:scale-125"
+					/>
 				</div>
 				<button
 					onClick={closePopUp}
