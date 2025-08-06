@@ -2,9 +2,13 @@
 
 import { getNetworkInterfacesSchema, loginSchema } from '@/types/ubusCalls';
 
-export async function ubusCall(
-	params: [string, string, string, { [key: string]: any }]
-) {
+export async function ubusCall({
+	url,
+	params
+}: {
+	url: string;
+	params: [string, string, string, { [key: string]: any }];
+}) {
 	const ubusObject = {
 		jsonrpc: '2.0',
 		id: 1,
@@ -13,7 +17,7 @@ export async function ubusCall(
 	};
 
 	try {
-		const response = await fetch('http://' + process.env.ROUTER_IP + '/ubus', {
+		const response = await fetch('http://' + url + '/ubus', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -35,22 +39,28 @@ export async function ubusCall(
 	}
 }
 
-export async function login() {
-	const username = process.env.ROUTER_USERNAME;
-	const password = process.env.ROUTER_PASSWORD;
-	if (!username || !password) {
-		throw new Error('Missing username or password');
-	}
-	const ubusResponse = await ubusCall([
-		'00000000000000000000000000000000',
-		'session',
-		'login',
-		{
-			username,
-			password,
-			timeout: 30
-		}
-	]);
+export async function login({
+	url,
+	username,
+	password
+}: {
+	url: string;
+	username: string;
+	password: string;
+}) {
+	const ubusResponse = await ubusCall({
+		url,
+		params: [
+			'00000000000000000000000000000000',
+			'session',
+			'login',
+			{
+				username,
+				password,
+				timeout: 30
+			}
+		]
+	});
 
 	if (!ubusResponse.success) {
 		return {
@@ -80,40 +90,40 @@ export async function login() {
 	} as const;
 }
 
-export async function getNetworkInterfaces(session: string) {
-	const ubusResponse = await ubusCall([
-		session,
-		'network.interface',
-		'dump',
-		{}
-	]);
+// export async function getNetworkInterfaces(session: string) {
+// 	const ubusResponse = await ubusCall([
+// 		session,
+// 		'network.interface',
+// 		'dump',
+// 		{}
+// 	]);
 
-	const parsedUbusResponse = getNetworkInterfacesSchema.safeParse(
-		ubusResponse.data
-	);
-	if (!parsedUbusResponse.success) {
-		return {
-			success: false,
-			error: 'Failed to parse ubus response'
-		} as const;
-	}
+// 	const parsedUbusResponse = getNetworkInterfacesSchema.safeParse(
+// 		ubusResponse.data
+// 	);
+// 	if (!parsedUbusResponse.success) {
+// 		return {
+// 			success: false,
+// 			error: 'Failed to parse ubus response'
+// 		} as const;
+// 	}
 
-	if (parsedUbusResponse.data.error) {
-		return {
-			success: false,
-			error: parsedUbusResponse.data.error.message
-		} as const;
-	}
+// 	if (parsedUbusResponse.data.error) {
+// 		return {
+// 			success: false,
+// 			error: parsedUbusResponse.data.error.message
+// 		} as const;
+// 	}
 
-	if (parsedUbusResponse.data.result) {
-		return {
-			success: true,
-			data: parsedUbusResponse.data.result[1].interface
-		} as const;
-	}
+// 	if (parsedUbusResponse.data.result) {
+// 		return {
+// 			success: true,
+// 			data: parsedUbusResponse.data.result[1].interface
+// 		} as const;
+// 	}
 
-	return {
-		success: false,
-		error: 'Failed to parse ubus response'
-	} as const;
-}
+// 	return {
+// 		success: false,
+// 		error: 'Failed to parse ubus response'
+// 	} as const;
+// }
