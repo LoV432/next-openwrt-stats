@@ -50,8 +50,10 @@ export async function login({
 	username: string;
 	password: string;
 }) {
-	const ubusResponse = await ubusCall({
-		routerIP,
+	const ubusObject = {
+		jsonrpc: '2.0',
+		id: 1,
+		method: 'call',
 		params: [
 			'00000000000000000000000000000000',
 			'session',
@@ -62,40 +64,54 @@ export async function login({
 				timeout: 30
 			}
 		]
-	});
+	};
 
-	if (!ubusResponse.success) {
+	try {
+		const response = await fetch('http://' + routerIP + '/ubus', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(ubusObject)
+		});
+
+		const ubusResponse = await response.json();
+
+		const parsedUbusResponse = loginSchema.safeParse(ubusResponse.data);
+		if (!parsedUbusResponse.success) {
+			console.log('[ERROR] Unknown ubus response', {
+				routerIP,
+				username,
+				parsedUbusResponse
+			});
+			return {
+				success: false,
+				error: 'Unexpected response from router'
+			} as const;
+		}
+
+		if (parsedUbusResponse.data.result[0] === 6) {
+			console.log('[ERROR] Login failed due to bad credentials');
+			return {
+				success: false,
+				error: 'Failed to login, Please check your username and password'
+			} as const;
+		}
+
 		return {
-			success: false,
-			error: ubusResponse.error
+			success: true,
+			data: parsedUbusResponse.data.result[1]
 		} as const;
-	}
-
-	const parsedUbusResponse = loginSchema.safeParse(ubusResponse.data);
-	if (!parsedUbusResponse.success) {
-		console.log('[ERROR] Unknown ubus response', {
+	} catch (error) {
+		console.log('[ERROR] Ubus call failed', {
 			routerIP,
-			username,
-			parsedUbusResponse
+			username
 		});
 		return {
 			success: false,
-			error: 'Unexpected response from router'
+			error: "Fetch request failed, Please check your router's IP"
 		} as const;
 	}
-
-	if (parsedUbusResponse.data.result[0] === 6) {
-		console.log('[ERROR] Login failed due to bad credentials');
-		return {
-			success: false,
-			error: 'Failed to login, Please check your username and password'
-		} as const;
-	}
-
-	return {
-		success: true,
-		data: parsedUbusResponse.data.result[1]
-	} as const;
 }
 
 // export async function getNetworkInterfaces(session: string) {
