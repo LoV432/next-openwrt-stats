@@ -19,15 +19,18 @@ export const loginSchema = z.object({
 	])
 });
 
+export const failedSessionSchema = z.object({
+	jsonrpc: z.string(),
+	id: z.number(),
+	error: z.object({
+		code: z.number(),
+		message: z.string()
+	})
+});
+
 export const getNetworkInterfacesSchema = z.object({
 	jsonrpc: z.string(),
 	id: z.number(),
-	error: z
-		.object({
-			code: z.number(),
-			message: z.string()
-		})
-		.optional(),
 	result: z
 		.tuple([
 			z.literal(0),

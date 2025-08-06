@@ -1,17 +1,41 @@
-import { getNetworkInterfacesSchema, loginSchema } from '@/types/ubusCalls';
+import {
+	failedSessionSchema,
+	getNetworkInterfacesSchema,
+	loginSchema
+} from '@/types/ubusCalls';
+import { db } from './dbDriver';
+import { routersTable } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 export async function ubusCall({
 	routerIP,
 	params
 }: {
 	routerIP: string;
-	params: [string, string, string, { [key: string]: any }];
+	params: { [key: string]: any };
 }) {
+	const session = await db
+		.select({
+			sessionKey: routersTable.session,
+			username: routersTable.username,
+			password: routersTable.password
+		})
+		.from(routersTable)
+		.where(eq(routersTable.routerIP, routerIP))
+		.limit(1);
+
 	const ubusObject = {
 		jsonrpc: '2.0',
 		id: 1,
 		method: 'call',
-		params
+		params: [
+			session[0].sessionKey,
+			'session',
+			'call',
+			{
+				...params
+			}
+		]
 	};
 
 	try {
@@ -24,6 +48,64 @@ export async function ubusCall({
 		});
 
 		const parsedResponse = await response.json();
+
+		const checkFailedSession = failedSessionSchema.safeParse(parsedResponse);
+		if (checkFailedSession.success) {
+			const newLogin = await login({
+				routerIP,
+				username: session[0].username,
+				password: session[0].password
+			});
+
+			if (!newLogin.success) {
+				return {
+					success: false,
+					error: newLogin.error
+				} as const;
+			}
+			const newSession = await db
+				.select({
+					sessionKey: routersTable.session
+				})
+				.from(routersTable)
+				.where(eq(routersTable.routerIP, routerIP))
+				.limit(1);
+			const newUbusObject = {
+				jsonrpc: '2.0',
+				id: 1,
+				method: 'call',
+				params: [
+					newSession[0].sessionKey,
+					'session',
+					'call',
+					{
+						...params
+					}
+				]
+			};
+			const response = await fetch('http://' + routerIP + '/ubus', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(newUbusObject)
+			});
+
+			const parsedResponse = await response.json();
+
+			const checkFailedSession = failedSessionSchema.safeParse(parsedResponse);
+			if (checkFailedSession.success) {
+				return {
+					success: false,
+					error: 'Failed to login, Please check your username and password'
+				} as const;
+			}
+
+			return {
+				success: true,
+				data: parsedResponse
+			} as const;
+		}
 
 		return {
 			success: true,

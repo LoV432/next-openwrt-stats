@@ -27,6 +27,7 @@ export async function registerRouter(
 	try {
 		return await db.transaction(async (tx) => {
 			const addRouter = await tx.insert(routersTable).values({
+				routerIP,
 				username,
 				password,
 				session: checkCredentials.data.ubus_rpc_session,
