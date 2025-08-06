@@ -6,13 +6,13 @@ import { login } from './ubusCalls';
 import { ne } from 'drizzle-orm';
 
 export async function registerRouter(
-	url: string,
+	routerIP: string,
 	username: string,
 	password: string,
 	isPrimary: boolean
 ) {
 	const checkCredentials = await login({
-		url,
+		routerIP,
 		username,
 		password
 	});
@@ -20,7 +20,7 @@ export async function registerRouter(
 	if (!checkCredentials.success) {
 		return {
 			success: false,
-			error: 'Failed to login, Please check your details'
+			error: checkCredentials.error
 		} as const;
 	}
 

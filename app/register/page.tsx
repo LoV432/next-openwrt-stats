@@ -1,54 +1,89 @@
 'use client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { registerRouter } from '@/lib/server/registerRouter';
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 export default function Register() {
-	const [url, setUrl] = useState('');
+	const [routerIP, setRouterIP] = useState('');
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
-	const [isPrimary, setIsPrimary] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
+	const router = useRouter();
 
 	async function register() {
-		const router = await registerRouter(url, username, password, isPrimary);
-		if (!router.success) {
-			alert(router.error);
+		setIsLoading(true);
+		try {
+			const addRouterRequest = await registerRouter(
+				routerIP,
+				username,
+				password,
+				true
+			);
+			if (!addRouterRequest.success) {
+				toast.error(addRouterRequest.error, {
+					richColors: true,
+					duration: 3000
+				});
+				return;
+			}
+			toast.success('Primary router added. Redirecting to dashboard', {
+				richColors: true,
+				duration: 3000
+			});
+			router.push('/');
+		} catch (error) {
+			toast.error('Failed to register router, please try again', {
+				richColors: true,
+				duration: 3000
+			});
 			return;
+		} finally {
+			setIsLoading(false);
 		}
-		alert('Router registered');
 	}
 
 	return (
-		<div className="flex flex-col items-center justify-center">
-			<h1 className="text-3xl font-bold">Register</h1>
-			<input
-				type="text"
-				placeholder="URL"
-				value={url}
-				onChange={(e) => setUrl(e.target.value)}
-			/>
-			<input
-				type="text"
-				placeholder="Username"
-				value={username}
-				onChange={(e) => setUsername(e.target.value)}
-			/>
-			<input
-				type="password"
-				placeholder="Password"
-				value={password}
-				onChange={(e) => setPassword(e.target.value)}
-			/>
-			<input
-				type="checkbox"
-				checked={isPrimary}
-				onChange={(e) => setIsPrimary(e.target.checked)}
-			/>
-			<button
-				onClick={register}
-				className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+		<div className="mt-20 flex flex-col items-center justify-center">
+			<h1 className="text-3xl font-bold">Welcome to Openwrt Stats</h1>
+			<p className="text-xl">
+				Please register your primary router to get started
+			</p>
+			<form
+				className="w-xs mt-10 flex flex-col items-center justify-center gap-4"
+				onSubmit={(e) => {
+					e.preventDefault();
+					register();
+				}}
 			>
-				Register
-			</button>
+				<Input
+					className="h-11"
+					placeholder="Router IP"
+					required
+					value={routerIP}
+					onChange={(e) => setRouterIP(e.target.value)}
+				/>
+				<Input
+					className="h-11"
+					placeholder="Username"
+					required
+					value={username}
+					onChange={(e) => setUsername(e.target.value)}
+				/>
+				<Input
+					className="h-11"
+					placeholder="Password"
+					required
+					value={password}
+					onChange={(e) => setPassword(e.target.value)}
+					type="password"
+				/>
+				<Button className="h-10 w-full" disabled={isLoading}>
+					{isLoading ? 'Registering...' : 'Register'}
+				</Button>
+			</form>
 		</div>
 	);
 }

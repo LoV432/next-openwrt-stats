@@ -1,18 +1,22 @@
-import './globals.css'
+import './globals.css';
+import { Toaster } from '@/components/ui/sonner';
 
 export const metadata = {
-  title: 'Openwrt Stats',
-  description: 'Openwrt Stats',
-}
+	title: 'Openwrt Stats',
+	description: 'Openwrt Stats'
+};
 
 export default function RootLayout({
-  children,
+	children
 }: {
-  children: React.ReactNode
+	children: React.ReactNode;
 }) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  )
+	return (
+		<html lang="en" className="dark">
+			<body>
+				<Toaster />
+				{children}
+			</body>
+		</html>
+	);
 }

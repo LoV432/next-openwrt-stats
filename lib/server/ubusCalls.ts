@@ -1,12 +1,10 @@
-'use server';
-
 import { getNetworkInterfacesSchema, loginSchema } from '@/types/ubusCalls';
 
 export async function ubusCall({
-	url,
+	routerIP,
 	params
 }: {
-	url: string;
+	routerIP: string;
 	params: [string, string, string, { [key: string]: any }];
 }) {
 	const ubusObject = {
@@ -17,7 +15,7 @@ export async function ubusCall({
 	};
 
 	try {
-		const response = await fetch('http://' + url + '/ubus', {
+		const response = await fetch('http://' + routerIP + '/ubus', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -32,24 +30,28 @@ export async function ubusCall({
 			data: parsedResponse
 		} as const;
 	} catch (error) {
+		console.log('[ERROR] Ubus call failed', {
+			routerIP,
+			params
+		});
 		return {
 			success: false,
-			error
+			error: "Fetch request failed, Please check your router's IP"
 		} as const;
 	}
 }
 
 export async function login({
-	url,
+	routerIP,
 	username,
 	password
 }: {
-	url: string;
+	routerIP: string;
 	username: string;
 	password: string;
 }) {
 	const ubusResponse = await ubusCall({
-		url,
+		routerIP,
 		params: [
 			'00000000000000000000000000000000',
 			'session',
@@ -71,13 +73,19 @@ export async function login({
 
 	const parsedUbusResponse = loginSchema.safeParse(ubusResponse.data);
 	if (!parsedUbusResponse.success) {
+		console.log('[ERROR] Unknown ubus response', {
+			routerIP,
+			username,
+			parsedUbusResponse
+		});
 		return {
 			success: false,
-			error: 'Failed to parse ubus response'
+			error: 'Unexpected response from router'
 		} as const;
 	}
 
 	if (parsedUbusResponse.data.result[0] === 6) {
+		console.log('[ERROR] Login failed due to bad credentials');
 		return {
 			success: false,
 			error: 'Failed to login, Please check your username and password'
