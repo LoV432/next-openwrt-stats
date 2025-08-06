@@ -38,7 +38,9 @@ export const getNetworkInterfacesSchema = z.object({
 				interface: z.array(
 					z.intersection(
 						z.object({
-							interface: z.string()
+							interface: z.string(),
+							l3_device: z.string(),
+							device: z.string()
 						}),
 						z.record(z.string(), z.any())
 					)
@@ -46,4 +48,13 @@ export const getNetworkInterfacesSchema = z.object({
 			})
 		])
 		.optional()
+});
+
+export const getRealTimeStatsSchema = z.object({
+	jsonrpc: z.string(),
+	id: z.number(),
+	result: z.tuple([
+		z.number(),
+		z.object({ result: z.array(z.array(z.number())) })
+	])
 });

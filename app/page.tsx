@@ -2,6 +2,7 @@ import { db } from '@/lib/server/dbDriver';
 import { routersTable } from '@/db/schema';
 import { redirect } from 'next/navigation';
 import { getNetworkInterfaces } from '@/lib/server/routerInterfaces';
+import { ClientPage } from './page.client';
 
 export default async function Home() {
 	const routers = await db.select().from(routersTable);
@@ -23,11 +24,7 @@ export default async function Home() {
 	return (
 		<div className="flex flex-col items-center justify-center">
 			<h1 className="text-3xl font-bold">Openwrt Stats</h1>
-			{networkInterfaces.data.map((networkInterface) => (
-				<p key={networkInterface.interface} className="text-xl">
-					{networkInterface.interface}
-				</p>
-			))}
+			<ClientPage routerInterfaces={networkInterfaces} />
 		</div>
 	);
 }
