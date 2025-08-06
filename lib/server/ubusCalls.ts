@@ -76,8 +76,7 @@ export async function login({
 		});
 
 		const ubusResponse = await response.json();
-
-		const parsedUbusResponse = loginSchema.safeParse(ubusResponse.data);
+		const parsedUbusResponse = loginSchema.safeParse(ubusResponse);
 		if (!parsedUbusResponse.success) {
 			console.log('[ERROR] Unknown ubus response', {
 				routerIP,
