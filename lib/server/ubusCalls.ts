@@ -1,8 +1,4 @@
-import {
-	failedSessionSchema,
-	getNetworkInterfacesSchema,
-	loginSchema
-} from '@/types/ubusCalls';
+import { failedSessionSchema, loginSchema } from '@/types/ubusCalls';
 import { db } from './dbDriver';
 import { routersTable } from '@/db/schema';
 import { eq } from 'drizzle-orm';
@@ -12,7 +8,7 @@ export async function ubusCall({
 	params
 }: {
 	routerIP: string;
-	params: { [key: string]: any };
+	params: [string, string, { [key: string]: any }];
 }) {
 	const session = await db
 		.select({
@@ -28,14 +24,7 @@ export async function ubusCall({
 		jsonrpc: '2.0',
 		id: 1,
 		method: 'call',
-		params: [
-			session[0].sessionKey,
-			'session',
-			'call',
-			{
-				...params
-			}
-		]
+		params: [session[0].sessionKey, ...params]
 	};
 
 	try {
@@ -51,6 +40,7 @@ export async function ubusCall({
 
 		const checkFailedSession = failedSessionSchema.safeParse(parsedResponse);
 		if (checkFailedSession.success) {
+			console.log('[INFO] Session expired, logging in again');
 			const newLogin = await login({
 				routerIP,
 				username: session[0].username,
@@ -58,30 +48,37 @@ export async function ubusCall({
 			});
 
 			if (!newLogin.success) {
+				console.log('[ERROR] Failed to login again', {
+					routerIP,
+					username: session[0].username,
+					password: session[0].password
+				});
 				return {
 					success: false,
 					error: newLogin.error
 				} as const;
 			}
-			const newSession = await db
-				.select({
-					sessionKey: routersTable.session
-				})
-				.from(routersTable)
-				.where(eq(routersTable.routerIP, routerIP))
-				.limit(1);
+			try {
+				await db
+					.update(routersTable)
+					.set({ session: newLogin.data.ubus_rpc_session })
+					.where(eq(routersTable.routerIP, routerIP));
+			} catch (error) {
+				console.log('[ERROR] Failed to update session', {
+					routerIP,
+					username: session[0].username,
+					password: session[0].password
+				});
+				return {
+					success: false,
+					error: 'Failed to update session, Please try again'
+				} as const;
+			}
 			const newUbusObject = {
 				jsonrpc: '2.0',
 				id: 1,
 				method: 'call',
-				params: [
-					newSession[0].sessionKey,
-					'session',
-					'call',
-					{
-						...params
-					}
-				]
+				params: [newLogin.data.ubus_rpc_session, ...params]
 			};
 			const response = await fetch('http://' + routerIP + '/ubus', {
 				method: 'POST',
@@ -194,41 +191,3 @@ export async function login({
 		} as const;
 	}
 }
-
-// export async function getNetworkInterfaces(session: string) {
-// 	const ubusResponse = await ubusCall([
-// 		session,
-// 		'network.interface',
-// 		'dump',
-// 		{}
-// 	]);
-
-// 	const parsedUbusResponse = getNetworkInterfacesSchema.safeParse(
-// 		ubusResponse.data
-// 	);
-// 	if (!parsedUbusResponse.success) {
-// 		return {
-// 			success: false,
-// 			error: 'Failed to parse ubus response'
-// 		} as const;
-// 	}
-
-// 	if (parsedUbusResponse.data.error) {
-// 		return {
-// 			success: false,
-// 			error: parsedUbusResponse.data.error.message
-// 		} as const;
-// 	}
-
-// 	if (parsedUbusResponse.data.result) {
-// 		return {
-// 			success: true,
-// 			data: parsedUbusResponse.data.result[1].interface
-// 		} as const;
-// 	}
-
-// 	return {
-// 		success: false,
-// 		error: 'Failed to parse ubus response'
-// 	} as const;
-// }
