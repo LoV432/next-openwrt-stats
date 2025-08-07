@@ -55,7 +55,7 @@ export async function getNetworkInterfaces() {
 }
 export type RouterInterfaces = Awaited<ReturnType<typeof getNetworkInterfaces>>;
 
-export async function getRealTimeStats(device: string) {
+export async function getRealTimeTraffic(device: string) {
 	const primaryRouter = await db
 		.select({
 			routerIP: routersTable.routerIP

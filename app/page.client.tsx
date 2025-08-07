@@ -1,7 +1,7 @@
 'use client';
 
 import {
-	getRealTimeStats,
+	getRealTimeTraffic,
 	RouterInterfaces
 } from '@/lib/server/routerInterfaces';
 import { useQuery } from '@tanstack/react-query';
@@ -35,10 +35,10 @@ export function ClientPage({
 		Array<{ time: string; rx: number; tx: number }>
 	>([]);
 
-	const query = useQuery({
+	const realtimeTrafficQuery = useQuery({
 		queryKey: ['traffic', activeDevice],
 		queryFn: async () => {
-			const trafficData = await getRealTimeStats(activeDevice);
+			const trafficData = await getRealTimeTraffic(activeDevice);
 			if (!trafficData.success) {
 				throw new Error(trafficData.error);
 			}
@@ -57,11 +57,11 @@ export function ClientPage({
 		},
 		refetchInterval: 1000
 	});
-	if (query.isLoading) {
+	if (realtimeTrafficQuery.isLoading) {
 		return <div>Loading...</div>;
 	}
-	if (query.isError) {
-		return <div>Error: {query.error.message}</div>;
+	if (realtimeTrafficQuery.isError) {
+		return <div>Error: {realtimeTrafficQuery.error.message}</div>;
 	}
 	return (
 		<div className="mx-auto flex w-full max-w-4xl flex-col items-center justify-center gap-4 p-4">
@@ -114,8 +114,12 @@ export function ClientPage({
 			</ChartContainer>
 
 			<div className="flex gap-4">
-				<p className="text-xl">Download: {query.data?.rxMbps} Mbps</p>
-				<p className="text-xl">Upload: {query.data?.txMbps} Mbps</p>
+				<p className="text-xl">
+					Download: {realtimeTrafficQuery.data?.rxMbps} Mbps
+				</p>
+				<p className="text-xl">
+					Upload: {realtimeTrafficQuery.data?.txMbps} Mbps
+				</p>
 			</div>
 		</div>
 	);
