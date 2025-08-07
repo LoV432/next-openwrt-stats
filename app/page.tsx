@@ -14,9 +14,7 @@ export default async function Home() {
 		return (
 			<div className="flex flex-col items-center justify-center">
 				<h1 className="text-3xl font-bold">Openwrt Stats</h1>
-				<p className="text-xl">
-					Failed to get network interfaces, Please try again
-				</p>
+				<p className="text-xl">{networkInterfaces.error}</p>
 			</div>
 		);
 	}

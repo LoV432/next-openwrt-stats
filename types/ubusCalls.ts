@@ -40,7 +40,7 @@ export const getNetworkInterfacesSchema = z.object({
 						z.object({
 							interface: z.string(),
 							l3_device: z.string(),
-							device: z.string()
+							device: z.string().optional()
 						}),
 						z.record(z.string(), z.any())
 					)

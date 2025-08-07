@@ -42,7 +42,9 @@ export async function getNetworkInterfaces() {
 	if (parsedUbusResponse.data.result) {
 		return {
 			success: true,
-			data: parsedUbusResponse.data.result[1].interface
+			data: parsedUbusResponse.data.result[1].interface.filter(
+				(i) => i.device !== 'lo'
+			)
 		} as const;
 	}
 
