@@ -3,7 +3,11 @@
 import { routersTable } from '@/db/schema';
 import { db } from './dbDriver';
 import { ubusCall } from './ubusCalls';
-import { wifiAPsSchema } from '@/types/ubusCalls';
+import {
+	wifiAPsSchema,
+	WifiClients,
+	wifiClientsSchema
+} from '@/types/ubusCalls';
 
 export async function getWifiAPs() {
 	const allRouters = await db
@@ -82,6 +86,70 @@ export async function getWifiAPs() {
 	}
 	return {
 		success: true,
-		data: wifiInterfacesMerged
+		data: {
+			wifiInterfaces: wifiInterfacesMerged,
+			allIfname
+		}
 	} as const;
+}
+
+export async function getWifiClients() {
+	const wifiUsers: {
+		[key: string]: WifiClients['result'][1]['results'][0][];
+	} = {};
+
+	const wifiAPs = await getWifiAPs();
+	if (!wifiAPs.success) {
+		return {
+			success: false,
+			error: wifiAPs.error
+		} as const;
+	}
+	for (const router of Object.keys(wifiAPs.data.allIfname)) {
+		const allifname = wifiAPs.data.allIfname[router];
+		for (const ifname of allifname) {
+			const ubusResponse = await ubusCall({
+				routerIP: router,
+				params: ['iwinfo', 'assoclist', { device: ifname }]
+			});
+			if (!ubusResponse.success) {
+				return {
+					success: false,
+					error: ubusResponse.error
+				} as const;
+			}
+			const parsedUbusResponse = wifiClientsSchema.safeParse(ubusResponse.data);
+			if (!parsedUbusResponse.success) {
+				return {
+					success: false,
+					error: 'Failed to parse ubus response from wifiClients'
+				} as const;
+			}
+			const wifiClients = parsedUbusResponse.data.result[1].results;
+			for (const client of wifiClients) {
+				if (!wifiUsers[router]) {
+					wifiUsers[router] = [];
+				}
+				wifiUsers[router].push({
+					mac: client.mac,
+					signal: client.signal,
+					signal_avg: client.signal_avg,
+					noise: client.noise,
+					connected_time: client.connected_time,
+					rx: {
+						packets: client.rx.packets,
+						bytes: client.rx.bytes
+					},
+					tx: {
+						packets: client.tx.packets,
+						bytes: client.tx.bytes
+					}
+				});
+			}
+		}
+	}
+	return {
+		success: true,
+		data: wifiUsers
+	};
 }

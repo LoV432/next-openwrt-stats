@@ -98,3 +98,32 @@ export const wifiAPsSchema = z.object({
 	id: z.number(),
 	result: z.tuple([z.literal(0), z.record(z.string(), radioSchema)])
 });
+
+export const wifiClientsSchema = z.object({
+	jsonrpc: z.string(),
+	id: z.number(),
+	result: z.tuple([
+		z.literal(0),
+		z.object({
+			results: z.array(
+				z.object({
+					mac: z.string(),
+					signal: z.number(),
+					signal_avg: z.number(),
+					noise: z.number(),
+					connected_time: z.number(),
+					rx: z.object({
+						packets: z.number(),
+						bytes: z.number()
+					}),
+					tx: z.object({
+						packets: z.number(),
+						bytes: z.number()
+					})
+				})
+			)
+		})
+	])
+});
+
+export type WifiClients = z.infer<typeof wifiClientsSchema>;
