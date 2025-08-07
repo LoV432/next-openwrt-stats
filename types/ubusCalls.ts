@@ -58,3 +58,25 @@ export const getRealTimeStatsSchema = z.object({
 		z.object({ result: z.array(z.array(z.number())) })
 	])
 });
+
+export const dhcpDevicesSchema = z.object({
+	jsonrpc: z.string(),
+	id: z.number(),
+	result: z.tuple([
+		z.literal(0),
+		z.object({
+			dhcp_leases: z.array(
+				z.union([
+					z.object({
+						expires: z.union([z.number(), z.boolean()]),
+						hostname: z.string(),
+						macaddr: z.string(),
+						duid: z.string(),
+						ipaddr: z.string()
+					})
+				])
+			),
+			dhcp6_leases: z.any()
+		})
+	])
+});

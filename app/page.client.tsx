@@ -4,6 +4,7 @@ import {
 	getRealTimeTraffic,
 	RouterInterfaces
 } from '@/lib/server/routerInterfaces';
+import { getDhcpDevices } from '@/lib/server/devices';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import {
@@ -13,6 +14,7 @@ import {
 	ChartTooltipContent
 } from '@/components/ui/chart';
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 const chartConfig = {
 	rx: {
@@ -57,11 +59,28 @@ export function ClientPage({
 		},
 		refetchInterval: 1000
 	});
-	if (realtimeTrafficQuery.isLoading) {
+	const dhcpDevicesQuery = useQuery({
+		queryKey: ['dhcpDevices'],
+		queryFn: async () => {
+			const dhcpDevices = await getDhcpDevices();
+			if (!dhcpDevices.success) {
+				throw new Error(dhcpDevices.error);
+			}
+
+			return dhcpDevices.data;
+		},
+		refetchInterval: 1000
+	});
+	if (realtimeTrafficQuery.isLoading || dhcpDevicesQuery.isLoading) {
 		return <div>Loading...</div>;
 	}
-	if (realtimeTrafficQuery.isError) {
-		return <div>Error: {realtimeTrafficQuery.error.message}</div>;
+	if (realtimeTrafficQuery.isError || dhcpDevicesQuery.isError) {
+		return (
+			<div>
+				Error:{' '}
+				{realtimeTrafficQuery.error?.message || dhcpDevicesQuery.error?.message}
+			</div>
+		);
 	}
 	return (
 		<div className="mx-auto flex w-full max-w-4xl flex-col items-center justify-center gap-4 p-4">
@@ -120,6 +139,30 @@ export function ClientPage({
 				<p className="text-xl">
 					Upload: {realtimeTrafficQuery.data?.txMbps} Mbps
 				</p>
+			</div>
+			<div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+				{dhcpDevicesQuery.data &&
+					Object.entries(dhcpDevicesQuery.data).map(([mac, device]) => (
+						<Card key={mac} className="w-full">
+							<CardHeader className="pb-2">
+								<h3 className="text-lg font-semibold">
+									{device.deviceName || 'Unknown Device'}
+								</h3>
+							</CardHeader>
+							<CardContent>
+								<div className="space-y-2 text-sm">
+									<p className="flex justify-between">
+										<span className="text-muted-foreground">IP Address:</span>
+										<span className="font-mono">{device.ipAddress}</span>
+									</p>
+									<p className="flex justify-between">
+										<span className="text-muted-foreground">MAC Address:</span>
+										<span className="font-mono">{mac}</span>
+									</p>
+								</div>
+							</CardContent>
+						</Card>
+					))}
 			</div>
 		</div>
 	);
