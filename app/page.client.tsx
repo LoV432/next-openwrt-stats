@@ -1,32 +1,10 @@
 'use client';
 
-import {
-	getRealTimeTraffic,
-	RouterInterfaces
-} from '@/lib/server/routerInterfaces';
-import { useQuery } from '@tanstack/react-query';
+import { RouterInterfaces } from '@/lib/server/routerInterfaces';
 import { useState } from 'react';
-import {
-	ChartConfig,
-	ChartContainer,
-	ChartTooltip,
-	ChartTooltipContent
-} from '@/components/ui/chart';
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { getWifiAPs } from '@/lib/server/wifiAPs';
 import ClientCards from '@/components/ClientCards';
-
-const chartConfig = {
-	rx: {
-		label: 'Download',
-		color: 'var(--chart-1)'
-	},
-	tx: {
-		label: 'Upload',
-		color: 'var(--chart-2)'
-	}
-} satisfies ChartConfig;
+import { WifiAPs } from '@/components/WifiAPs';
+import { RealtimeTraffic } from '@/components/RealtimeTraffic';
 
 export function ClientPage({
 	routerInterfaces
@@ -34,57 +12,7 @@ export function ClientPage({
 	routerInterfaces: Extract<RouterInterfaces, { success: true }>;
 }) {
 	const [activeDevice, setActiveDevice] = useState('lan4');
-	const [trafficHistory, setTrafficHistory] = useState<
-		Array<{ time: string; rx: number; tx: number }>
-	>([]);
 
-	const realtimeTrafficQuery = useQuery({
-		queryKey: ['traffic', activeDevice],
-		queryFn: async () => {
-			const trafficData = await getRealTimeTraffic(activeDevice);
-			if (!trafficData.success) {
-				throw new Error(trafficData.error);
-			}
-
-			setTrafficHistory((prev) => {
-				const now = new Date().toLocaleTimeString();
-				const newData = {
-					time: now,
-					rx: trafficData.data.rxMbps,
-					tx: trafficData.data.txMbps
-				};
-				return [...prev.slice(-15), newData];
-			});
-
-			return trafficData.data;
-		},
-		refetchInterval: 1000
-	});
-
-	const wifiAPsQuery = useQuery({
-		queryKey: ['wifiAPs'],
-		queryFn: async () => {
-			const wifiAPs = await getWifiAPs();
-			if (!wifiAPs.success) {
-				throw new Error(wifiAPs.error);
-			}
-
-			return wifiAPs.data;
-		},
-		refetchInterval: false
-	});
-
-	if (realtimeTrafficQuery.isLoading || wifiAPsQuery.isLoading) {
-		return <div>Loading...</div>;
-	}
-	if (realtimeTrafficQuery.isError || wifiAPsQuery.isError) {
-		return (
-			<div>
-				Error:{' '}
-				{realtimeTrafficQuery.error?.message || wifiAPsQuery.error?.message}
-			</div>
-		);
-	}
 	return (
 		<div className="mx-auto flex w-full max-w-4xl flex-col items-center justify-center gap-4 p-4">
 			<div className="flex flex-wrap justify-center gap-4">
@@ -107,84 +35,9 @@ export function ClientPage({
 					</button>
 				))}
 			</div>
-
-			<ChartContainer className="h-[400px] w-full" config={chartConfig}>
-				<LineChart data={trafficHistory}>
-					<CartesianGrid />
-					<XAxis dataKey="time" className="hidden" />
-					<YAxis unit=" Mbps" padding={{ top: 10, bottom: 10 }} />
-					<ChartTooltip
-						content={<ChartTooltipContent indicator="line" unit="Mbps" />}
-					/>
-					<Line
-						key="rx"
-						type="monotone"
-						dataKey="rx"
-						strokeWidth={4}
-						stroke="var(--color-rx)"
-						isAnimationActive={false}
-					/>
-					<Line
-						key="tx"
-						type="monotone"
-						dataKey="tx"
-						strokeWidth={4}
-						stroke="var(--color-tx)"
-						isAnimationActive={false}
-					/>
-				</LineChart>
-			</ChartContainer>
-
-			<div className="flex gap-4">
-				<p className="text-xl">
-					Download: {realtimeTrafficQuery.data?.rxMbps} Mbps
-				</p>
-				<p className="text-xl">
-					Upload: {realtimeTrafficQuery.data?.txMbps} Mbps
-				</p>
-			</div>
+			<RealtimeTraffic activeDevice={activeDevice} />
 			<ClientCards />
-			<div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-				{wifiAPsQuery.data &&
-					Object.entries(wifiAPsQuery.data.wifiInterfaces).map(
-						([ssid, data]) => (
-							<Card key={ssid} className="w-full">
-								<CardHeader>
-									<h3 className="text-lg font-semibold">
-										Access Point - {ssid}
-									</h3>
-									<p>{Array.from(data.ip).join(' / ')}</p>
-								</CardHeader>
-								<CardContent>
-									<div className="space-y-1.5 text-sm">
-										<p className="flex justify-between">
-											<span className="text-muted-foreground">Channel:</span>
-											<span>{Array.from(data.channel).join(' / ')}</span>
-										</p>
-										<p className="flex justify-between">
-											<span className="text-muted-foreground">Band:</span>
-											<span>
-												{Array.from(data.band)
-													.join(' / ')
-													.replace('2g', '2.4')
-													.replace('5g', '5')}{' '}
-												GHz
-											</span>
-										</p>
-										<p className="flex justify-between">
-											<span className="text-muted-foreground">Width:</span>
-											<span>{Array.from(data.htmode).join(' / ')}</span>
-										</p>
-										<p className="flex justify-between">
-											<span className="text-muted-foreground">Power:</span>
-											<span>{Array.from(data.txpower).join(' / ')} dBm</span>
-										</p>
-									</div>
-								</CardContent>
-							</Card>
-						)
-					)}
-			</div>
+			<WifiAPs />
 		</div>
 	);
 }
