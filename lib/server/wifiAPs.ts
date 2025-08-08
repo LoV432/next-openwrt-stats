@@ -95,7 +95,9 @@ export async function getWifiAPs() {
 
 export async function getWifiClients() {
 	const wifiUsers: {
-		[key: string]: WifiClients['result'][1]['results'][0][];
+		[key: string]: WifiClients['result'][1]['results'][0] & {
+			ip: string;
+		};
 	} = {};
 
 	const wifiAPs = await getWifiAPs();
@@ -127,24 +129,10 @@ export async function getWifiClients() {
 			}
 			const wifiClients = parsedUbusResponse.data.result[1].results;
 			for (const client of wifiClients) {
-				if (!wifiUsers[router]) {
-					wifiUsers[router] = [];
-				}
-				wifiUsers[router].push({
-					mac: client.mac,
-					signal: client.signal,
-					signal_avg: client.signal_avg,
-					noise: client.noise,
-					connected_time: client.connected_time,
-					rx: {
-						packets: client.rx.packets,
-						bytes: client.rx.bytes
-					},
-					tx: {
-						packets: client.tx.packets,
-						bytes: client.tx.bytes
-					}
-				});
+				wifiUsers[client.mac] = {
+					...client,
+					ip: router
+				};
 			}
 		}
 	}

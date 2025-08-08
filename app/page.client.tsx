@@ -4,7 +4,6 @@ import {
 	getRealTimeTraffic,
 	RouterInterfaces
 } from '@/lib/server/routerInterfaces';
-import { getDhcpDevices } from '@/lib/server/devices';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import {
@@ -15,7 +14,8 @@ import {
 } from '@/components/ui/chart';
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { getWifiAPs, getWifiClients } from '@/lib/server/wifiAPs';
+import { getWifiAPs } from '@/lib/server/wifiAPs';
+import ClientCards from '@/components/ClientCards';
 
 const chartConfig = {
 	rx: {
@@ -60,18 +60,6 @@ export function ClientPage({
 		},
 		refetchInterval: 1000
 	});
-	const dhcpDevicesQuery = useQuery({
-		queryKey: ['dhcpDevices'],
-		queryFn: async () => {
-			const dhcpDevices = await getDhcpDevices();
-			if (!dhcpDevices.success) {
-				throw new Error(dhcpDevices.error);
-			}
-
-			return dhcpDevices.data;
-		},
-		refetchInterval: false
-	});
 
 	const wifiAPsQuery = useQuery({
 		queryKey: ['wifiAPs'],
@@ -86,40 +74,14 @@ export function ClientPage({
 		refetchInterval: false
 	});
 
-	const wifiClientsQuery = useQuery({
-		queryKey: ['wifiClients'],
-		queryFn: async () => {
-			const wifiClients = await getWifiClients();
-			if (!wifiClients.success) {
-				throw new Error(wifiClients.error);
-			}
-
-			return wifiClients.data;
-		},
-		refetchInterval: false
-	});
-
-	if (
-		realtimeTrafficQuery.isLoading ||
-		dhcpDevicesQuery.isLoading ||
-		wifiAPsQuery.isLoading ||
-		wifiClientsQuery.isLoading
-	) {
+	if (realtimeTrafficQuery.isLoading || wifiAPsQuery.isLoading) {
 		return <div>Loading...</div>;
 	}
-	if (
-		realtimeTrafficQuery.isError ||
-		dhcpDevicesQuery.isError ||
-		wifiAPsQuery.isError ||
-		wifiClientsQuery.isError
-	) {
+	if (realtimeTrafficQuery.isError || wifiAPsQuery.isError) {
 		return (
 			<div>
 				Error:{' '}
-				{realtimeTrafficQuery.error?.message ||
-					dhcpDevicesQuery.error?.message ||
-					wifiAPsQuery.error?.message ||
-					wifiClientsQuery.error?.message}
+				{realtimeTrafficQuery.error?.message || wifiAPsQuery.error?.message}
 			</div>
 		);
 	}
@@ -181,30 +143,7 @@ export function ClientPage({
 					Upload: {realtimeTrafficQuery.data?.txMbps} Mbps
 				</p>
 			</div>
-			<div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-				{dhcpDevicesQuery.data &&
-					Object.entries(dhcpDevicesQuery.data).map(([mac, device]) => (
-						<Card key={mac} className="w-full">
-							<CardHeader className="pb-2">
-								<h3 className="text-lg font-semibold">
-									{device.deviceName || 'Unknown Device'}
-								</h3>
-							</CardHeader>
-							<CardContent>
-								<div className="space-y-2 text-sm">
-									<p className="flex justify-between">
-										<span className="text-muted-foreground">IP Address:</span>
-										<span className="font-mono">{device.ipAddress}</span>
-									</p>
-									<p className="flex justify-between">
-										<span className="text-muted-foreground">MAC Address:</span>
-										<span className="font-mono">{mac}</span>
-									</p>
-								</div>
-							</CardContent>
-						</Card>
-					))}
-			</div>
+			<ClientCards />
 			<div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 				{wifiAPsQuery.data &&
 					Object.entries(wifiAPsQuery.data.wifiInterfaces).map(
