@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from './ui/card';
 import { Wifi } from 'lucide-react';
 import { getWifiClients } from '@/lib/server/wifiAPs';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { formatBytes, secondsToHumanReadable } from '@/lib/utils';
 
 export default function ClientCards() {
 	const dhcpDevicesQuery = useQuery({
@@ -130,7 +131,7 @@ function ClientCard({
 													Connected Time:
 												</span>
 												<span>
-													{Math.floor(wifiData.connected_time / 60)} minutes
+													{secondsToHumanReadable(wifiData.connected_time)}
 												</span>
 											</p>
 											<div className="my-2 border-t" />
@@ -141,17 +142,13 @@ function ClientCard({
 														<span className="text-muted-foreground">
 															RX Bytes:
 														</span>
-														<span>
-															{(wifiData.rx.bytes / 1024 / 1024).toFixed(2)} MB
-														</span>
+														<span>{formatBytes(wifiData.rx.bytes)}</span>
 													</p>
 													<p className="flex justify-between text-sm">
 														<span className="text-muted-foreground">
 															TX Bytes:
 														</span>
-														<span>
-															{(wifiData.tx.bytes / 1024 / 1024).toFixed(2)} MB
-														</span>
+														<span>{formatBytes(wifiData.tx.bytes)}</span>
 													</p>
 												</div>
 											</div>
