@@ -4,6 +4,7 @@ import {
 	PopoverContent,
 	PopoverTrigger
 } from '@/components/ui/popover';
+import { NetworkInterface } from '@/types/ubusCalls';
 import { GlobeIcon } from 'lucide-react';
 import { useState } from 'react';
 
@@ -12,21 +13,9 @@ export function InterfacePicker({
 	activeDevice,
 	setActiveDevice
 }: {
-	networkInterfaces: Array<{
-		interface: string;
-		device?: string;
-		l3_device: string;
-	}>;
-	activeDevice?: {
-		device?: string;
-		l3_device: string;
-		interface: string;
-	};
-	setActiveDevice: (device: {
-		device?: string;
-		l3_device: string;
-		interface: string;
-	}) => void;
+	networkInterfaces: Array<NetworkInterface>;
+	activeDevice: NetworkInterface | undefined;
+	setActiveDevice: (device: NetworkInterface) => void;
 }) {
 	const [isOpen, setIsOpen] = useState(false);
 	return (

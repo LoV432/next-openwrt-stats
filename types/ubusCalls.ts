@@ -25,6 +25,24 @@ export const failedSessionSchema = z.object({
 	})
 });
 
+const networkInterface = z.object({
+	interface: z.string(),
+	l3_device: z.string(),
+	up: z.boolean(),
+	uptime: z.number(),
+	device: z.string().optional(),
+	'dns-server': z.array(z.string()).optional(),
+	'ipv4-address': z.array(
+		z.object({
+			address: z.string(),
+			mask: z.number(),
+			ptpaddress: z.string().optional()
+		})
+	)
+});
+
+export type NetworkInterface = z.infer<typeof networkInterface>;
+
 export const getNetworkInterfacesSchema = z.object({
 	jsonrpc: z.string(),
 	id: z.number(),
@@ -32,13 +50,7 @@ export const getNetworkInterfacesSchema = z.object({
 		.tuple([
 			z.literal(0),
 			z.object({
-				interface: z.array(
-					z.object({
-						interface: z.string(),
-						l3_device: z.string(),
-						device: z.string().optional()
-					})
-				)
+				interface: z.array(networkInterface)
 			})
 		])
 		.optional()

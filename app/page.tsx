@@ -5,6 +5,7 @@ import { RealtimeTraffic } from '@/components/RealtimeTraffic';
 import ClientCards from '@/components/ClientCards';
 import { WifiAPs } from '@/components/WifiAPs';
 import { Header } from '@/components/Header';
+import { NetworkInterfaceInfo } from '@/components/NetworkInterfaceInfo';
 
 export default async function Home() {
 	const routers = await db.select().from(routersTable);
@@ -17,6 +18,7 @@ export default async function Home() {
 			<Header />
 			<div className="grid w-full grid-cols-3 gap-4">
 				<RealtimeTraffic />
+				<NetworkInterfaceInfo />
 			</div>
 			<ClientCards />
 			<WifiAPs />

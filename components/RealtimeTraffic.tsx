@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/popover';
 import { GlobeIcon } from 'lucide-react';
 import { InterfacePicker } from './InterfacePicker';
+import { NetworkInterface } from '@/types/ubusCalls';
 
 const chartConfig = {
 	rx: {
@@ -38,11 +39,7 @@ export function RealtimeTraffic() {
 	const [trafficHistory, setTrafficHistory] = useState<
 		Array<{ time: string; rx: number; tx: number }>
 	>([]);
-	const [activeDevice, setActiveDevice] = useState<{
-		device?: string;
-		l3_device: string;
-		interface: string;
-	}>();
+	const [activeDevice, setActiveDevice] = useState<NetworkInterface>();
 
 	const { data: networkInterfaces } = useQuery({
 		queryKey: ['networkInterfaces'],
