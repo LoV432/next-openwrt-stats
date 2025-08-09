@@ -47,7 +47,7 @@ export async function getDhcpDevices() {
 			for (const device of parsedDhcpDevicesResponse.data.result[1]
 				.dhcp_leases) {
 				dhcpDevices[device.macaddr] = {
-					deviceName: device.hostname,
+					deviceName: device.hostname || 'Unknown Device',
 					macAddress: device.macaddr,
 					ipAddress: device.ipaddr,
 					leaseTime: device.expires

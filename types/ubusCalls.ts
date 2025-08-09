@@ -62,9 +62,8 @@ export const dhcpDevicesSchema = z.object({
 			dhcp_leases: z.array(
 				z.object({
 					expires: z.union([z.number(), z.boolean()]),
-					hostname: z.string(),
+					hostname: z.string().optional(),
 					macaddr: z.string(),
-					duid: z.string(),
 					ipaddr: z.string()
 				})
 			)
