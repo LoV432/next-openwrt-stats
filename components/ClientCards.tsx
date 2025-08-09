@@ -1,3 +1,4 @@
+'use client';
 import { getDhcpDevices } from '@/lib/server/devices';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';

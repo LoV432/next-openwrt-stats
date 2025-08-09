@@ -1,28 +1,23 @@
 import { db } from '@/lib/server/dbDriver';
 import { routersTable } from '@/db/schema';
 import { redirect } from 'next/navigation';
-import { getNetworkInterfaces } from '@/lib/server/routerInterfaces';
-import { ClientPage } from './page.client';
+import { RealtimeTraffic } from '@/components/RealtimeTraffic';
+import ClientCards from '@/components/ClientCards';
+import { WifiAPs } from '@/components/WifiAPs';
 
 export default async function Home() {
 	const routers = await db.select().from(routersTable);
 	if (routers.length === 0) {
 		redirect('/register');
 	}
-	const networkInterfaces = await getNetworkInterfaces();
-	if (!networkInterfaces.success) {
-		return (
-			<div className="flex flex-col items-center justify-center">
-				<h1 className="text-3xl font-bold">Openwrt Stats</h1>
-				<p className="text-xl">{networkInterfaces.error}</p>
-			</div>
-		);
-	}
 
 	return (
-		<div className="flex flex-col items-center justify-center">
-			<h1 className="text-3xl font-bold">Openwrt Stats</h1>
-			<ClientPage routerInterfaces={networkInterfaces} />
+		<div className="mx-auto flex w-[80%] flex-col items-center justify-center gap-4 p-4">
+			<div className="grid w-full grid-cols-3 gap-4">
+				<RealtimeTraffic />
+			</div>
+			<ClientCards />
+			<WifiAPs />
 		</div>
 	);
 }

@@ -1,3 +1,5 @@
+'use client';
+
 import { getWifiAPs } from '@/lib/server/wifiAPs';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';

@@ -53,7 +53,6 @@ export async function getNetworkInterfaces() {
 		error: 'Failed to parse ubus response'
 	} as const;
 }
-export type RouterInterfaces = Awaited<ReturnType<typeof getNetworkInterfaces>>;
 
 export async function getRealTimeTraffic(device: string) {
 	const primaryRouter = await db
