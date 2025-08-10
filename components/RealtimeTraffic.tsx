@@ -12,6 +12,15 @@ import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useNetwork } from '@/providers/networkContext';
+import { Button } from './ui/button';
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger
+} from './ui/dialog';
+import { ChartAreaIcon } from 'lucide-react';
 
 const chartConfig = {
 	rx: {
@@ -79,7 +88,49 @@ export function RealtimeTraffic() {
 	return (
 		<Card className="w-full">
 			<CardHeader>
-				<h3 className="text-lg font-semibold">Realtime Traffic</h3>
+				<div className="flex h-4 items-center justify-between">
+					<h3 className="text-lg font-semibold">Realtime Traffic</h3>
+					<Dialog>
+						<DialogTrigger asChild>
+							<Button variant="outline" size="sm">
+								<ChartAreaIcon className="h-3 w-3" />
+							</Button>
+						</DialogTrigger>
+						<DialogContent className="min-w-[unset]! max-w-[unset]! w-fit">
+							<DialogHeader>
+								<DialogTitle>Realtime Traffic Chart</DialogTitle>
+							</DialogHeader>
+							<ChartContainer className="h-[400px] w-full" config={chartConfig}>
+								<LineChart data={trafficHistory}>
+									<CartesianGrid />
+									<XAxis dataKey="time" />
+									<YAxis unit=" Mbps" padding={{ top: 10, bottom: 10 }} />
+									<ChartTooltip
+										content={
+											<ChartTooltipContent indicator="line" unit="Mbps" />
+										}
+									/>
+									<Line
+										key="rx"
+										type="monotone"
+										dataKey="rx"
+										strokeWidth={4}
+										stroke="var(--chart-1)"
+										isAnimationActive={false}
+									/>
+									<Line
+										key="tx"
+										type="monotone"
+										dataKey="tx"
+										strokeWidth={4}
+										stroke="var(--chart-2)"
+										isAnimationActive={false}
+									/>
+								</LineChart>
+							</ChartContainer>
+						</DialogContent>
+					</Dialog>
+				</div>
 			</CardHeader>
 			<CardContent>
 				<div className="space-y-4 text-sm">
@@ -102,32 +153,3 @@ export function RealtimeTraffic() {
 		</Card>
 	);
 }
-
-// {
-// 	/* <ChartContainer className="h-[400px] w-full" config={chartConfig}>
-// 				<LineChart data={trafficHistory}>
-// 					<CartesianGrid />
-// 					<XAxis dataKey="time" className="hidden" />
-// 					<YAxis unit=" Mbps" padding={{ top: 10, bottom: 10 }} />
-// 					<ChartTooltip
-// 						content={<ChartTooltipContent indicator="line" unit="Mbps" />}
-// 					/>
-// 					<Line
-// 						key="rx"
-// 						type="monotone"
-// 						dataKey="rx"
-// 						strokeWidth={4}
-// 						stroke="var(--color-rx)"
-// 						isAnimationActive={false}
-// 					/>
-// 					<Line
-// 						key="tx"
-// 						type="monotone"
-// 						dataKey="tx"
-// 						strokeWidth={4}
-// 						stroke="var(--color-tx)"
-// 						isAnimationActive={false}
-// 					/>
-// 				</LineChart>
-// 			</ChartContainer> */
-// }
