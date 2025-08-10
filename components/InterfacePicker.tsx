@@ -7,6 +7,7 @@ import {
 import { NetworkInterface } from '@/types/ubusCalls';
 import { GlobeIcon } from 'lucide-react';
 import { useState } from 'react';
+import { Button } from './ui/button';
 
 export function InterfacePicker({
 	networkInterfaces,
@@ -20,34 +21,38 @@ export function InterfacePicker({
 	const [isOpen, setIsOpen] = useState(false);
 	return (
 		<Popover open={isOpen} onOpenChange={setIsOpen}>
-			<PopoverTrigger>
-				<div className="hover:bg-muted flex w-full cursor-pointer items-center justify-end gap-2 rounded-md p-2">
+			<PopoverTrigger asChild>
+				<Button variant="outline">
 					<GlobeIcon className="h-4 w-4" />
-					<span className="text-muted-foreground text-sm">
-						{activeDevice?.device || activeDevice?.l3_device}
+					<span>
+						{activeDevice?.device ||
+							activeDevice?.l3_device ||
+							'Select Interface'}
 					</span>
-				</div>
+				</Button>
 			</PopoverTrigger>
-			<PopoverContent className="w-80">
-				<div className="space-y-2">
-					<h4 className="mb-2 font-medium">Network Interfaces</h4>
-					<div className="space-y-1">
+			<PopoverContent className="w-80 p-0" align="end">
+				<div className="grid">
+					<h4 className="mb-2 border-b px-4 py-3 font-medium">
+						Network Interfaces
+					</h4>
+					<div className="p-2">
 						{networkInterfaces.map((networkInterface) => (
-							<p
+							<button
 								onClick={() => {
 									setActiveDevice(networkInterface);
 									setIsOpen(false);
 								}}
 								key={networkInterface.interface}
-								className="hover:bg-muted flex cursor-pointer justify-between rounded p-2 text-sm"
+								className="hover:bg-muted flex w-full cursor-pointer items-center justify-between rounded-md px-3 py-2 text-sm"
 							>
 								<span className="text-muted-foreground">
 									{networkInterface.interface}
 								</span>
-								<span>
+								<span className="font-medium">
 									{networkInterface.device || networkInterface.l3_device}
 								</span>
-							</p>
+							</button>
 						))}
 					</div>
 				</div>

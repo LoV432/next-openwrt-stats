@@ -36,7 +36,7 @@ export function WireguardInfo({ interfaceName }: WireguardInfoProps) {
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
 				<Button variant="outline" size="sm">
-					<NetworkIcon className="h-4 w-4" />
+					<NetworkIcon className="h-3 w-3" />
 				</Button>
 			</DialogTrigger>
 			<DialogContent className="w-fit sm:max-w-[unset]">

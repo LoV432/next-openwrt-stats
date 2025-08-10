@@ -1,8 +1,5 @@
 'use client';
-import {
-	getNetworkInterfaces,
-	getRealTimeTraffic
-} from '@/lib/server/routerInterfaces';
+import { getRealTimeTraffic } from '@/lib/server/routerInterfaces';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import {
@@ -14,14 +11,7 @@ import {
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Progress } from '@/components/ui/progress';
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger
-} from '@/components/ui/popover';
-import { GlobeIcon } from 'lucide-react';
-import { InterfacePicker } from './InterfacePicker';
-import { NetworkInterface } from '@/types/ubusCalls';
+import { useNetwork } from '@/providers/networkContext';
 
 const chartConfig = {
 	rx: {
@@ -39,33 +29,16 @@ export function RealtimeTraffic() {
 	const [trafficHistory, setTrafficHistory] = useState<
 		Array<{ time: string; rx: number; tx: number }>
 	>([]);
-	const [activeDevice, setActiveDevice] = useState<NetworkInterface>();
-
-	const { data: networkInterfaces } = useQuery({
-		queryKey: ['networkInterfaces'],
-		queryFn: async () => {
-			const networkInterfaces = await getNetworkInterfaces();
-			if (!networkInterfaces.success) {
-				throw new Error(networkInterfaces.error);
-			}
-			if (networkInterfaces.data.length === 0) {
-				throw new Error('No network interfaces found');
-			}
-			return networkInterfaces.data;
-		},
-		refetchInterval: false
-	});
-	const defaultDevice = networkInterfaces?.[0];
+	const { activeDevice } = useNetwork();
 
 	const realtimeTrafficQuery = useQuery({
 		queryKey: ['traffic'],
 		queryFn: async () => {
-			const device = activeDevice || defaultDevice;
-			if (!device) {
-				throw new Error('No active device found');
+			if (!activeDevice) {
+				throw new Error('No interface selected');
 			}
 			const trafficData = await getRealTimeTraffic(
-				device.device || device.l3_device
+				activeDevice.device || activeDevice.l3_device
 			);
 			if (!trafficData.success) {
 				throw new Error(trafficData.error);
@@ -82,7 +55,7 @@ export function RealtimeTraffic() {
 			});
 			return trafficData.data;
 		},
-		enabled: !!defaultDevice,
+		enabled: !!activeDevice,
 		refetchInterval: 1000
 	});
 
@@ -106,16 +79,7 @@ export function RealtimeTraffic() {
 	return (
 		<Card className="w-full">
 			<CardHeader>
-				<div className="flex items-center justify-between">
-					{networkInterfaces && networkInterfaces?.length > 1 && (
-						<InterfacePicker
-							networkInterfaces={networkInterfaces}
-							activeDevice={activeDevice || defaultDevice}
-							setActiveDevice={setActiveDevice}
-						/>
-					)}
-					<h3 className="text-lg font-semibold">Realtime Traffic</h3>
-				</div>
+				<h3 className="text-lg font-semibold">Realtime Traffic</h3>
 			</CardHeader>
 			<CardContent>
 				<div className="space-y-4 text-sm">
