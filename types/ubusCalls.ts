@@ -28,6 +28,7 @@ export const failedSessionSchema = z.object({
 const networkInterface = z.object({
 	interface: z.string(),
 	l3_device: z.string(),
+	proto: z.string(),
 	up: z.boolean(),
 	uptime: z.number(),
 	device: z.string().optional(),
@@ -138,3 +139,28 @@ export const wifiClientsSchema = z.object({
 });
 
 export type WifiClients = z.infer<typeof wifiClientsSchema>;
+
+const wireguardPeerSchema = z.object({
+	name: z.string(),
+	public_key: z.string(),
+	endpoint: z.string(),
+	allowed_ips: z.array(z.string()),
+	latest_handshake: z.string(),
+	transfer_rx: z.string(),
+	transfer_tx: z.string(),
+	persistent_keepalive: z.string()
+});
+
+const wireguardInterface = z.object({
+	name: z.string(),
+	public_key: z.string(),
+	listen_port: z.string(),
+	fwmark: z.string(),
+	peers: z.array(wireguardPeerSchema)
+});
+
+export const wireguardInterfacesSchema = z.object({
+	jsonrpc: z.string(),
+	id: z.number(),
+	result: z.tuple([z.literal(0), z.record(z.string(), wireguardInterface)])
+});

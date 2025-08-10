@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader } from './ui/card';
 import { InterfacePicker } from './InterfacePicker';
 import { NetworkInterface } from '@/types/ubusCalls';
 import { secondsToHumanReadable } from '@/lib/utils';
+import { WireguardInfo } from './WireguardInfo';
 
 export function NetworkInterfaceInfo() {
 	const [activeDevice, setActiveDevice] = useState<NetworkInterface>();
@@ -38,16 +39,22 @@ export function NetworkInterfaceInfo() {
 
 	return (
 		<Card className="w-full">
-			<CardHeader className="pb-2">
+			<CardHeader>
 				<div className="flex items-center justify-between">
-					<h3 className="text-lg font-semibold">Network Interface Info</h3>
-					{networkInterfaces && networkInterfaces.data?.length > 1 && (
-						<InterfacePicker
-							networkInterfaces={networkInterfaces.data}
-							activeDevice={activeDevice}
-							setActiveDevice={setActiveDevice}
-						/>
-					)}
+					<div className="flex w-full items-center justify-between">
+						{networkInterfaces && networkInterfaces.data?.length > 1 && (
+							<InterfacePicker
+								networkInterfaces={networkInterfaces.data}
+								activeDevice={activeDevice}
+								setActiveDevice={setActiveDevice}
+							/>
+						)}
+						{activeDevice?.proto === 'wireguard' ? (
+							<WireguardInfo interfaceName={activeDevice.interface} />
+						) : (
+							<h3 className="text-lg font-semibold">Network Interface</h3>
+						)}
+					</div>
 				</div>
 			</CardHeader>
 			<CardContent>

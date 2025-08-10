@@ -105,9 +105,8 @@ export function RealtimeTraffic() {
 
 	return (
 		<Card className="w-full">
-			<CardHeader className="pb-2">
+			<CardHeader>
 				<div className="flex items-center justify-between">
-					<h3 className="text-lg font-semibold">Realtime Traffic</h3>
 					{networkInterfaces && networkInterfaces?.length > 1 && (
 						<InterfacePicker
 							networkInterfaces={networkInterfaces}
@@ -115,10 +114,11 @@ export function RealtimeTraffic() {
 							setActiveDevice={setActiveDevice}
 						/>
 					)}
+					<h3 className="text-lg font-semibold">Realtime Traffic</h3>
 				</div>
 			</CardHeader>
 			<CardContent>
-				<div className="space-y-2 text-sm">
+				<div className="space-y-4 text-sm">
 					<div className="flex w-full items-center gap-2">
 						<span className="text-muted-foreground w-1/4">Download:</span>
 						<span className="ml-auto font-mono">

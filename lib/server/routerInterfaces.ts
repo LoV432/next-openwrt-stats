@@ -1,7 +1,8 @@
 'use server';
 import {
 	getNetworkInterfacesSchema,
-	getRealTimeStatsSchema
+	getRealTimeStatsSchema,
+	wireguardInterfacesSchema
 } from '@/types/ubusCalls';
 import { ubusCall } from './ubusCalls';
 import { db } from './dbDriver';
@@ -98,6 +99,50 @@ export async function getRealTimeTraffic(device: string) {
 		return {
 			success: true,
 			data: traffic
+		} as const;
+	}
+
+	return {
+		success: false,
+		error: 'Failed to parse ubus response'
+	} as const;
+}
+
+export async function getWireguardInterfaces() {
+	const primaryRouter = await db
+		.select({
+			routerIP: routersTable.routerIP
+		})
+		.from(routersTable)
+		.where(eq(routersTable.isPrimary, 1))
+		.limit(1);
+	const ubusResponse = await ubusCall({
+		routerIP: primaryRouter[0].routerIP,
+		params: ['luci.wireguard', 'getWgInstances', {}]
+	});
+
+	if (!ubusResponse.success) {
+		return {
+			success: false,
+			error: ubusResponse.error
+		} as const;
+	}
+
+	const parsedUbusResponse = wireguardInterfacesSchema.safeParse(
+		ubusResponse.data
+	);
+
+	if (!parsedUbusResponse.success) {
+		return {
+			success: false,
+			error: 'Failed to parse ubus response'
+		} as const;
+	}
+
+	if (parsedUbusResponse.data.result) {
+		return {
+			success: true,
+			data: parsedUbusResponse.data.result[1]
 		} as const;
 	}
 
