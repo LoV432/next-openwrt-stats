@@ -20,8 +20,8 @@ export default async function Home() {
 				<RealtimeTraffic />
 				<NetworkInterfaceInfo />
 			</div>
-			<ClientCards />
 			<WifiAPs />
+			<ClientCards />
 		</div>
 	);
 }
