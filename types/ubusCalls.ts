@@ -164,3 +164,69 @@ export const wireguardInterfacesSchema = z.object({
 	id: z.number(),
 	result: z.tuple([z.literal(0), z.record(z.string(), wireguardInterface)])
 });
+
+const pbrPolicy = z.object({
+	'.anonymous': z.boolean(),
+	'.type': z.literal('policy'),
+	'.name': z.string(),
+	'.index': z.number(),
+	enabled: z.string().default('1'),
+	name: z.string().optional(),
+	src_addr: z.string().optional(),
+	src_port: z.string().optional(),
+	dest_addr: z.string().optional(),
+	dest_port: z.string().optional(),
+	proto: z.string().optional(),
+	chain: z.string().optional(),
+	interface: z.string()
+});
+
+const pbrInclude = z.object({
+	'.anonymous': z.boolean(),
+	'.type': z.literal('include'),
+	'.name': z.string(),
+	'.index': z.number(),
+	path: z.string(),
+	enabled: z.string().optional()
+});
+
+const pbrPolicyConfig = z.object({
+	'.anonymous': z.boolean(),
+	'.type': z.literal('pbr'),
+	'.name': z.string(),
+	'.index': z.number(),
+	enabled: z.string(),
+	verbosity: z.string(),
+	strict_enforcement: z.string(),
+	resolver_set: z.string(),
+	resolver_instance: z.array(z.string()),
+	ipv6_enabled: z.string(),
+	boot_timeout: z.string(),
+	rule_create_option: z.string(),
+	procd_boot_delay: z.string(),
+	procd_reload_delay: z.string(),
+	webui_show_ignore_target: z.string(),
+	nft_rule_counter: z.string(),
+	nft_set_auto_merge: z.string(),
+	nft_set_counter: z.string(),
+	nft_set_flags_interval: z.string(),
+	nft_set_flags_timeout: z.string(),
+	nft_set_timeout: z.string(),
+	nft_set_policy: z.string(),
+	webui_supported_protocol: z.array(z.string()),
+	ignored_interface: z.array(z.string())
+});
+
+export const pbrPolicySchema = z.object({
+	jsonrpc: z.string(),
+	id: z.number(),
+	result: z.tuple([
+		z.literal(0),
+		z.object({
+			values: z.record(
+				z.string(),
+				z.discriminatedUnion('.type', [pbrPolicyConfig, pbrPolicy, pbrInclude])
+			)
+		})
+	])
+});

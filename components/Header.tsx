@@ -3,6 +3,7 @@
 import { AddRouter } from '@/components/AddRouter';
 import { InterfacePicker } from './InterfacePicker';
 import { useNetwork } from '@/providers/networkContext';
+import { PBRInfo } from './PBRInfo';
 
 export function Header() {
 	const { networkInterfaces, activeDevice, setActiveDevice } = useNetwork();
@@ -19,6 +20,7 @@ export function Header() {
 							setActiveDevice={setActiveDevice}
 						/>
 					)}
+					<PBRInfo />
 					<AddRouter />
 				</div>
 			</div>
