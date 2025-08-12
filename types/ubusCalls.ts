@@ -230,3 +230,41 @@ export const pbrPolicySchema = z.object({
 		})
 	])
 });
+
+export const pbrInterfacesSchema = z.object({
+	jsonrpc: z.string(),
+	id: z.number(),
+	result: z.tuple([
+		z.literal(0),
+		z.object({
+			pbr: z.object({
+				interfaces: z.array(z.string())
+			})
+		})
+	])
+});
+
+export const addPolicyForm = z.object({
+	name: z.string().min(1, 'Name is required'),
+	enabled: z.string().min(1, 'Enabled is required'),
+	src_addr: z
+		.string()
+		.transform((val) => {
+			if (val === '') {
+				return undefined;
+			}
+			return val;
+		})
+		.optional(),
+	src_port: z.string().optional(),
+	dest_addr: z.string().optional(),
+	dest_port: z.string().optional(),
+	chain: z.string().optional(),
+	interface: z.string().min(1, 'Interface is required'),
+	proto: z.string().optional()
+});
+
+export const addPolicyFormClient = z.object({
+	...addPolicyForm.shape,
+	predefinedSrcAddr: z.array(z.string())
+});

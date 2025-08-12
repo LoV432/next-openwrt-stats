@@ -10,8 +10,9 @@ import {
 } from './ui/dialog';
 import { Card } from './ui/card';
 import { useQuery } from '@tanstack/react-query';
-import { getPBRPolicy } from '@/lib/server/pbrInfo';
+import { getPBRInterfaces, getPBRPolicy } from '@/lib/server/pbrInfo';
 import { PBRIcon } from './PBRIcons';
+import { AddRule } from './AddPBRPolicy';
 
 function Field({ label, value }: { label: string; value: string }) {
 	const values = value.split(' ').map((v) => {
@@ -56,9 +57,26 @@ export function PBRInfo() {
 		}
 	});
 
+	const { data: interfaces, refetch: refetchInterfaces } = useQuery({
+		queryKey: ['pbrInterfaces'],
+		queryFn: async () => {
+			const pbrData = await getPBRInterfaces();
+			if (!pbrData.success) throw new Error(pbrData.error);
+			return pbrData.data;
+		}
+	});
+
 	const policies = Object.values(data || {})
 		.map((policy) => {
 			if (policy['.type'] === 'policy') {
+				return policy;
+			}
+			return null;
+		})
+		.filter((policy) => policy !== null);
+	const config = Object.values(data || {})
+		.map((policy) => {
+			if (policy['.type'] === 'pbr') {
 				return policy;
 			}
 			return null;
@@ -75,12 +93,24 @@ export function PBRInfo() {
 					<DialogTitle>Policy Based Routing</DialogTitle>
 				</DialogHeader>
 				<div
-					className="h-full space-y-4 overflow-y-auto"
+					className="h-full space-y-4 overflow-y-auto border-t pt-4"
 					style={{
-						scrollbarColor: 'white transparent',
+						scrollbarColor: 'transparent transparent',
 						scrollbarWidth: 'thin'
 					}}
 				>
+					{config &&
+						config.length > 0 &&
+						interfaces &&
+						interfaces.length > 0 && (
+							<div className="w-full">
+								<AddRule
+									supportedProtocols={config[0].webui_supported_protocol}
+									interfaces={interfaces}
+									refetchInterfaces={refetchInterfaces}
+								/>
+							</div>
+						)}
 					{policies.map((policy) => (
 						<Card
 							key={policy['.name']}
