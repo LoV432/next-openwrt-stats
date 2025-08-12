@@ -29,7 +29,7 @@ import {
 	SelectValue
 } from '@/components/ui/select';
 import { useState } from 'react';
-import { setPBRPolicy } from '@/lib/server/pbrInfo';
+import { setPBRPolicy } from '@/lib/server/pbrCalls';
 import {
 	Accordion,
 	AccordionContent,

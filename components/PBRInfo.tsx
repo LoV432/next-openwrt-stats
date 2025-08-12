@@ -10,9 +10,16 @@ import {
 } from './ui/dialog';
 import { Card } from './ui/card';
 import { useQuery } from '@tanstack/react-query';
-import { getPBRInterfaces, getPBRPolicy } from '@/lib/server/pbrInfo';
+import {
+	deletePBRPolicy,
+	getPBRInterfaces,
+	getPBRPolicy
+} from '@/lib/server/pbrCalls';
 import { PBRIcon } from './PBRIcons';
 import { AddRule } from './AddPBRPolicy';
+import { toast } from 'sonner';
+import { useState } from 'react';
+import { Trash2Icon } from 'lucide-react';
 
 function Field({ label, value }: { label: string; value: string }) {
 	const values = value.split(' ').map((v) => {
@@ -46,7 +53,7 @@ function Field({ label, value }: { label: string; value: string }) {
 }
 
 export function PBRInfo() {
-	const { data } = useQuery({
+	const { data, refetch: refetchInterfaces } = useQuery({
 		queryKey: ['pbrPolicy'],
 		queryFn: async () => {
 			const pbrData = await getPBRPolicy();
@@ -57,7 +64,7 @@ export function PBRInfo() {
 		}
 	});
 
-	const { data: interfaces, refetch: refetchInterfaces } = useQuery({
+	const { data: interfaces } = useQuery({
 		queryKey: ['pbrInterfaces'],
 		queryFn: async () => {
 			const pbrData = await getPBRInterfaces();
@@ -117,7 +124,7 @@ export function PBRInfo() {
 							className="p-4 shadow-sm transition-shadow duration-200 hover:shadow"
 						>
 							<div className="flex flex-col gap-4">
-								<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+								<div className="flex flex-wrap gap-14">
 									<div className="flex flex-col gap-1">
 										<div className="text-muted-foreground text-sm font-medium">
 											Name:
@@ -130,6 +137,14 @@ export function PBRInfo() {
 										</div>
 										<div className="text-sm">
 											{policy.enabled === '1' ? 'Enabled' : 'Disabled'}
+										</div>
+									</div>
+									<div className="ml-auto flex flex-col gap-1">
+										<div className="flex gap-2">
+											<DeletePolicy
+												policyName={policy['.name']}
+												refetchInterfaces={refetchInterfaces}
+											/>
 										</div>
 									</div>
 								</div>
@@ -170,5 +185,50 @@ export function PBRInfo() {
 				</div>
 			</DialogContent>
 		</Dialog>
+	);
+}
+
+function DeletePolicy({
+	policyName,
+	refetchInterfaces
+}: {
+	policyName: string;
+	refetchInterfaces: () => void;
+}) {
+	const [isLoading, setIsLoading] = useState(false);
+	async function deleteAction() {
+		setIsLoading(true);
+		try {
+			const deleteResponse = await deletePBRPolicy({
+				name: policyName
+			});
+			if (!deleteResponse.success) {
+				toast.error(deleteResponse.error);
+				throw new Error(deleteResponse.error);
+			}
+			refetchInterfaces();
+			toast.success('Policy deleted successfully', {
+				richColors: true
+			});
+		} catch (err) {
+			toast.error('Something went wrong', {
+				richColors: true
+			});
+			console.error(err);
+		} finally {
+			setIsLoading(false);
+		}
+	}
+
+	return (
+		<Button
+			variant={'outline'}
+			onClick={() => {
+				deleteAction();
+			}}
+			disabled={isLoading}
+		>
+			<Trash2Icon />
+		</Button>
 	);
 }

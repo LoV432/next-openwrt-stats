@@ -189,3 +189,62 @@ export async function setPBRPolicy({
 		data: commitChangesResponse.data
 	} as const;
 }
+
+export async function deletePBRPolicy({ name }: { name: string }) {
+	const primaryRouter = await db
+		.select({
+			routerIP: routersTable.routerIP
+		})
+		.from(routersTable)
+		.where(eq(routersTable.isPrimary, 1))
+		.limit(1);
+
+	if (!primaryRouter.length) {
+		return {
+			success: false,
+			error: 'No primary router found'
+		} as const;
+	}
+
+	const pbrPolicyResponse = await ubusCall({
+		routerIP: primaryRouter[0].routerIP,
+		params: [
+			'uci',
+			'delete',
+			{
+				config: 'pbr',
+				options: null,
+				section: name
+			}
+		]
+	});
+	if (!pbrPolicyResponse.success) {
+		return {
+			success: false,
+			error: pbrPolicyResponse.error
+		} as const;
+	}
+
+	const commitChangesResponse = await ubusCall({
+		routerIP: primaryRouter[0].routerIP,
+		params: [
+			'uci',
+			'commit',
+			{
+				config: 'pbr'
+			}
+		]
+	});
+
+	if (!commitChangesResponse.success) {
+		return {
+			success: false,
+			error: commitChangesResponse.error
+		} as const;
+	}
+
+	return {
+		success: true,
+		data: commitChangesResponse.data
+	} as const;
+}
