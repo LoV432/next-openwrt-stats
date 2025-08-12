@@ -266,5 +266,5 @@ export const addPolicyForm = z.object({
 
 export const addPolicyFormClient = z.object({
 	...addPolicyForm.shape,
-	predefinedSrcAddr: z.array(z.string())
+	predefinedDstAddr: z.array(z.string())
 });

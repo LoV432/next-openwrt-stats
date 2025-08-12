@@ -60,7 +60,7 @@ export function AddRule({
 			name: '',
 			enabled: '1',
 			interface: interfaces[0],
-			predefinedSrcAddr: [],
+			predefinedDstAddr: [],
 			chain: 'prerouting',
 			proto: supportedProtocols[0]
 		}
@@ -69,16 +69,17 @@ export function AddRule({
 	async function onSubmit(values: FormValues) {
 		setIsLoading(true);
 		try {
-			let combinedSrcAddr: string | undefined;
-			if (values.src_addr && values.predefinedSrcAddr.length > 0) {
-				combinedSrcAddr = `${values.src_addr} ${values.predefinedSrcAddr.join(' ')}`;
+			let combinedDstAddr: string | undefined;
+			if (values.dest_addr && values.predefinedDstAddr.length > 0) {
+				combinedDstAddr = `${values.dest_addr} ${values.predefinedDstAddr.join(' ')}`;
 			} else {
-				combinedSrcAddr = values.src_addr || values.predefinedSrcAddr.join(' ');
+				combinedDstAddr =
+					values.dest_addr || values.predefinedDstAddr.join(' ');
 			}
 
 			const submitValues = {
 				...values,
-				src_addr: combinedSrcAddr
+				dest_addr: combinedDstAddr
 			};
 			const parsedSubmitValues = addPolicyForm.safeParse(submitValues);
 			if (!parsedSubmitValues.success) {
@@ -197,20 +198,6 @@ export function AddRule({
 
 						<FormField
 							control={form.control}
-							name="predefinedSrcAddr"
-							render={({ field }) => (
-								<FormItem>
-									<PredefinedSrcAddr
-										predefinedSrcAddr={field.value}
-										setPredefinedSrcAddr={(arr) => field.onChange(arr)}
-									/>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						<FormField
-							control={form.control}
 							name="src_port"
 							render={({ field }) => (
 								<FormItem>
@@ -234,6 +221,20 @@ export function AddRule({
 											{...field}
 										/>
 									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						<FormField
+							control={form.control}
+							name="predefinedDstAddr"
+							render={({ field }) => (
+								<FormItem>
+									<PredefinedDstAddr
+										predefinedDstAddr={field.value}
+										setpredefinedDstAddr={(arr) => field.onChange(arr)}
+									/>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -356,12 +357,12 @@ export function AddRule({
 	);
 }
 
-function PredefinedSrcAddr({
-	predefinedSrcAddr,
-	setPredefinedSrcAddr
+function PredefinedDstAddr({
+	predefinedDstAddr,
+	setpredefinedDstAddr
 }: {
-	predefinedSrcAddr: string[];
-	setPredefinedSrcAddr: React.Dispatch<React.SetStateAction<string[]>>;
+	predefinedDstAddr: string[];
+	setpredefinedDstAddr: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
 	const allIcons = [
 		'facebook',
@@ -383,27 +384,27 @@ function PredefinedSrcAddr({
 	return (
 		<Accordion type="single" collapsible className="rounded-lg border px-3">
 			<AccordionItem value="item-1">
-				<AccordionTrigger>Predefined Source Address</AccordionTrigger>
+				<AccordionTrigger>Predefined Destination Address</AccordionTrigger>
 				<AccordionContent>
 					<div className="flex w-full flex-wrap gap-4">
 						{allIcons.map((iconName) => (
 							<div
 								key={iconName}
 								className={`h-10 w-10 text-sm ${
-									predefinedSrcAddr.includes(LINK + iconName)
+									predefinedDstAddr.includes(LINK + iconName)
 										? 'fill-white'
 										: 'fill-zinc-700'
 								}`}
 								onClick={() => {
-									if (predefinedSrcAddr.includes(LINK + iconName)) {
-										setPredefinedSrcAddr(
-											predefinedSrcAddr.filter(
+									if (predefinedDstAddr.includes(LINK + iconName)) {
+										setpredefinedDstAddr(
+											predefinedDstAddr.filter(
 												(addr) => addr !== LINK + iconName
 											)
 										);
 									} else {
-										setPredefinedSrcAddr([
-											...predefinedSrcAddr,
+										setpredefinedDstAddr([
+											...predefinedDstAddr,
 											LINK + iconName
 										]);
 									}
