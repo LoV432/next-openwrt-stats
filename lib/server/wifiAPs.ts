@@ -44,44 +44,40 @@ export async function getWifiAPs() {
 			} as const;
 		}
 		const parsedUbusResponse = wifiAPsSchema.safeParse(ubusResponse.data);
-		if (!parsedUbusResponse.success) {
-			return {
-				success: false,
-				error: 'Failed to parse ubus response from wifiAPs'
-			} as const;
-		}
-		for (const radio of Object.values(parsedUbusResponse.data.result[1])) {
-			for (const radioInterface of radio.interfaces) {
-				if (!wifiInterfacesMerged[radioInterface.iwinfo.ssid]) {
-					wifiInterfacesMerged[radioInterface.iwinfo.ssid] = {
-						ip: new Set(),
-						channel: new Set(),
-						band: new Set(),
-						htmode: new Set(),
-						txpower: new Set()
-					};
+		if (parsedUbusResponse.success) {
+			for (const radio of Object.values(parsedUbusResponse.data.result[1])) {
+				for (const radioInterface of radio.interfaces) {
+					if (!wifiInterfacesMerged[radioInterface.iwinfo.ssid]) {
+						wifiInterfacesMerged[radioInterface.iwinfo.ssid] = {
+							ip: new Set(),
+							channel: new Set(),
+							band: new Set(),
+							htmode: new Set(),
+							txpower: new Set()
+						};
+					}
+					wifiInterfacesMerged[radioInterface.iwinfo.ssid].ip.add(
+						router.routerIP
+					);
+					wifiInterfacesMerged[radioInterface.iwinfo.ssid].channel.add(
+						radioInterface.iwinfo.channel
+					);
+					wifiInterfacesMerged[radioInterface.iwinfo.ssid].band.add(
+						radio.config.band
+					);
+					wifiInterfacesMerged[radioInterface.iwinfo.ssid].htmode.add(
+						radio.config.htmode
+					);
+					wifiInterfacesMerged[radioInterface.iwinfo.ssid].txpower.add(
+						radioInterface.iwinfo.txpower
+					);
 				}
-				wifiInterfacesMerged[radioInterface.iwinfo.ssid].ip.add(
-					router.routerIP
-				);
-				wifiInterfacesMerged[radioInterface.iwinfo.ssid].channel.add(
-					radioInterface.iwinfo.channel
-				);
-				wifiInterfacesMerged[radioInterface.iwinfo.ssid].band.add(
-					radio.config.band
-				);
-				wifiInterfacesMerged[radioInterface.iwinfo.ssid].htmode.add(
-					radio.config.htmode
-				);
-				wifiInterfacesMerged[radioInterface.iwinfo.ssid].txpower.add(
-					radioInterface.iwinfo.txpower
-				);
+				const ifname = radio.interfaces[0].ifname;
+				if (!allIfname[router.routerIP]) {
+					allIfname[router.routerIP] = [];
+				}
+				allIfname[router.routerIP].push(ifname);
 			}
-			const ifname = radio.interfaces[0].ifname;
-			if (!allIfname[router.routerIP]) {
-				allIfname[router.routerIP] = [];
-			}
-			allIfname[router.routerIP].push(ifname);
 		}
 	}
 	return {
