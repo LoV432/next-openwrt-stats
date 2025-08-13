@@ -181,6 +181,8 @@ const pbrPolicy = z.object({
 	interface: z.string()
 });
 
+export type PbrPolicy = z.infer<typeof pbrPolicy>;
+
 const pbrInclude = z.object({
 	'.anonymous': z.boolean(),
 	'.type': z.literal('include'),
@@ -196,26 +198,58 @@ const pbrPolicyConfig = z.object({
 	'.name': z.string(),
 	'.index': z.number(),
 	enabled: z.string(),
-	verbosity: z.string(),
-	strict_enforcement: z.string(),
-	resolver_set: z.string(),
-	resolver_instance: z.array(z.string()),
-	ipv6_enabled: z.string(),
-	boot_timeout: z.string(),
-	rule_create_option: z.string(),
-	procd_boot_delay: z.string(),
-	procd_reload_delay: z.string(),
-	webui_show_ignore_target: z.string(),
-	nft_rule_counter: z.string(),
-	nft_set_auto_merge: z.string(),
-	nft_set_counter: z.string(),
-	nft_set_flags_interval: z.string(),
-	nft_set_flags_timeout: z.string(),
-	nft_set_timeout: z.string(),
-	nft_set_policy: z.string(),
-	webui_supported_protocol: z.array(z.string()),
-	ignored_interface: z.array(z.string())
+	// verbosity: z.string(),
+	// strict_enforcement: z.string(),
+	// resolver_set: z.string(),
+	// resolver_instance: z.array(z.string()),
+	// ipv6_enabled: z.string(),
+	// boot_timeout: z.string(),
+	// rule_create_option: z.string(),
+	// procd_boot_delay: z.string(),
+	// procd_reload_delay: z.string(),
+	// webui_show_ignore_target: z.string(),
+	// nft_rule_counter: z.string(),
+	// nft_set_auto_merge: z.string(),
+	// nft_set_counter: z.string(),
+	// nft_set_flags_interval: z.string(),
+	// nft_set_flags_timeout: z.string(),
+	// nft_set_timeout: z.string(),
+	// nft_set_policy: z.string(),
+	webui_supported_protocol: z.array(z.string())
+	// ignored_interface: z.array(z.string())
 });
+
+const pbrUnknown = z
+	.object({
+		'.anonymous': z.boolean(),
+		'.type': z.literal('unknown'),
+		'.name': z.string(),
+		'.index': z.number()
+	})
+	.catchall(z.unknown());
+
+const anyPbr = z.preprocess(
+	(val) => {
+		if (
+			typeof val === 'object' &&
+			val !== null &&
+			'.type' in val &&
+			typeof (val as any)['.type'] === 'string'
+		) {
+			const t = (val as any)['.type'];
+			if (!['pbr', 'policy', 'include'].includes(t)) {
+				return { ...val, '.type': 'unknown' };
+			}
+		}
+		return val;
+	},
+	z.discriminatedUnion('.type', [
+		pbrPolicyConfig,
+		pbrPolicy,
+		pbrInclude,
+		pbrUnknown
+	])
+);
 
 export const pbrPolicySchema = z.object({
 	jsonrpc: z.string(),
@@ -223,10 +257,7 @@ export const pbrPolicySchema = z.object({
 	result: z.tuple([
 		z.literal(0),
 		z.object({
-			values: z.record(
-				z.string(),
-				z.discriminatedUnion('.type', [pbrPolicyConfig, pbrPolicy, pbrInclude])
-			)
+			values: z.record(z.string(), anyPbr)
 		})
 	])
 });

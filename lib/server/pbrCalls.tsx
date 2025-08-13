@@ -160,23 +160,140 @@ export async function setPBRPolicy({
 		]
 	});
 	if (!pbrPolicyResponse.success) {
+		console.log('[ERROR] Failed to add policy', {
+			parsedForm,
+			pbrPolicyResponse
+		});
 		return {
 			success: false,
 			error: pbrPolicyResponse.error
 		} as const;
 	}
 
-	const commitChangesResponse = await ubusCall({
-		routerIP: primaryRouter[0].routerIP,
-		params: [
-			'uci',
-			'commit',
-			{
-				config: 'pbr'
-			}
-		]
-	});
+	const commitChangesResponse = await commitPBRchanges();
+	if (!commitChangesResponse.success) {
+		return {
+			success: false,
+			error: commitChangesResponse.error
+		} as const;
+	}
 
+	return {
+		success: true,
+		data: commitChangesResponse.data
+	} as const;
+}
+
+export async function editPBRPolicy({
+	values,
+	policy
+}: {
+	values: Record<string, any>;
+	policy: string;
+}) {
+	const parsedNewValues = addPolicyForm.safeParse(values);
+	if (!parsedNewValues.success) {
+		return {
+			success: false,
+			error: 'Invalid form values'
+		} as const;
+	}
+	const primaryRouter = await db
+		.select({
+			routerIP: routersTable.routerIP
+		})
+		.from(routersTable)
+		.where(eq(routersTable.isPrimary, 1))
+		.limit(1);
+
+	if (!primaryRouter.length) {
+		return {
+			success: false,
+			error: 'No primary router found'
+		} as const;
+	}
+
+	const currentPolicies = await getPBRPolicy();
+	if (currentPolicies.error) {
+		return {
+			success: false,
+			error: currentPolicies.error
+		} as const;
+	}
+
+	let policyToEdit = currentPolicies.data[policy];
+	if (!policyToEdit || policyToEdit['.type'] !== 'policy') {
+		return {
+			success: false,
+			error: 'Policy not found'
+		} as const;
+	}
+
+	const oldValues = Object.entries(policyToEdit);
+	const newValues = Object.entries(parsedNewValues.data);
+	const allKeysToDelete = oldValues.filter(
+		([key]) =>
+			!newValues.some(([newKey]) => newKey === key) && !key.startsWith('.')
+	);
+	const deleteValues = allKeysToDelete.map(([key]) => key);
+
+	if (deleteValues.length > 0) {
+		const deleteResponse = await ubusCall({
+			routerIP: primaryRouter[0].routerIP,
+			params: [
+				'uci',
+				'delete',
+				{
+					config: 'pbr',
+					options: deleteValues,
+					section: policyToEdit['.name']
+				}
+			]
+		});
+		if (!deleteResponse.success) {
+			console.log('[ERROR] Failed to edit policy', {
+				policy,
+				deleteResponse
+			});
+			return {
+				success: false,
+				error: deleteResponse.error
+			} as const;
+		}
+	}
+
+	let postData = parsedNewValues.data;
+	deleteValues.forEach((key) => {
+		if (key in postData) {
+			delete postData[key as keyof typeof postData];
+		}
+	});
+	if (Object.keys(postData).length > 0) {
+		const pbrPolicyResponse = await ubusCall({
+			routerIP: primaryRouter[0].routerIP,
+			params: [
+				'uci',
+				'set',
+				{
+					config: 'pbr',
+					section: policyToEdit['.name'],
+					values: postData
+				}
+			]
+		});
+		if (!pbrPolicyResponse.success) {
+			console.log('[ERROR] Failed to edit policy', {
+				policy,
+				pbrPolicyResponse
+			});
+			return {
+				success: false,
+				error: pbrPolicyResponse.error
+			} as const;
+		}
+	}
+
+	const commitChangesResponse = await commitPBRchanges();
 	if (!commitChangesResponse.success) {
 		return {
 			success: false,
@@ -219,12 +336,81 @@ export async function deletePBRPolicy({ name }: { name: string }) {
 		]
 	});
 	if (!pbrPolicyResponse.success) {
+		console.log('[ERROR] Failed to delete policy', {
+			name,
+			pbrPolicyResponse
+		});
 		return {
 			success: false,
 			error: pbrPolicyResponse.error
 		} as const;
 	}
 
+	const commitChangesResponse = await commitPBRchanges();
+	if (!commitChangesResponse.success) {
+		return {
+			success: false,
+			error: commitChangesResponse.error
+		} as const;
+	}
+
+	return {
+		success: true,
+		data: commitChangesResponse.data
+	} as const;
+}
+
+// async function revertPBRPolicy() {
+// 	const primaryRouter = await db
+// 		.select({
+// 			routerIP: routersTable.routerIP
+// 		})
+// 		.from(routersTable)
+// 		.where(eq(routersTable.isPrimary, 1))
+// 		.limit(1);
+
+// 	if (!primaryRouter.length) {
+// 		return {
+// 			success: false,
+// 			error: 'No primary router found'
+// 		} as const;
+// 	}
+
+// 	const pbrPolicyResponse = await ubusCall({
+// 		routerIP: primaryRouter[0].routerIP,
+// 		params: ['uci', 'rollback', {}]
+// 	});
+// 	if (!pbrPolicyResponse.success) {
+// 		console.log('[ERROR] Failed to revert pbr policy', {
+// 			pbrPolicyResponse
+// 		});
+// 		return {
+// 			success: false,
+// 			error: pbrPolicyResponse.error
+// 		} as const;
+// 	}
+
+// 	return {
+// 		success: true,
+// 		data: pbrPolicyResponse.data
+// 	} as const;
+// }
+
+async function commitPBRchanges() {
+	const primaryRouter = await db
+		.select({
+			routerIP: routersTable.routerIP
+		})
+		.from(routersTable)
+		.where(eq(routersTable.isPrimary, 1))
+		.limit(1);
+
+	if (!primaryRouter.length) {
+		return {
+			success: false,
+			error: 'No primary router found'
+		} as const;
+	}
 	const commitChangesResponse = await ubusCall({
 		routerIP: primaryRouter[0].routerIP,
 		params: [
@@ -237,6 +423,9 @@ export async function deletePBRPolicy({ name }: { name: string }) {
 	});
 
 	if (!commitChangesResponse.success) {
+		console.log('[ERROR] Failed to commit pbr changes', {
+			commitChangesResponse
+		});
 		return {
 			success: false,
 			error: commitChangesResponse.error

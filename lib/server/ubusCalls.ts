@@ -2,6 +2,7 @@ import { failedSessionSchema, loginSchema } from '@/types/ubusCalls';
 import { db } from './dbDriver';
 import { routersTable } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import 'server-only';
 
 export async function ubusCall({
 	routerIP,
@@ -94,7 +95,7 @@ export async function ubusCall({
 			if (checkFailedSession.success) {
 				return {
 					success: false,
-					error: 'Failed to login, Please check your username and password'
+					error: 'Unknown response from router'
 				} as const;
 			}
 

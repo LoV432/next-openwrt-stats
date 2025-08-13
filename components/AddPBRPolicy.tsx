@@ -28,8 +28,8 @@ import {
 	SelectTrigger,
 	SelectValue
 } from '@/components/ui/select';
-import { useState } from 'react';
-import { setPBRPolicy } from '@/lib/server/pbrCalls';
+import { useEffect, useState } from 'react';
+import { editPBRPolicy, setPBRPolicy } from '@/lib/server/pbrCalls';
 import {
 	Accordion,
 	AccordionContent,
@@ -38,18 +38,27 @@ import {
 } from '@/components/ui/accordion';
 import { PBRIcon } from './PBRIcons';
 import { toast } from 'sonner';
-import { addPolicyForm, addPolicyFormClient } from '@/types/ubusCalls';
+import {
+	addPolicyForm,
+	addPolicyFormClient,
+	PbrPolicy
+} from '@/types/ubusCalls';
+import { PencilLine } from 'lucide-react';
 
 type FormValues = z.infer<typeof addPolicyFormClient>;
 
-export function AddRule({
+export function AddEditRule({
 	supportedProtocols,
 	interfaces,
-	refetchInterfaces
+	refetchInterfaces,
+	policy,
+	initialValues
 }: {
 	supportedProtocols: string[];
 	interfaces: string[];
 	refetchInterfaces: () => void;
+	policy?: string;
+	initialValues?: PbrPolicy;
 }) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
@@ -66,6 +75,33 @@ export function AddRule({
 		}
 	});
 
+	useEffect(() => {
+		if (initialValues) {
+			const predefinedDstAddr = initialValues.dest_addr
+				?.split(' ')
+				.filter((addr) =>
+					addr.startsWith(
+						'https://raw.githubusercontent.com/LoV432/pta-block/refs/heads/master/domains/'
+					)
+				);
+			const dest_addr = initialValues.dest_addr
+				?.split(' ')
+				.filter(
+					(addr) =>
+						!addr.startsWith(
+							'https://raw.githubusercontent.com/LoV432/pta-block/refs/heads/master/domains/'
+						)
+				)
+				.join(' ')
+				.trim();
+			form.reset({
+				...initialValues,
+				predefinedDstAddr: predefinedDstAddr || [],
+				dest_addr: dest_addr || undefined
+			});
+		}
+	}, [initialValues]);
+
 	async function onSubmit(values: FormValues) {
 		setIsLoading(true);
 		try {
@@ -79,7 +115,7 @@ export function AddRule({
 
 			const submitValues = {
 				...values,
-				dest_addr: combinedDstAddr
+				dest_addr: combinedDstAddr || undefined
 			};
 			const parsedSubmitValues = addPolicyForm.safeParse(submitValues);
 			if (!parsedSubmitValues.success) {
@@ -89,12 +125,23 @@ export function AddRule({
 				return;
 			}
 
-			const pbrData = await setPBRPolicy({
-				values: parsedSubmitValues.data
-			});
-			if (!pbrData.success) {
-				toast.error(pbrData.error);
-				throw new Error(pbrData.error);
+			if (!policy) {
+				const pbrData = await setPBRPolicy({
+					values: parsedSubmitValues.data
+				});
+				if (!pbrData.success) {
+					toast.error(pbrData.error);
+					throw new Error(pbrData.error);
+				}
+			} else {
+				const pbrData = await editPBRPolicy({
+					values: parsedSubmitValues.data,
+					policy
+				});
+				if (!pbrData.success) {
+					toast.error(pbrData.error);
+					throw new Error(pbrData.error);
+				}
 			}
 			toast.success('Rule saved successfully', {
 				richColors: true
@@ -124,7 +171,7 @@ export function AddRule({
 		>
 			<DialogTrigger asChild>
 				<Button variant="outline" className="w-full">
-					Add Rule
+					{policy ? <PencilLine /> : 'Add Rule'}
 				</Button>
 			</DialogTrigger>
 			<DialogContent className="flex h-full max-h-[80vh] max-w-3xl flex-col">
@@ -260,7 +307,7 @@ export function AddRule({
 								<FormItem>
 									<Select
 										onValueChange={field.onChange}
-										defaultValue={field.value}
+										defaultValue={field.value || 'prerouting'}
 									>
 										<FormControl>
 											<SelectTrigger className="w-full">
@@ -290,8 +337,7 @@ export function AddRule({
 									<FormItem className="flex-1">
 										<Select
 											onValueChange={field.onChange}
-											defaultValue={interfaces?.[0] || ''}
-											disabled={!interfaces}
+											defaultValue={field.value}
 										>
 											<FormControl>
 												<SelectTrigger className="w-full">
@@ -324,7 +370,7 @@ export function AddRule({
 									<FormItem className="flex-1">
 										<Select
 											onValueChange={field.onChange}
-											defaultValue={field.value}
+											defaultValue={field.value || supportedProtocols[0]}
 										>
 											<FormControl>
 												<SelectTrigger className="w-full">

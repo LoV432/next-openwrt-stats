@@ -16,7 +16,7 @@ import {
 	getPBRPolicy
 } from '@/lib/server/pbrCalls';
 import { PBRIcon } from './PBRIcons';
-import { AddRule } from './AddPBRPolicy';
+import { AddEditRule } from './AddPBRPolicy';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { Trash2Icon } from 'lucide-react';
@@ -89,13 +89,12 @@ export function PBRInfo() {
 			return null;
 		})
 		.filter((policy) => policy !== null);
-
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
 				<Button variant="outline">PBR</Button>
 			</DialogTrigger>
-			<DialogContent className="h-full max-h-[80vh] max-w-3xl overflow-hidden">
+			<DialogContent className="flex h-full max-h-[80vh] max-w-3xl flex-col overflow-hidden">
 				<DialogHeader>
 					<DialogTitle>Policy Based Routing</DialogTitle>
 				</DialogHeader>
@@ -111,7 +110,7 @@ export function PBRInfo() {
 						interfaces &&
 						interfaces.length > 0 && (
 							<div className="w-full">
-								<AddRule
+								<AddEditRule
 									supportedProtocols={config[0].webui_supported_protocol}
 									interfaces={interfaces}
 									refetchInterfaces={refetchInterfaces}
@@ -145,6 +144,22 @@ export function PBRInfo() {
 												policyName={policy['.name']}
 												refetchInterfaces={refetchInterfaces}
 											/>
+											{config &&
+												config.length > 0 &&
+												interfaces &&
+												interfaces.length > 0 && (
+													<div className="w-full">
+														<AddEditRule
+															supportedProtocols={
+																config[0].webui_supported_protocol
+															}
+															interfaces={interfaces}
+															refetchInterfaces={refetchInterfaces}
+															policy={policy['.name']}
+															initialValues={policy}
+														/>
+													</div>
+												)}
 										</div>
 									</div>
 								</div>
