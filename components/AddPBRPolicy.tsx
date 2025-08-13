@@ -50,13 +50,13 @@ type FormValues = z.infer<typeof addPolicyFormClient>;
 export function AddEditRule({
 	supportedProtocols,
 	interfaces,
-	refetchInterfaces,
+	refetchPolicies,
 	policy,
 	initialValues
 }: {
 	supportedProtocols: string[];
 	interfaces: string[];
-	refetchInterfaces: () => void;
+	refetchPolicies: () => Promise<any>;
 	policy?: string;
 	initialValues?: PbrPolicy;
 }) {
@@ -143,11 +143,11 @@ export function AddEditRule({
 					throw new Error(pbrData.error);
 				}
 			}
+			await refetchPolicies();
 			toast.success('Rule saved successfully', {
 				richColors: true
 			});
 			form.reset();
-			refetchInterfaces();
 			setIsOpen(false);
 		} catch (err) {
 			toast.error('Something went wrong', {

@@ -53,7 +53,7 @@ function Field({ label, value }: { label: string; value: string }) {
 }
 
 export function PBRInfo() {
-	const { data, refetch: refetchInterfaces } = useQuery({
+	const { data, refetch: refetchPolicies } = useQuery({
 		queryKey: ['pbrPolicy'],
 		queryFn: async () => {
 			const pbrData = await getPBRPolicy();
@@ -113,7 +113,7 @@ export function PBRInfo() {
 								<AddEditRule
 									supportedProtocols={config[0].webui_supported_protocol}
 									interfaces={interfaces}
-									refetchInterfaces={refetchInterfaces}
+									refetchPolicies={refetchPolicies}
 								/>
 							</div>
 						)}
@@ -142,7 +142,7 @@ export function PBRInfo() {
 										<div className="flex gap-2">
 											<DeletePolicy
 												policyName={policy['.name']}
-												refetchInterfaces={refetchInterfaces}
+												refetchPolicies={refetchPolicies}
 											/>
 											{config &&
 												config.length > 0 &&
@@ -154,7 +154,7 @@ export function PBRInfo() {
 																config[0].webui_supported_protocol
 															}
 															interfaces={interfaces}
-															refetchInterfaces={refetchInterfaces}
+															refetchPolicies={refetchPolicies}
 															policy={policy['.name']}
 															initialValues={policy}
 														/>
@@ -205,10 +205,10 @@ export function PBRInfo() {
 
 function DeletePolicy({
 	policyName,
-	refetchInterfaces
+	refetchPolicies
 }: {
 	policyName: string;
-	refetchInterfaces: () => void;
+	refetchPolicies: () => void;
 }) {
 	const [isLoading, setIsLoading] = useState(false);
 	async function deleteAction() {
@@ -221,7 +221,7 @@ function DeletePolicy({
 				toast.error(deleteResponse.error);
 				throw new Error(deleteResponse.error);
 			}
-			refetchInterfaces();
+			await refetchPolicies();
 			toast.success('Policy deleted successfully', {
 				richColors: true
 			});
