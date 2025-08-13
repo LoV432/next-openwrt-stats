@@ -5,21 +5,17 @@ import {
 	wireguardInterfacesSchema
 } from '@/types/ubusCalls';
 import { ubusCall } from './ubusCalls';
-import { db } from './dbDriver';
-import { routersTable } from '@/db/schema';
-import { eq } from 'drizzle-orm';
 import { calcMbps } from '../utils';
+import { getPrimaryRouter } from './routerDB';
 
 export async function getNetworkInterfaces() {
-	const primaryRouter = await db
-		.select({
-			routerIP: routersTable.routerIP
-		})
-		.from(routersTable)
-		.where(eq(routersTable.isPrimary, 1))
-		.limit(1);
+	const primaryRouter = await getPrimaryRouter();
+	if (!primaryRouter.success) {
+		return primaryRouter;
+	}
+
 	const ubusResponse = await ubusCall({
-		routerIP: primaryRouter[0].routerIP,
+		routerIP: primaryRouter.data.routerIP,
 		params: ['network.interface', 'dump', {}]
 	});
 
@@ -56,15 +52,13 @@ export async function getNetworkInterfaces() {
 }
 
 export async function getRealTimeTraffic(device: string) {
-	const primaryRouter = await db
-		.select({
-			routerIP: routersTable.routerIP
-		})
-		.from(routersTable)
-		.where(eq(routersTable.isPrimary, 1))
-		.limit(1);
+	const primaryRouter = await getPrimaryRouter();
+	if (!primaryRouter.success) {
+		return primaryRouter;
+	}
+
 	const ubusResponse = await ubusCall({
-		routerIP: primaryRouter[0].routerIP,
+		routerIP: primaryRouter.data.routerIP,
 		params: [
 			'luci',
 			'getRealtimeStats',
@@ -109,15 +103,13 @@ export async function getRealTimeTraffic(device: string) {
 }
 
 export async function getWireguardInterfaces() {
-	const primaryRouter = await db
-		.select({
-			routerIP: routersTable.routerIP
-		})
-		.from(routersTable)
-		.where(eq(routersTable.isPrimary, 1))
-		.limit(1);
+	const primaryRouter = await getPrimaryRouter();
+	if (!primaryRouter.success) {
+		return primaryRouter;
+	}
+
 	const ubusResponse = await ubusCall({
-		routerIP: primaryRouter[0].routerIP,
+		routerIP: primaryRouter.data.routerIP,
 		params: ['luci.wireguard', 'getWgInstances', {}]
 	});
 

@@ -1,32 +1,20 @@
 'use server';
-import { db } from './dbDriver';
-import { routersTable } from '@/db/schema';
-import { eq } from 'drizzle-orm';
 import {
 	addPolicyForm,
 	pbrInterfacesSchema,
 	pbrPolicySchema
 } from '@/types/ubusCalls';
 import { ubusCall } from './ubusCalls';
+import { getPrimaryRouter } from './routerDB';
 
 export async function getPBRPolicy() {
-	const primaryRouter = await db
-		.select({
-			routerIP: routersTable.routerIP
-		})
-		.from(routersTable)
-		.where(eq(routersTable.isPrimary, 1))
-		.limit(1);
-
-	if (!primaryRouter.length) {
-		return {
-			success: false,
-			error: 'No primary router found'
-		} as const;
+	const primaryRouter = await getPrimaryRouter();
+	if (!primaryRouter.success) {
+		return primaryRouter;
 	}
 
 	const pbrPolicyResponse = await ubusCall({
-		routerIP: primaryRouter[0].routerIP,
+		routerIP: primaryRouter.data.routerIP,
 		params: [
 			'uci',
 			'get',
@@ -60,23 +48,13 @@ export async function getPBRPolicy() {
 }
 
 export async function getPBRInterfaces() {
-	const primaryRouter = await db
-		.select({
-			routerIP: routersTable.routerIP
-		})
-		.from(routersTable)
-		.where(eq(routersTable.isPrimary, 1))
-		.limit(1);
-
-	if (!primaryRouter.length) {
-		return {
-			success: false,
-			error: 'No primary router found'
-		} as const;
+	const primaryRouter = await getPrimaryRouter();
+	if (!primaryRouter.success) {
+		return primaryRouter;
 	}
 
 	const pbrInterfacesResponse = await ubusCall({
-		routerIP: primaryRouter[0].routerIP,
+		routerIP: primaryRouter.data.routerIP,
 		params: ['luci.pbr', 'getInterfaces', {}]
 	});
 
@@ -125,19 +103,9 @@ export async function setPBRPolicy({
 			error: 'Invalid form values'
 		} as const;
 	}
-	const primaryRouter = await db
-		.select({
-			routerIP: routersTable.routerIP
-		})
-		.from(routersTable)
-		.where(eq(routersTable.isPrimary, 1))
-		.limit(1);
-
-	if (!primaryRouter.length) {
-		return {
-			success: false,
-			error: 'No primary router found'
-		} as const;
+	const primaryRouter = await getPrimaryRouter();
+	if (!primaryRouter.success) {
+		return primaryRouter;
 	}
 
 	const postData: Record<string, string> = {};
@@ -148,7 +116,7 @@ export async function setPBRPolicy({
 	});
 
 	const pbrPolicyResponse = await ubusCall({
-		routerIP: primaryRouter[0].routerIP,
+		routerIP: primaryRouter.data.routerIP,
 		params: [
 			'uci',
 			'add',
@@ -198,19 +166,9 @@ export async function editPBRPolicy({
 			error: 'Invalid form values'
 		} as const;
 	}
-	const primaryRouter = await db
-		.select({
-			routerIP: routersTable.routerIP
-		})
-		.from(routersTable)
-		.where(eq(routersTable.isPrimary, 1))
-		.limit(1);
-
-	if (!primaryRouter.length) {
-		return {
-			success: false,
-			error: 'No primary router found'
-		} as const;
+	const primaryRouter = await getPrimaryRouter();
+	if (!primaryRouter.success) {
+		return primaryRouter;
 	}
 
 	const currentPolicies = await getPBRPolicy();
@@ -239,7 +197,7 @@ export async function editPBRPolicy({
 
 	if (deleteValues.length > 0) {
 		const deleteResponse = await ubusCall({
-			routerIP: primaryRouter[0].routerIP,
+			routerIP: primaryRouter.data.routerIP,
 			params: [
 				'uci',
 				'delete',
@@ -270,7 +228,7 @@ export async function editPBRPolicy({
 	});
 	if (Object.keys(postData).length > 0) {
 		const pbrPolicyResponse = await ubusCall({
-			routerIP: primaryRouter[0].routerIP,
+			routerIP: primaryRouter.data.routerIP,
 			params: [
 				'uci',
 				'set',
@@ -308,23 +266,13 @@ export async function editPBRPolicy({
 }
 
 export async function deletePBRPolicy({ name }: { name: string }) {
-	const primaryRouter = await db
-		.select({
-			routerIP: routersTable.routerIP
-		})
-		.from(routersTable)
-		.where(eq(routersTable.isPrimary, 1))
-		.limit(1);
-
-	if (!primaryRouter.length) {
-		return {
-			success: false,
-			error: 'No primary router found'
-		} as const;
+	const primaryRouter = await getPrimaryRouter();
+	if (!primaryRouter.success) {
+		return primaryRouter;
 	}
 
 	const pbrPolicyResponse = await ubusCall({
-		routerIP: primaryRouter[0].routerIP,
+		routerIP: primaryRouter.data.routerIP,
 		params: [
 			'uci',
 			'delete',
@@ -397,22 +345,13 @@ export async function deletePBRPolicy({ name }: { name: string }) {
 // }
 
 async function commitPBRchanges() {
-	const primaryRouter = await db
-		.select({
-			routerIP: routersTable.routerIP
-		})
-		.from(routersTable)
-		.where(eq(routersTable.isPrimary, 1))
-		.limit(1);
-
-	if (!primaryRouter.length) {
-		return {
-			success: false,
-			error: 'No primary router found'
-		} as const;
+	const primaryRouter = await getPrimaryRouter();
+	if (!primaryRouter.success) {
+		return primaryRouter;
 	}
+
 	const commitChangesResponse = await ubusCall({
-		routerIP: primaryRouter[0].routerIP,
+		routerIP: primaryRouter.data.routerIP,
 		params: [
 			'uci',
 			'commit',

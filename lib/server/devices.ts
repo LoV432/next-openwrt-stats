@@ -1,18 +1,15 @@
 'use server';
 
-import { routersTable } from '@/db/schema';
-import { db } from './dbDriver';
 import { ubusCall } from './ubusCalls';
 import { dhcpDevicesSchema } from '@/types/ubusCalls';
+import { getRouters } from './routerDB';
 
 export async function getDhcpDevices() {
-	const allRoutes = await db
-		.select({ routerIP: routersTable.routerIP })
-		.from(routersTable);
-	if (!allRoutes.length) {
+	const allRouters = await getRouters();
+	if (!allRouters.success) {
 		return {
 			success: false,
-			error: 'No routers found'
+			error: allRouters.error
 		} as const;
 	}
 	const dhcpDevices: {
@@ -23,7 +20,7 @@ export async function getDhcpDevices() {
 			leaseTime: number | boolean;
 		};
 	} = {};
-	for (const router of allRoutes) {
+	for (const router of allRouters.data) {
 		const dhcpDevicesResponse = await ubusCall({
 			routerIP: router.routerIP,
 			params: ['luci-rpc', 'getDHCPLeases', {}]

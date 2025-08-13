@@ -1,7 +1,6 @@
 'use server';
 
-import { routersTable } from '@/db/schema';
-import { db } from './dbDriver';
+import { getRouters } from './routerDB';
 import { ubusCall } from './ubusCalls';
 import {
 	wifiAPsSchema,
@@ -10,14 +9,9 @@ import {
 } from '@/types/ubusCalls';
 
 export async function getWifiAPs() {
-	const allRouters = await db
-		.select({ routerIP: routersTable.routerIP })
-		.from(routersTable);
-	if (!allRouters.length) {
-		return {
-			success: false,
-			error: 'No routers found'
-		} as const;
+	const allRouters = await getRouters();
+	if (!allRouters.success) {
+		return allRouters;
 	}
 
 	const wifiInterfacesMerged: {
@@ -32,7 +26,7 @@ export async function getWifiAPs() {
 
 	const allIfname: { [key: string]: string[] } = {};
 
-	for (const router of allRouters) {
+	for (const router of allRouters.data) {
 		const ubusResponse = await ubusCall({
 			routerIP: router.routerIP,
 			params: ['luci-rpc', 'getWirelessDevices', {}]
