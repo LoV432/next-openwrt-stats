@@ -32,6 +32,10 @@ export async function getWifiAPs() {
 			params: ['luci-rpc', 'getWirelessDevices', {}]
 		});
 		if (!ubusResponse.success) {
+			console.log('[ERROR] ubus call to get wifi APs threw an error', {
+				routerIP: router.routerIP,
+				error: ubusResponse.error
+			});
 			return {
 				success: false,
 				error: ubusResponse.error
@@ -92,6 +96,9 @@ export async function getWifiClients() {
 
 	const wifiAPs = await getWifiAPs();
 	if (!wifiAPs.success) {
+		console.log('[ERROR] getWifiAPs threw an error', {
+			wifiAPs
+		});
 		return {
 			success: false,
 			error: wifiAPs.error
@@ -112,6 +119,10 @@ export async function getWifiClients() {
 			}
 			const parsedUbusResponse = wifiClientsSchema.safeParse(ubusResponse.data);
 			if (!parsedUbusResponse.success) {
+				console.log('[ERROR] Failed to parse ubus response from wifiClients', {
+					routerIP: router,
+					error: parsedUbusResponse.error
+				});
 				return {
 					success: false,
 					error: 'Failed to parse ubus response from wifiClients'

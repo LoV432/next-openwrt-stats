@@ -2,7 +2,13 @@
 import { NetworkInterface } from '@/types/ubusCalls';
 import { getNetworkInterfaces } from '@/lib/server/routerInterfaces';
 import { useQuery } from '@tanstack/react-query';
-import { createContext, useContext, useState, ReactNode } from 'react';
+import {
+	createContext,
+	useContext,
+	useState,
+	ReactNode,
+	useEffect
+} from 'react';
 
 type NetworkContextType = {
 	networkInterfaces?: NetworkInterface[];
@@ -36,9 +42,11 @@ export function NetworkProvider({ children }: { children: ReactNode }) {
 		refetchInterval: false
 	});
 
-	if (networkInterfaces && !activeDevice) {
-		setActiveDevice(networkInterfaces[0]);
-	}
+	useEffect(() => {
+		if (networkInterfaces && !activeDevice) {
+			setActiveDevice(networkInterfaces[0]);
+		}
+	}, [networkInterfaces, activeDevice]);
 
 	return (
 		<NetworkContext.Provider

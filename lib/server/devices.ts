@@ -26,6 +26,10 @@ export async function getDhcpDevices() {
 			params: ['luci-rpc', 'getDHCPLeases', {}]
 		});
 		if (!dhcpDevicesResponse.success) {
+			console.log('[ERROR] ubus call to get dhcp devices threw an error', {
+				routerIP: router.routerIP,
+				error: dhcpDevicesResponse.error
+			});
 			return {
 				success: false,
 				error: dhcpDevicesResponse.error
@@ -35,6 +39,10 @@ export async function getDhcpDevices() {
 			dhcpDevicesResponse.data
 		);
 		if (!parsedDhcpDevicesResponse.success) {
+			console.log('[ERROR] Failed to parse dhcp devices response', {
+				routerIP: router.routerIP,
+				error: parsedDhcpDevicesResponse.error
+			});
 			return {
 				success: false,
 				error: 'Failed to parse dhcp devices response'

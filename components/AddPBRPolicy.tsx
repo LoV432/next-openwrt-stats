@@ -131,7 +131,7 @@ export function AddEditRule({
 				});
 				if (!pbrData.success) {
 					toast.error(pbrData.error);
-					throw new Error(pbrData.error);
+					return;
 				}
 			} else {
 				const pbrData = await editPBRPolicy({
@@ -140,7 +140,7 @@ export function AddEditRule({
 				});
 				if (!pbrData.success) {
 					toast.error(pbrData.error);
-					throw new Error(pbrData.error);
+					return;
 				}
 			}
 			await refetchPolicies();

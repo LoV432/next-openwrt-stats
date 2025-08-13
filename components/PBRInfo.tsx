@@ -208,7 +208,7 @@ function DeletePolicy({
 	refetchPolicies
 }: {
 	policyName: string;
-	refetchPolicies: () => void;
+	refetchPolicies: () => Promise<any>;
 }) {
 	const [isLoading, setIsLoading] = useState(false);
 	async function deleteAction() {
@@ -218,8 +218,10 @@ function DeletePolicy({
 				name: policyName
 			});
 			if (!deleteResponse.success) {
-				toast.error(deleteResponse.error);
-				throw new Error(deleteResponse.error);
+				toast.error(deleteResponse.error, {
+					richColors: true
+				});
+				return;
 			}
 			await refetchPolicies();
 			toast.success('Policy deleted successfully', {

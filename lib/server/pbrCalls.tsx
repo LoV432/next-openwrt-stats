@@ -25,6 +25,10 @@ export async function getPBRPolicy() {
 	});
 
 	if (!pbrPolicyResponse.success) {
+		console.log('[ERROR] ubus call to get pbr policy threw an error', {
+			routerIP: primaryRouter.data.routerIP,
+			error: pbrPolicyResponse.error
+		});
 		return {
 			success: false,
 			error: pbrPolicyResponse.error
@@ -35,6 +39,10 @@ export async function getPBRPolicy() {
 		pbrPolicyResponse.data
 	);
 	if (!parsedPbrPolicyResponse.success) {
+		console.log('[ERROR] Failed to parse pbr policy response', {
+			routerIP: primaryRouter.data.routerIP,
+			error: parsedPbrPolicyResponse.error
+		});
 		return {
 			success: false,
 			error: 'Failed to parse pbr policy response'
@@ -59,6 +67,10 @@ export async function getPBRInterfaces() {
 	});
 
 	if (!pbrInterfacesResponse.success) {
+		console.log('[ERROR] ubus call to get pbr interfaces threw an error', {
+			routerIP: primaryRouter.data.routerIP,
+			error: pbrInterfacesResponse.error
+		});
 		return {
 			success: false,
 			error: pbrInterfacesResponse.error
@@ -69,6 +81,10 @@ export async function getPBRInterfaces() {
 		pbrInterfacesResponse.data
 	);
 	if (!parsedPbrPolicyResponse.success) {
+		console.log('[ERROR] Failed to parse pbr policy response', {
+			routerIP: primaryRouter.data.routerIP,
+			error: parsedPbrPolicyResponse.error
+		});
 		return {
 			success: false,
 			error: 'Failed to parse pbr policy response'
@@ -128,7 +144,8 @@ export async function setPBRPolicy({
 		]
 	});
 	if (!pbrPolicyResponse.success) {
-		console.log('[ERROR] Failed to add policy', {
+		console.log('[ERROR] ubus call to add policy threw an error', {
+			routerIP: primaryRouter.data.routerIP,
 			parsedForm,
 			pbrPolicyResponse
 		});
@@ -140,6 +157,10 @@ export async function setPBRPolicy({
 
 	const commitChangesResponse = await commitPBRchanges();
 	if (!commitChangesResponse.success) {
+		console.log('[ERROR] attempt to commit add policy changes threw an error', {
+			routerIP: primaryRouter.data.routerIP,
+			error: commitChangesResponse.error
+		});
 		return {
 			success: false,
 			error: commitChangesResponse.error
@@ -173,6 +194,10 @@ export async function editPBRPolicy({
 
 	const currentPolicies = await getPBRPolicy();
 	if (currentPolicies.error) {
+		console.log('[ERROR] getPBRPolicy threw an error', {
+			routerIP: primaryRouter.data.routerIP,
+			error: currentPolicies.error
+		});
 		return {
 			success: false,
 			error: currentPolicies.error
@@ -181,6 +206,10 @@ export async function editPBRPolicy({
 
 	let policyToEdit = currentPolicies.data[policy];
 	if (!policyToEdit || policyToEdit['.type'] !== 'policy') {
+		console.log('[ERROR] Attempted to edit policy that does not exist', {
+			routerIP: primaryRouter.data.routerIP,
+			policy
+		});
 		return {
 			success: false,
 			error: 'Policy not found'
@@ -209,9 +238,10 @@ export async function editPBRPolicy({
 			]
 		});
 		if (!deleteResponse.success) {
-			console.log('[ERROR] Failed to edit policy', {
+			console.log('[ERROR] ubus call to delete policy threw an error', {
+				routerIP: primaryRouter.data.routerIP,
 				policy,
-				deleteResponse
+				error: deleteResponse.error
 			});
 			return {
 				success: false,
@@ -240,9 +270,10 @@ export async function editPBRPolicy({
 			]
 		});
 		if (!pbrPolicyResponse.success) {
-			console.log('[ERROR] Failed to edit policy', {
+			console.log('[ERROR] ubus call to edit policy threw an error', {
+				routerIP: primaryRouter.data.routerIP,
 				policy,
-				pbrPolicyResponse
+				error: pbrPolicyResponse.error
 			});
 			return {
 				success: false,
@@ -253,6 +284,13 @@ export async function editPBRPolicy({
 
 	const commitChangesResponse = await commitPBRchanges();
 	if (!commitChangesResponse.success) {
+		console.log(
+			'[ERROR] attempt to commit edit policy changes threw an error',
+			{
+				routerIP: primaryRouter.data.routerIP,
+				error: commitChangesResponse.error
+			}
+		);
 		return {
 			success: false,
 			error: commitChangesResponse.error
@@ -284,9 +322,10 @@ export async function deletePBRPolicy({ name }: { name: string }) {
 		]
 	});
 	if (!pbrPolicyResponse.success) {
-		console.log('[ERROR] Failed to delete policy', {
+		console.log('[ERROR] ubus call to delete policy threw an error', {
+			routerIP: primaryRouter.data.routerIP,
 			name,
-			pbrPolicyResponse
+			error: pbrPolicyResponse.error
 		});
 		return {
 			success: false,
@@ -296,6 +335,13 @@ export async function deletePBRPolicy({ name }: { name: string }) {
 
 	const commitChangesResponse = await commitPBRchanges();
 	if (!commitChangesResponse.success) {
+		console.log(
+			'[ERROR] attempt to commit delete policy changes threw an error',
+			{
+				routerIP: primaryRouter.data.routerIP,
+				error: commitChangesResponse.error
+			}
+		);
 		return {
 			success: false,
 			error: commitChangesResponse.error

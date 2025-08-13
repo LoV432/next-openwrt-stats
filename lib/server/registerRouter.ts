@@ -47,7 +47,11 @@ export async function registerRouter(
 			} as const;
 		});
 	} catch (error) {
-		console.log(error);
+		console.log('[ERROR] Failed to add router', {
+			routerIP,
+			username,
+			error
+		});
 		return {
 			success: false,
 			error: 'Failed to add router'

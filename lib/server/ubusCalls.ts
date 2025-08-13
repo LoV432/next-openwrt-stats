@@ -34,7 +34,8 @@ export async function ubusCall({
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify(ubusObject)
+			body: JSON.stringify(ubusObject),
+			signal: AbortSignal.timeout(2000)
 		});
 
 		const parsedResponse = await response.json();
@@ -49,11 +50,6 @@ export async function ubusCall({
 			});
 
 			if (!newLogin.success) {
-				console.log('[ERROR] Failed to login again', {
-					routerIP,
-					username: session[0].username,
-					password: session[0].password
-				});
 				return {
 					success: false,
 					error: newLogin.error
@@ -65,14 +61,12 @@ export async function ubusCall({
 					.set({ session: newLogin.data.ubus_rpc_session })
 					.where(eq(routersTable.routerIP, routerIP));
 			} catch (error) {
-				console.log('[ERROR] Failed to update session', {
-					routerIP,
-					username: session[0].username,
-					password: session[0].password
-				});
+				console.log(
+					'[ERROR] Failed to update session key in DB after a successful login'
+				);
 				return {
 					success: false,
-					error: 'Failed to update session, Please try again'
+					error: 'Failed to update session key in DB after a successful login'
 				} as const;
 			}
 			const newUbusObject = {
@@ -93,9 +87,13 @@ export async function ubusCall({
 
 			const checkFailedSession = failedSessionSchema.safeParse(parsedResponse);
 			if (checkFailedSession.success) {
+				console.log('[ERROR] Relogin attempt failed for unknown reason', {
+					routerIP,
+					checkFailedSession
+				});
 				return {
 					success: false,
-					error: 'Unknown response from router'
+					error: 'Relogin attempt failed for unknown reason'
 				} as const;
 			}
 
@@ -110,13 +108,15 @@ export async function ubusCall({
 			data: parsedResponse
 		} as const;
 	} catch (error) {
-		console.log('[ERROR] Ubus call failed', {
+		console.log('[ERROR] fetch request threw an error during ubus call', {
 			routerIP,
-			params
+			params,
+			error
 		});
 		return {
 			success: false,
-			error: "Fetch request failed, Please check your router's IP"
+			error:
+				"Fetch request threw an error during ubus call, Please check your router's IP"
 		} as const;
 	}
 }
@@ -152,28 +152,33 @@ export async function login({
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify(ubusObject)
+			body: JSON.stringify(ubusObject),
+			signal: AbortSignal.timeout(2000)
 		});
 
 		const ubusResponse = await response.json();
 		const parsedUbusResponse = loginSchema.safeParse(ubusResponse);
 		if (!parsedUbusResponse.success) {
-			console.log('[ERROR] Unknown ubus response', {
+			console.log('[ERROR] Unknown ubus response from login the call', {
 				routerIP,
 				username,
 				parsedUbusResponse
 			});
 			return {
 				success: false,
-				error: 'Unexpected response from router'
+				error: 'Unknown ubus response from login the call'
 			} as const;
 		}
 
 		if (parsedUbusResponse.data.result[0] === 6) {
-			console.log('[ERROR] Login failed due to bad credentials');
+			console.log('[ERROR] Login failed due to bad credentials', {
+				routerIP,
+				username,
+				password
+			});
 			return {
 				success: false,
-				error: 'Failed to login, Please check your username and password'
+				error: 'Login failed due to bad credentials'
 			} as const;
 		}
 
@@ -182,13 +187,15 @@ export async function login({
 			data: parsedUbusResponse.data.result[1]
 		} as const;
 	} catch (error) {
-		console.log('[ERROR] Ubus call failed', {
+		console.log('[ERROR] fetch request threw an error during ubus login call', {
 			routerIP,
-			username
+			username,
+			error
 		});
 		return {
 			success: false,
-			error: "Fetch request failed, Please check your router's IP"
+			error:
+				"Fetch request threw an error during ubus login call, Please check your router's IP"
 		} as const;
 	}
 }
