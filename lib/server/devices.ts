@@ -30,10 +30,7 @@ export async function getDhcpDevices() {
 				routerIP: router.routerIP,
 				error: dhcpDevicesResponse.error
 			});
-			return {
-				success: false,
-				error: dhcpDevicesResponse.error
-			} as const;
+			continue;
 		}
 		const parsedDhcpDevicesResponse = dhcpDevicesSchema.safeParse(
 			dhcpDevicesResponse.data
@@ -43,10 +40,7 @@ export async function getDhcpDevices() {
 				routerIP: router.routerIP,
 				error: parsedDhcpDevicesResponse.error
 			});
-			return {
-				success: false,
-				error: 'Failed to parse dhcp devices response'
-			} as const;
+			continue;
 		}
 		if (parsedDhcpDevicesResponse.data.result) {
 			for (const device of parsedDhcpDevicesResponse.data.result[1]
