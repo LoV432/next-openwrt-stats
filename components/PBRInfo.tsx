@@ -89,6 +89,11 @@ export function PBRInfo() {
 			return null;
 		})
 		.filter((policy) => policy !== null);
+
+	if (config.length === 0) {
+		// TODO: I assume this would mean PBR is not installed or enabled.
+		return null;
+	}
 	return (
 		<Dialog>
 			<DialogTrigger asChild>

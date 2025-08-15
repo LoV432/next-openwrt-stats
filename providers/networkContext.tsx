@@ -39,7 +39,8 @@ export function NetworkProvider({ children }: { children: ReactNode }) {
 			}
 			return networkInterfaces.data;
 		},
-		refetchInterval: false
+		refetchInterval: false,
+		retry: 1
 	});
 
 	useEffect(() => {

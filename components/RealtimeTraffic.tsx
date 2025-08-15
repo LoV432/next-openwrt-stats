@@ -38,13 +38,13 @@ export function RealtimeTraffic() {
 	const [trafficHistory, setTrafficHistory] = useState<
 		Array<{ time: string; rx: number; tx: number }>
 	>([]);
-	const { activeDevice } = useNetwork();
+	const { activeDevice, error } = useNetwork();
 
 	const realtimeTrafficQuery = useQuery({
 		queryKey: ['traffic'],
 		queryFn: async () => {
 			if (!activeDevice) {
-				throw new Error('No interface selected');
+				throw new Error('No interface selected' + error?.message);
 			}
 			const trafficData = await getRealTimeTraffic(
 				activeDevice.device || activeDevice.l3_device
@@ -65,14 +65,24 @@ export function RealtimeTraffic() {
 			return trafficData.data;
 		},
 		enabled: !!activeDevice,
-		refetchInterval: 1000
+		refetchInterval: 1000,
+		retry: 1
 	});
 
-	if (realtimeTrafficQuery.isLoading || !realtimeTrafficQuery.data) {
-		return <div>Loading...</div>;
+	if (realtimeTrafficQuery.isPaused) {
+		return <LoadingErrorCard />;
 	}
-	if (realtimeTrafficQuery.isError) {
-		return <div>Error: {realtimeTrafficQuery.error?.message}</div>;
+
+	if (realtimeTrafficQuery.error) {
+		return <LoadingErrorCard error={realtimeTrafficQuery.error?.message} />;
+	}
+
+	if (realtimeTrafficQuery.isLoading) {
+		return <LoadingErrorCard />;
+	}
+
+	if (!realtimeTrafficQuery.data) {
+		return <LoadingErrorCard />;
 	}
 
 	const uploadPercent =
@@ -149,6 +159,41 @@ export function RealtimeTraffic() {
 					</div>
 					<Progress className="w-full" value={uploadPercent} />
 				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
+function LoadingErrorCard({ error }: { error?: string }) {
+	return (
+		<Card className="w-full">
+			<CardHeader>
+				<div className="flex h-4 w-full items-center justify-between">
+					<h3 className="text-lg font-semibold">Realtime Traffic</h3>
+				</div>
+			</CardHeader>
+			<CardContent>
+				{error ? (
+					<div className="space-y-2 text-sm">
+						<div className="flex w-full items-center gap-2">
+							<span className="text-muted-foreground w-1/4">Error:</span>
+							<span className="ml-auto font-mono">{error}</span>
+						</div>
+					</div>
+				) : (
+					<div className="space-y-4 text-sm">
+						<div className="flex w-full items-center gap-2">
+							<span className="text-muted-foreground w-1/4">Download:</span>
+							<span className="ml-auto font-mono">{0} Mbps</span>
+						</div>
+						<Progress className="w-full" value={0} />
+						<div className="flex w-full items-center gap-2">
+							<span className="text-muted-foreground w-1/4">Upload:</span>
+							<span className="ml-auto font-mono">{0} Mbps</span>
+						</div>
+						<Progress className="w-full" value={0} />
+					</div>
+				)}
 			</CardContent>
 		</Card>
 	);

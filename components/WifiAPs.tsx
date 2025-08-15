@@ -16,14 +16,41 @@ export function WifiAPs() {
 
 			return wifiAPs.data;
 		},
-		refetchInterval: false
+		refetchInterval: false,
+		retry: 1
 	});
 
-	if (wifiAPsQuery.isLoading) {
-		return <div>Loading...</div>;
-	}
 	if (wifiAPsQuery.isError) {
-		return <div>Error: {wifiAPsQuery.error?.message}</div>;
+		return (
+			<div className="w-full border-y-2 border-zinc-800 py-4">
+				<div className="grid h-44 w-full place-items-center text-xl">
+					<div className="flex h-full w-full flex-col items-center justify-center">
+						<WifiIcon className="h-12 w-12 animate-pulse" />
+						Error: {wifiAPsQuery.error?.message}
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	if (wifiAPsQuery.isLoading) {
+		return (
+			<div className="w-full border-y-2 border-zinc-800 py-4">
+				<div className="grid h-44 w-full place-items-center text-xl">
+					<div className="flex h-full w-full flex-col items-center justify-center">
+						<WifiIcon className="h-12 w-12 animate-pulse" />
+						Loading Wifi APs...
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	if (
+		wifiAPsQuery.data &&
+		Object.keys(wifiAPsQuery.data.wifiInterfaces).length === 0
+	) {
+		return <></>;
 	}
 
 	return (

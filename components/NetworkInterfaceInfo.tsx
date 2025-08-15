@@ -5,13 +5,13 @@ import { WireguardInfo } from './WireguardInfo';
 import { useNetwork } from '@/providers/networkContext';
 
 export function NetworkInterfaceInfo() {
-	const { networkInterfaces, activeDevice, isLoading, error } = useNetwork();
+	const { activeDevice, isLoading, error } = useNetwork();
 
-	if (isLoading || !networkInterfaces) {
-		return <div>Loading...</div>;
-	}
 	if (error) {
-		return <div>Error: {error.message}</div>;
+		return <LoadingErrorCard error={error.message} />;
+	}
+	if (isLoading) {
+		return <LoadingErrorCard />;
 	}
 
 	return (
@@ -59,6 +59,47 @@ export function NetworkInterfaceInfo() {
 						</>
 					)}
 				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
+function LoadingErrorCard({ error }: { error?: string }) {
+	return (
+		<Card className="w-full">
+			<CardHeader>
+				<div className="flex h-4 w-full items-center justify-between">
+					<h3 className="text-lg font-semibold">Network Interface</h3>
+				</div>
+			</CardHeader>
+			<CardContent>
+				{error ? (
+					<div className="space-y-2 text-sm">
+						<div className="flex w-full items-center gap-2">
+							<span className="text-muted-foreground w-1/4">Error:</span>
+							<span className="ml-auto font-mono">{error}</span>
+						</div>
+					</div>
+				) : (
+					<div className="space-y-2 text-sm">
+						<div className="flex w-full items-center gap-2">
+							<span className="text-muted-foreground w-1/4">IPv4 Address:</span>
+							<span className="ml-auto font-mono">- - - -</span>
+						</div>
+						<div className="flex w-full items-center gap-2 text-sm">
+							<span className="text-muted-foreground w-1/4">Gateway IP:</span>
+							<span className="ml-auto font-mono">- - - -</span>
+						</div>
+						<div className="flex w-full items-center gap-2">
+							<span className="text-muted-foreground w-1/4">DNS Servers:</span>
+							<span className="ml-auto font-mono">- - - -</span>
+						</div>
+						<div className="flex w-full items-center gap-2">
+							<span className="text-muted-foreground w-1/4">Uptime:</span>
+							<span className="ml-auto font-mono">- - - -</span>
+						</div>
+					</div>
+				)}
 			</CardContent>
 		</Card>
 	);

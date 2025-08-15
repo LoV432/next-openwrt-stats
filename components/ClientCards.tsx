@@ -2,7 +2,7 @@
 import { getDhcpDevices } from '@/lib/server/devices';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
-import { Wifi } from 'lucide-react';
+import { User2Icon, Wifi } from 'lucide-react';
 import { getWifiClients } from '@/lib/server/wifiAPs';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { formatBytes, secondsToHumanReadable } from '@/lib/utils';
@@ -18,7 +18,8 @@ export default function ClientCards() {
 
 			return dhcpDevices.data;
 		},
-		refetchInterval: false
+		refetchInterval: false,
+		retry: 1
 	});
 
 	const wifiClientsQuery = useQuery({
@@ -31,16 +32,33 @@ export default function ClientCards() {
 
 			return wifiClients.data;
 		},
-		refetchInterval: false
+		refetchInterval: false,
+		retry: 1
 	});
-	if (dhcpDevicesQuery.isLoading || wifiClientsQuery.isLoading) {
-		return <div>Loading...</div>;
-	}
+
 	if (dhcpDevicesQuery.isError || wifiClientsQuery.isError) {
 		return (
-			<div>
-				Error:{' '}
-				{dhcpDevicesQuery.error?.message || wifiClientsQuery.error?.message}
+			<div className="w-full border-y-2 border-zinc-800 py-4">
+				<div className="grid h-44 w-full place-items-center text-xl">
+					<div className="flex h-full w-full flex-col items-center justify-center">
+						<User2Icon className="h-12 w-12 animate-pulse" />
+						<div>Error: {dhcpDevicesQuery.error?.message}</div>
+						<div>Error: {wifiClientsQuery.error?.message}</div>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	if (dhcpDevicesQuery.isLoading || wifiClientsQuery.isLoading) {
+		return (
+			<div className="w-full border-y-2 border-zinc-800 py-4">
+				<div className="grid h-44 w-full place-items-center text-xl">
+					<div className="flex h-full w-full flex-col items-center justify-center">
+						<User2Icon className="h-12 w-12 animate-pulse" />
+						Loading DHCP and Wifi Clients...
+					</div>
+				</div>
 			</div>
 		);
 	}

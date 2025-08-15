@@ -6,12 +6,7 @@ import { useNetwork } from '@/providers/networkContext';
 import { PBRInfo } from './PBRInfo';
 
 export function Header() {
-	const { networkInterfaces, activeDevice, setActiveDevice, error } =
-		useNetwork();
-
-	if (error) {
-		return <div>Error: {error.message}</div>;
-	}
+	const { networkInterfaces, activeDevice, setActiveDevice } = useNetwork();
 
 	return (
 		<header className="w-full">
