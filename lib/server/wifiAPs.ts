@@ -26,60 +26,63 @@ export async function getWifiAPs() {
 
 	const allIfname: { [key: string]: string[] } = {};
 
-	for (const router of allRouters.data) {
-		const ubusResponse = await ubusCall({
-			routerIP: router.routerIP,
-			params: ['luci-rpc', 'getWirelessDevices', {}]
-		});
-		if (!ubusResponse.success) {
-			console.log('[ERROR] ubus call to get wifi APs threw an error', {
+	await Promise.all(
+		allRouters.data.map(async (router) => {
+			const ubusResponse = await ubusCall({
 				routerIP: router.routerIP,
-				error: ubusResponse.error
+				params: ['luci-rpc', 'getWirelessDevices', {}]
 			});
-			continue;
-		}
-		const parsedUbusResponse = wifiAPsSchema.safeParse(ubusResponse.data);
-		if (!parsedUbusResponse.success) {
-			console.log('[ERROR] Failed to parse ubus response from wifiAPs', {
-				routerIP: router.routerIP,
-				error: parsedUbusResponse.error
-			});
-			continue;
-		}
-		for (const radio of Object.values(parsedUbusResponse.data.result[1])) {
-			for (const radioInterface of radio.interfaces) {
-				if (!wifiInterfacesMerged[radioInterface.iwinfo.ssid]) {
-					wifiInterfacesMerged[radioInterface.iwinfo.ssid] = {
-						ip: new Set(),
-						channel: new Set(),
-						band: new Set(),
-						htmode: new Set(),
-						txpower: new Set()
-					};
+			if (!ubusResponse.success) {
+				console.log('[ERROR] ubus call to get wifi APs threw an error', {
+					routerIP: router.routerIP,
+					error: ubusResponse.error
+				});
+				return;
+			}
+			const parsedUbusResponse = wifiAPsSchema.safeParse(ubusResponse.data);
+			if (!parsedUbusResponse.success) {
+				console.log('[ERROR] Failed to parse ubus response from wifiAPs', {
+					routerIP: router.routerIP,
+					error: parsedUbusResponse.error
+				});
+				return;
+			}
+			for (const radio of Object.values(parsedUbusResponse.data.result[1])) {
+				for (const radioInterface of radio.interfaces) {
+					if (!wifiInterfacesMerged[radioInterface.iwinfo.ssid]) {
+						wifiInterfacesMerged[radioInterface.iwinfo.ssid] = {
+							ip: new Set(),
+							channel: new Set(),
+							band: new Set(),
+							htmode: new Set(),
+							txpower: new Set()
+						};
+					}
+					wifiInterfacesMerged[radioInterface.iwinfo.ssid].ip.add(
+						router.routerIP
+					);
+					wifiInterfacesMerged[radioInterface.iwinfo.ssid].channel.add(
+						radioInterface.iwinfo.channel
+					);
+					wifiInterfacesMerged[radioInterface.iwinfo.ssid].band.add(
+						radio.config.band
+					);
+					wifiInterfacesMerged[radioInterface.iwinfo.ssid].htmode.add(
+						radio.config.htmode
+					);
+					wifiInterfacesMerged[radioInterface.iwinfo.ssid].txpower.add(
+						radioInterface.iwinfo.txpower
+					);
 				}
-				wifiInterfacesMerged[radioInterface.iwinfo.ssid].ip.add(
-					router.routerIP
-				);
-				wifiInterfacesMerged[radioInterface.iwinfo.ssid].channel.add(
-					radioInterface.iwinfo.channel
-				);
-				wifiInterfacesMerged[radioInterface.iwinfo.ssid].band.add(
-					radio.config.band
-				);
-				wifiInterfacesMerged[radioInterface.iwinfo.ssid].htmode.add(
-					radio.config.htmode
-				);
-				wifiInterfacesMerged[radioInterface.iwinfo.ssid].txpower.add(
-					radioInterface.iwinfo.txpower
-				);
+				const ifname = radio.interfaces[0].ifname;
+				if (!allIfname[router.routerIP]) {
+					allIfname[router.routerIP] = [];
+				}
+				allIfname[router.routerIP].push(ifname);
 			}
-			const ifname = radio.interfaces[0].ifname;
-			if (!allIfname[router.routerIP]) {
-				allIfname[router.routerIP] = [];
-			}
-			allIfname[router.routerIP].push(ifname);
-		}
-	}
+		})
+	);
+
 	return {
 		success: true,
 		data: {
@@ -106,33 +109,41 @@ export async function getWifiClients() {
 			error: wifiAPs.error
 		} as const;
 	}
-	for (const router of Object.keys(wifiAPs.data.allIfname)) {
-		const allifname = wifiAPs.data.allIfname[router];
-		for (const ifname of allifname) {
-			const ubusResponse = await ubusCall({
-				routerIP: router,
-				params: ['iwinfo', 'assoclist', { device: ifname }]
-			});
-			if (!ubusResponse.success) {
-				continue;
-			}
-			const parsedUbusResponse = wifiClientsSchema.safeParse(ubusResponse.data);
-			if (!parsedUbusResponse.success) {
-				console.log('[ERROR] Failed to parse ubus response from wifiClients', {
+	await Promise.all(
+		Object.keys(wifiAPs.data.allIfname).map(async (router) => {
+			const allifname = wifiAPs.data.allIfname[router];
+			for (const ifname of allifname) {
+				const ubusResponse = await ubusCall({
 					routerIP: router,
-					error: parsedUbusResponse.error
+					params: ['iwinfo', 'assoclist', { device: ifname }]
 				});
-				continue;
+				if (!ubusResponse.success) {
+					continue;
+				}
+				const parsedUbusResponse = wifiClientsSchema.safeParse(
+					ubusResponse.data
+				);
+				if (!parsedUbusResponse.success) {
+					console.log(
+						'[ERROR] Failed to parse ubus response from wifiClients',
+						{
+							routerIP: router,
+							error: parsedUbusResponse.error
+						}
+					);
+					continue;
+				}
+				const wifiClients = parsedUbusResponse.data.result[1].results;
+				for (const client of wifiClients) {
+					wifiUsers[client.mac] = {
+						...client,
+						ip: router
+					};
+				}
 			}
-			const wifiClients = parsedUbusResponse.data.result[1].results;
-			for (const client of wifiClients) {
-				wifiUsers[client.mac] = {
-					...client,
-					ip: router
-				};
-			}
-		}
-	}
+		})
+	);
+
 	return {
 		success: true,
 		data: wifiUsers

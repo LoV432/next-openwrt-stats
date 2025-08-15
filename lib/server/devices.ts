@@ -20,40 +20,42 @@ export async function getDhcpDevices() {
 			leaseTime: number | boolean;
 		};
 	} = {};
-	for (const router of allRouters.data) {
-		const dhcpDevicesResponse = await ubusCall({
-			routerIP: router.routerIP,
-			params: ['luci-rpc', 'getDHCPLeases', {}]
-		});
-		if (!dhcpDevicesResponse.success) {
-			console.log('[ERROR] ubus call to get dhcp devices threw an error', {
+	await Promise.all(
+		allRouters.data.map(async (router) => {
+			const dhcpDevicesResponse = await ubusCall({
 				routerIP: router.routerIP,
-				error: dhcpDevicesResponse.error
+				params: ['luci-rpc', 'getDHCPLeases', {}]
 			});
-			continue;
-		}
-		const parsedDhcpDevicesResponse = dhcpDevicesSchema.safeParse(
-			dhcpDevicesResponse.data
-		);
-		if (!parsedDhcpDevicesResponse.success) {
-			console.log('[ERROR] Failed to parse dhcp devices response', {
-				routerIP: router.routerIP,
-				error: parsedDhcpDevicesResponse.error
-			});
-			continue;
-		}
-		if (parsedDhcpDevicesResponse.data.result) {
-			for (const device of parsedDhcpDevicesResponse.data.result[1]
-				.dhcp_leases) {
-				dhcpDevices[device.macaddr] = {
-					deviceName: device.hostname || 'Unknown Device',
-					macAddress: device.macaddr,
-					ipAddress: device.ipaddr,
-					leaseTime: device.expires
-				};
+			if (!dhcpDevicesResponse.success) {
+				console.log('[ERROR] ubus call to get dhcp devices threw an error', {
+					routerIP: router.routerIP,
+					error: dhcpDevicesResponse.error
+				});
+				return;
 			}
-		}
-	}
+			const parsedDhcpDevicesResponse = dhcpDevicesSchema.safeParse(
+				dhcpDevicesResponse.data
+			);
+			if (!parsedDhcpDevicesResponse.success) {
+				console.log('[ERROR] Failed to parse dhcp devices response', {
+					routerIP: router.routerIP,
+					error: parsedDhcpDevicesResponse.error
+				});
+				return;
+			}
+			if (parsedDhcpDevicesResponse.data.result) {
+				for (const device of parsedDhcpDevicesResponse.data.result[1]
+					.dhcp_leases) {
+					dhcpDevices[device.macaddr] = {
+						deviceName: device.hostname || 'Unknown Device',
+						macAddress: device.macaddr,
+						ipAddress: device.ipaddr,
+						leaseTime: device.expires
+					};
+				}
+			}
+		})
+	);
 	return {
 		success: true,
 		data: dhcpDevices
