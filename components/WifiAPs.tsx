@@ -3,7 +3,15 @@
 import { getWifiAPs } from '@/lib/server/wifiAPs';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
-import { WifiIcon } from 'lucide-react';
+import { Settings2, WifiIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger
+} from '@/components/ui/dialog';
 
 export function WifiAPs() {
 	const wifiAPsQuery = useQuery({
@@ -57,12 +65,18 @@ export function WifiAPs() {
 		<div className="w-full border-y-2 border-zinc-800 py-4">
 			<div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 				{wifiAPsQuery.data &&
-					Object.entries(wifiAPsQuery.data.wifiInterfaces).map(
+					Object.entries(wifiAPsQuery.data.wifiInterfacesMerged).map(
 						([ssid, data]) => (
 							<Card key={ssid} className="w-full">
 								<CardHeader>
-									<h3 className="text-lg font-semibold">
+									<h3 className="flex text-lg font-semibold">
 										<WifiIcon className="mb-1 mr-1 inline-block" /> {ssid}
+										<div className="ml-auto">
+											<DetailedWifiAPs
+												wifiInterfaces={wifiAPsQuery.data.wifiInterfaces[ssid]}
+												ssid={ssid}
+											/>
+										</div>
 									</h3>
 									<p>{Array.from(data.ip).join(' / ')}</p>
 								</CardHeader>
@@ -97,5 +111,78 @@ export function WifiAPs() {
 					)}
 			</div>
 		</div>
+	);
+}
+
+function DetailedWifiAPs({
+	wifiInterfaces,
+	ssid
+}: {
+	wifiInterfaces: {
+		ip: string;
+		channel: number;
+		band: string;
+		htmode: string;
+		txpower: number;
+	}[];
+	ssid: string;
+}) {
+	return (
+		<Dialog>
+			<DialogTrigger asChild>
+				<Button variant="outline">
+					<Settings2 className="h-4 w-4" />
+				</Button>
+			</DialogTrigger>
+			<DialogContent className="h-[80vh] sm:max-w-[425px]">
+				<DialogHeader>
+					<DialogTitle>Details for {ssid}</DialogTitle>
+				</DialogHeader>
+				<div className="w-full overflow-y-auto py-4">
+					<div className="flex w-full flex-col gap-5">
+						{wifiInterfaces &&
+							wifiInterfaces.map((wifiInterface) => (
+								<Card
+									key={
+										wifiInterface.ip +
+										wifiInterface.channel +
+										wifiInterface.band +
+										wifiInterface.htmode +
+										wifiInterface.txpower
+									}
+									className="w-full"
+								>
+									<CardHeader>
+										<h3 className="text-lg font-semibold">
+											<WifiIcon className="mb-1 mr-1 inline-block" /> {ssid} on{' '}
+											{wifiInterface.ip}
+										</h3>
+									</CardHeader>
+									<CardContent>
+										<div className="space-y-1.5 text-sm">
+											<p className="flex justify-between">
+												<span className="text-muted-foreground">Channel:</span>
+												<span>{wifiInterface.channel}</span>
+											</p>
+											<p className="flex justify-between">
+												<span className="text-muted-foreground">Band:</span>
+												<span>{wifiInterface.band}</span>
+											</p>
+											<p className="flex justify-between">
+												<span className="text-muted-foreground">Width:</span>
+												<span>{wifiInterface.htmode}</span>
+											</p>
+											<p className="flex justify-between">
+												<span className="text-muted-foreground">Power:</span>
+												<span>{wifiInterface.txpower} dBm</span>
+											</p>
+										</div>
+									</CardContent>
+								</Card>
+							))}
+					</div>
+				</div>
+			</DialogContent>
+		</Dialog>
 	);
 }

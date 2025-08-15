@@ -89,18 +89,20 @@ const radioSchema = z.object({
 		band: z.string(),
 		htmode: z.string()
 	}),
-	interfaces: z.array(
-		z.object({
-			section: z.string(),
-			ifname: z.string(),
-			iwinfo: z.object({
-				channel: z.number(),
-				phy: z.string(),
-				txpower: z.number(),
-				ssid: z.string()
+	interfaces: z
+		.array(
+			z.object({
+				section: z.string(),
+				ifname: z.string(),
+				iwinfo: z.object({
+					channel: z.number(),
+					phy: z.string(),
+					txpower: z.number(),
+					ssid: z.string()
+				})
 			})
-		})
-	)
+		)
+		.nullable()
 });
 
 export type Radio = z.infer<typeof radioSchema>;

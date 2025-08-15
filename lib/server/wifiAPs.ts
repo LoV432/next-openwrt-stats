@@ -14,6 +14,16 @@ export async function getWifiAPs() {
 		return allRouters;
 	}
 
+	const wifiInterfaces: {
+		[key: string]: {
+			ip: string;
+			channel: number;
+			band: string;
+			htmode: string;
+			txpower: number;
+		}[];
+	} = {};
+
 	const wifiInterfacesMerged: {
 		[key: string]: {
 			ip: Set<string>;
@@ -48,7 +58,17 @@ export async function getWifiAPs() {
 				return;
 			}
 			for (const radio of Object.values(parsedUbusResponse.data.result[1])) {
-				for (const radioInterface of radio.interfaces) {
+				for (const radioInterface of radio.interfaces || []) {
+					if (!wifiInterfaces[radioInterface.iwinfo.ssid]) {
+						wifiInterfaces[radioInterface.iwinfo.ssid] = [];
+					}
+					wifiInterfaces[radioInterface.iwinfo.ssid].push({
+						ip: router.routerIP,
+						channel: radioInterface.iwinfo.channel,
+						band: radio.config.band,
+						htmode: radio.config.htmode,
+						txpower: radioInterface.iwinfo.txpower
+					});
 					if (!wifiInterfacesMerged[radioInterface.iwinfo.ssid]) {
 						wifiInterfacesMerged[radioInterface.iwinfo.ssid] = {
 							ip: new Set(),
@@ -74,11 +94,13 @@ export async function getWifiAPs() {
 						radioInterface.iwinfo.txpower
 					);
 				}
-				const ifname = radio.interfaces[0].ifname;
+				if (!radio.interfaces || radio.interfaces.length === 0) {
+					continue;
+				}
 				if (!allIfname[router.routerIP]) {
 					allIfname[router.routerIP] = [];
 				}
-				allIfname[router.routerIP].push(ifname);
+				allIfname[router.routerIP].push(radio.interfaces[0].ifname);
 			}
 		})
 	);
@@ -86,8 +108,9 @@ export async function getWifiAPs() {
 	return {
 		success: true,
 		data: {
-			wifiInterfaces: wifiInterfacesMerged,
-			allIfname
+			wifiInterfacesMerged,
+			allIfname,
+			wifiInterfaces
 		}
 	} as const;
 }
