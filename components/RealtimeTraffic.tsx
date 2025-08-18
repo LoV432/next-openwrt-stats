@@ -106,14 +106,17 @@ export function RealtimeTraffic() {
 								<ChartAreaIcon className="h-3 w-3" />
 							</Button>
 						</DialogTrigger>
-						<DialogContent className="min-w-[unset]! max-w-[unset]! w-fit">
+						<DialogContent className="w-full max-w-[95vw] sm:max-w-2xl md:max-w-3xl">
 							<DialogHeader>
 								<DialogTitle>Realtime Traffic Chart</DialogTitle>
 							</DialogHeader>
-							<ChartContainer className="h-[400px] w-full" config={chartConfig}>
+							<ChartContainer
+								className="aspect-auto h-[220px] w-full sm:h-[320px] md:h-[420px]"
+								config={chartConfig}
+							>
 								<LineChart data={trafficHistory}>
 									<CartesianGrid />
-									<XAxis dataKey="time" />
+									<XAxis dataKey="time" className="hidden" />
 									<YAxis unit=" Mbps" padding={{ top: 10, bottom: 10 }} />
 									<ChartTooltip
 										content={
