@@ -124,6 +124,7 @@ function DetailedWifiAPs({
 		band: string;
 		htmode: string;
 		txpower: number;
+		bitrate?: number;
 	}[];
 	ssid: string;
 }) {
@@ -134,51 +135,63 @@ function DetailedWifiAPs({
 					<Settings2 className="h-4 w-4" />
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="h-[80vh] sm:max-w-[425px]">
+			<DialogContent className="h-[80vh] sm:max-w-[700px]">
 				<DialogHeader>
 					<DialogTitle>Details for {ssid}</DialogTitle>
 				</DialogHeader>
+
 				<div className="w-full overflow-y-auto py-4">
-					<div className="flex w-full flex-col gap-5">
+					<div className="flex w-full flex-col gap-4">
 						{wifiInterfaces &&
-							wifiInterfaces.map((wifiInterface) => (
-								<Card
+							wifiInterfaces.map((wifiInterface, idx) => (
+								<div
 									key={
 										wifiInterface.ip +
 										wifiInterface.channel +
 										wifiInterface.band +
 										wifiInterface.htmode +
-										wifiInterface.txpower
+										wifiInterface.txpower +
+										idx
 									}
-									className="w-full"
+									className="bg-background w-full rounded-md border px-3 py-3"
 								>
-									<CardHeader>
-										<h3 className="text-lg font-semibold">
-											<WifiIcon className="mb-1 mr-1 inline-block" /> {ssid} on{' '}
-											{wifiInterface.ip}
-										</h3>
-									</CardHeader>
-									<CardContent>
-										<div className="space-y-1.5 text-sm">
-											<p className="flex justify-between">
-												<span className="text-muted-foreground">Channel:</span>
-												<span>{wifiInterface.channel}</span>
-											</p>
-											<p className="flex justify-between">
-												<span className="text-muted-foreground">Band:</span>
-												<span>{wifiInterface.band}</span>
-											</p>
-											<p className="flex justify-between">
-												<span className="text-muted-foreground">Width:</span>
-												<span>{wifiInterface.htmode}</span>
-											</p>
-											<p className="flex justify-between">
-												<span className="text-muted-foreground">Power:</span>
-												<span>{wifiInterface.txpower} dBm</span>
-											</p>
+									<div className="flex items-start gap-4">
+										<div className="flex w-full items-center gap-3">
+											<div className="bg-muted rounded-md p-2">
+												<WifiIcon className="text-muted-foreground h-5 w-5" />
+											</div>
+											<div className="flex flex-col">
+												<div className="flex items-center gap-2">
+													<span className="text-lg font-semibold">{ssid}</span>
+													<span className="text-muted-foreground text-sm">
+														on {wifiInterface.ip}
+													</span>
+												</div>
+												<div className="text-muted-foreground text-sm">
+													Channel: {wifiInterface.channel} · Band:{' '}
+													{wifiInterface.band} · Width: {wifiInterface.htmode}
+												</div>
+												<div className="text-muted-foreground text-sm">
+													Bitrate:{' '}
+													{wifiInterface.bitrate
+														? wifiInterface.bitrate / 1000
+														: '?'}{' '}
+													Mbit/s · Power: {wifiInterface.txpower} dBm
+												</div>
+											</div>
+											<div className="ml-auto">
+												<div className="flex items-center gap-2">
+													<Button variant="outline" size="sm">
+														Disable
+													</Button>
+													<Button variant="destructive" size="sm">
+														Remove
+													</Button>
+												</div>
+											</div>
 										</div>
-									</CardContent>
-								</Card>
+									</div>
+								</div>
 							))}
 					</div>
 				</div>

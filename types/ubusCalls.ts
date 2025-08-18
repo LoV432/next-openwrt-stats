@@ -98,7 +98,8 @@ const radioSchema = z.object({
 					channel: z.number(),
 					phy: z.string(),
 					txpower: z.number(),
-					ssid: z.string()
+					ssid: z.string(),
+					bitrate: z.number().optional()
 				})
 			})
 		)

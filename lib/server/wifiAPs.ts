@@ -21,6 +21,7 @@ export async function getWifiAPs() {
 			band: string;
 			htmode: string;
 			txpower: number;
+			bitrate?: number;
 		}[];
 	} = {};
 
@@ -31,6 +32,7 @@ export async function getWifiAPs() {
 			band: Set<string>;
 			htmode: Set<string>;
 			txpower: Set<number>;
+			bitrate: Set<number>;
 		};
 	} = {};
 
@@ -67,7 +69,8 @@ export async function getWifiAPs() {
 						channel: radioInterface.iwinfo.channel,
 						band: radio.config.band,
 						htmode: radio.config.htmode,
-						txpower: radioInterface.iwinfo.txpower
+						txpower: radioInterface.iwinfo.txpower,
+						bitrate: radioInterface.iwinfo.bitrate
 					});
 					if (!wifiInterfacesMerged[radioInterface.iwinfo.ssid]) {
 						wifiInterfacesMerged[radioInterface.iwinfo.ssid] = {
@@ -75,7 +78,8 @@ export async function getWifiAPs() {
 							channel: new Set(),
 							band: new Set(),
 							htmode: new Set(),
-							txpower: new Set()
+							txpower: new Set(),
+							bitrate: new Set()
 						};
 					}
 					wifiInterfacesMerged[radioInterface.iwinfo.ssid].ip.add(
