@@ -78,7 +78,11 @@ export function WifiAPs() {
 											/>
 										</div>
 									</h3>
-									<p>{Array.from(data.ip).join(' / ')}</p>
+									<p>
+										{Array.from(data.ip)
+											.sort((a, b) => a.localeCompare(b))
+											.join(' / ')}
+									</p>
 								</CardHeader>
 								<CardContent>
 									<div className="space-y-1.5 text-sm">
@@ -143,56 +147,60 @@ function DetailedWifiAPs({
 				<div className="w-full overflow-y-auto py-4">
 					<div className="flex w-full flex-col gap-4">
 						{wifiInterfaces &&
-							wifiInterfaces.map((wifiInterface, idx) => (
-								<div
-									key={
-										wifiInterface.ip +
-										wifiInterface.channel +
-										wifiInterface.band +
-										wifiInterface.htmode +
-										wifiInterface.txpower +
-										idx
-									}
-									className="bg-background w-full rounded-md border px-3 py-3"
-								>
-									<div className="flex items-start gap-4">
-										<div className="flex w-full items-center gap-3">
-											<div className="bg-muted rounded-md p-2">
-												<WifiIcon className="text-muted-foreground h-5 w-5" />
-											</div>
-											<div className="flex flex-col">
-												<div className="flex items-center gap-2">
-													<span className="text-lg font-semibold">{ssid}</span>
-													<span className="text-muted-foreground text-sm">
-														on {wifiInterface.ip}
-													</span>
+							wifiInterfaces
+								.sort((a, b) => a.ip.localeCompare(b.ip))
+								.map((wifiInterface, idx) => (
+									<div
+										key={
+											wifiInterface.ip +
+											wifiInterface.channel +
+											wifiInterface.band +
+											wifiInterface.htmode +
+											wifiInterface.txpower +
+											idx
+										}
+										className="bg-background w-full rounded-md border px-3 py-3"
+									>
+										<div className="flex items-start gap-4">
+											<div className="flex w-full items-center gap-3">
+												<div className="bg-muted rounded-md p-2">
+													<WifiIcon className="text-muted-foreground h-5 w-5" />
 												</div>
-												<div className="text-muted-foreground text-sm">
-													Channel: {wifiInterface.channel} · Band:{' '}
-													{wifiInterface.band} · Width: {wifiInterface.htmode}
+												<div className="flex flex-col">
+													<div className="flex items-center gap-2">
+														<span className="text-lg font-semibold">
+															{ssid}
+														</span>
+														<span className="text-muted-foreground text-sm">
+															on {wifiInterface.ip}
+														</span>
+													</div>
+													<div className="text-muted-foreground text-sm">
+														Channel: {wifiInterface.channel} · Band:{' '}
+														{wifiInterface.band} · Width: {wifiInterface.htmode}
+													</div>
+													<div className="text-muted-foreground text-sm">
+														Bitrate:{' '}
+														{wifiInterface.bitrate
+															? wifiInterface.bitrate / 1000
+															: '?'}{' '}
+														Mbit/s · Power: {wifiInterface.txpower} dBm
+													</div>
 												</div>
-												<div className="text-muted-foreground text-sm">
-													Bitrate:{' '}
-													{wifiInterface.bitrate
-														? wifiInterface.bitrate / 1000
-														: '?'}{' '}
-													Mbit/s · Power: {wifiInterface.txpower} dBm
-												</div>
-											</div>
-											<div className="ml-auto">
-												<div className="flex items-center gap-2">
-													<Button variant="outline" size="sm">
-														Disable
-													</Button>
-													<Button variant="destructive" size="sm">
-														Remove
-													</Button>
+												<div className="ml-auto">
+													<div className="flex items-center gap-2">
+														<Button variant="outline" size="sm">
+															Disable
+														</Button>
+														<Button variant="destructive" size="sm">
+															Remove
+														</Button>
+													</div>
 												</div>
 											</div>
 										</div>
 									</div>
-								</div>
-							))}
+								))}
 					</div>
 				</div>
 			</DialogContent>
