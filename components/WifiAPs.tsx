@@ -1,6 +1,6 @@
 'use client';
 
-import { getWifiAPs } from '@/lib/server/wifiAPs';
+import { disableWifiAP, getWifiAPs } from '@/lib/server/wifiAPs';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Settings2, WifiIcon } from 'lucide-react';
@@ -123,6 +123,7 @@ function DetailedWifiAPs({
 	ssid
 }: {
 	wifiInterfaces: {
+		configSection: string;
 		ip: string;
 		channel: number;
 		band: string;
@@ -193,7 +194,16 @@ function DetailedWifiAPs({
 												</div>
 											</div>
 											<div className="ml-auto mt-3 flex flex-wrap items-center gap-2 md:ml-4 md:mt-0">
-												<Button variant="outline" size="sm">
+												<Button
+													variant="outline"
+													size="sm"
+													onClick={() =>
+														disableWifiAP({
+															routerIP: wifiInterface.ip,
+															configSection: wifiInterface.configSection
+														})
+													}
+												>
 													Disable
 												</Button>{' '}
 												<Button variant="destructive" size="sm">

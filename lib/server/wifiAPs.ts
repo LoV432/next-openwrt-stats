@@ -1,6 +1,6 @@
 'use server';
 
-import { getRouters } from './routerDB';
+import { getRouter, getRouters } from './routerDB';
 import { ubusCall } from './ubusCalls';
 import {
 	wifiAPsSchema,
@@ -16,6 +16,7 @@ export async function getWifiAPs() {
 
 	const wifiInterfaces: {
 		[key: string]: {
+			configSection: string;
 			ip: string;
 			channel: number;
 			band: string;
@@ -51,6 +52,7 @@ export async function getWifiAPs() {
 				});
 				return;
 			}
+
 			const parsedUbusResponse = wifiAPsSchema.safeParse(ubusResponse.data);
 			if (!parsedUbusResponse.success) {
 				console.log('[ERROR] Failed to parse ubus response from wifiAPs', {
@@ -65,6 +67,7 @@ export async function getWifiAPs() {
 						wifiInterfaces[radioInterface.iwinfo.ssid] = [];
 					}
 					wifiInterfaces[radioInterface.iwinfo.ssid].push({
+						configSection: radioInterface.section,
 						ip: router.routerIP,
 						channel: radioInterface.iwinfo.channel,
 						band: radio.config.band,
@@ -175,4 +178,70 @@ export async function getWifiClients() {
 		success: true,
 		data: wifiUsers
 	};
+}
+
+export async function disableWifiAP({
+	routerIP,
+	configSection
+}: {
+	routerIP: string;
+	configSection: string;
+}) {
+	const router = await getRouter(routerIP);
+	if (!router.success) {
+		return router;
+	}
+
+	const ubusResponse = await ubusCall({
+		routerIP: router.data.routerIP,
+		params: [
+			'uci',
+			'set',
+			{
+				config: 'wireless',
+				section: configSection,
+				values: {
+					disabled: '1'
+				}
+			}
+		]
+	});
+
+	if (!ubusResponse.success) {
+		console.log('[ERROR] ubus call to disable wifi AP threw an error', {
+			routerIP: router.data.routerIP,
+			error: ubusResponse.error
+		});
+		return {
+			success: false,
+			error: ubusResponse.error
+		} as const;
+	}
+
+	const confirmResponse = await ubusCall({
+		routerIP: router.data.routerIP,
+		params: [
+			'uci',
+			'commit',
+			{
+				config: 'wireless'
+			}
+		]
+	});
+
+	if (!confirmResponse.success) {
+		console.log('[ERROR] ubus call to commit wifi AP disable threw an error', {
+			routerIP: router.data.routerIP,
+			error: confirmResponse.error
+		});
+		return {
+			success: false,
+			error: confirmResponse.error
+		} as const;
+	}
+
+	return {
+		success: true,
+		data: ubusResponse.data
+	} as const;
 }
