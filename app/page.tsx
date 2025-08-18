@@ -14,9 +14,9 @@ export default async function Home() {
 	}
 
 	return (
-		<div className="mx-auto flex w-[80%] flex-col items-center justify-center gap-4 p-4">
+		<div className="mx-auto flex w-full flex-col items-center justify-center gap-4 p-4 sm:w-[80%]">
 			<Header />
-			<div className="grid w-full grid-cols-3 gap-4">
+			<div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
 				<RealtimeTraffic />
 				<NetworkInterfaceInfo />
 			</div>

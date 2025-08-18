@@ -161,42 +161,44 @@ function DetailedWifiAPs({
 										}
 										className="bg-background w-full rounded-md border px-3 py-3"
 									>
-										<div className="flex items-start gap-4">
-											<div className="flex w-full items-center gap-3">
+										<div className="flex flex-col gap-3 md:flex-row md:items-center">
+											<div className="flex-shrink-0">
 												<div className="bg-muted rounded-md p-2">
 													<WifiIcon className="text-muted-foreground h-5 w-5" />
 												</div>
-												<div className="flex flex-col">
-													<div className="flex items-center gap-2">
-														<span className="text-lg font-semibold">
-															{ssid}
-														</span>
-														<span className="text-muted-foreground text-sm">
-															on {wifiInterface.ip}
-														</span>
-													</div>
-													<div className="text-muted-foreground text-sm">
-														Channel: {wifiInterface.channel} · Band:{' '}
-														{wifiInterface.band} · Width: {wifiInterface.htmode}
-													</div>
-													<div className="text-muted-foreground text-sm">
-														Bitrate:{' '}
-														{wifiInterface.bitrate
-															? wifiInterface.bitrate / 1000
-															: '?'}{' '}
-														Mbit/s · Power: {wifiInterface.txpower} dBm
+											</div>
+											<div className="flex min-w-0 flex-1 flex-col">
+												<div className="flex items-center justify-between gap-2">
+													<div className="truncate">
+														<div className="flex items-center gap-2">
+															<span className="truncate text-lg font-semibold">
+																{ssid}
+															</span>
+															<span className="text-muted-foreground truncate text-sm">
+																on {wifiInterface.ip}
+															</span>
+														</div>
 													</div>
 												</div>
-												<div className="ml-auto">
-													<div className="flex items-center gap-2">
-														<Button variant="outline" size="sm">
-															Disable
-														</Button>
-														<Button variant="destructive" size="sm">
-															Remove
-														</Button>
-													</div>
+												<div className="text-muted-foreground mt-1 text-sm md:mt-0">
+													Channel: {wifiInterface.channel} · Band:{' '}
+													{wifiInterface.band} · Width: {wifiInterface.htmode}
 												</div>
+												<div className="text-muted-foreground mt-1 text-sm">
+													Bitrate:{' '}
+													{wifiInterface.bitrate
+														? wifiInterface.bitrate / 1000
+														: '?'}{' '}
+													Mbit/s · Power: {wifiInterface.txpower} dBm
+												</div>
+											</div>
+											<div className="ml-auto mt-3 flex flex-wrap items-center gap-2 md:ml-4 md:mt-0">
+												<Button variant="outline" size="sm">
+													Disable
+												</Button>{' '}
+												<Button variant="destructive" size="sm">
+													Remove
+												</Button>
 											</div>
 										</div>
 									</div>
