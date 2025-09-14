@@ -83,11 +83,7 @@ export function WifiAPs() {
 											/>
 										</div>
 									</h3>
-									<p>
-										{Array.from(data.ip)
-											.sort((a, b) => a.localeCompare(b))
-											.join(' / ')}
-									</p>
+									<p>{Array.from(data.ip).join(' / ')}</p>
 								</CardHeader>
 								<CardContent>
 									<div className="space-y-1.5 text-sm">
@@ -203,75 +199,73 @@ function DetailedWifiAPs({
 				<div className="w-full overflow-y-auto py-4">
 					<div className="flex w-full flex-col gap-4">
 						{allAPsWithSameSSID &&
-							allAPsWithSameSSID
-								.sort((a, b) => a.ip.localeCompare(b.ip))
-								.map((wifiInterface, idx) => (
-									<div
-										key={
-											wifiInterface.ip +
-											wifiInterface.channel +
-											wifiInterface.band +
-											wifiInterface.htmode +
-											wifiInterface.txpower +
-											idx
-										}
-										className="bg-background w-full rounded-md border px-3 py-3"
-									>
-										<div className="flex flex-col gap-3 md:flex-row md:items-center">
-											<div className="flex-shrink-0">
-												<div className="bg-muted rounded-md p-2">
-													<WifiIcon className="text-muted-foreground h-5 w-5" />
-												</div>
-											</div>
-											<div className="flex min-w-0 flex-1 flex-col">
-												<div className="flex items-center justify-between gap-2">
-													<div className="truncate">
-														<div className="flex items-center gap-2">
-															<span className="truncate text-lg font-semibold">
-																{ssid}
-															</span>
-															<span className="text-muted-foreground truncate text-sm">
-																on {wifiInterface.ip}
-															</span>
-														</div>
-													</div>
-												</div>
-												<div className="text-muted-foreground mt-1 text-sm md:mt-0">
-													Channel: {wifiInterface.channel} · Band:{' '}
-													{wifiInterface.band} · Width: {wifiInterface.htmode}
-												</div>
-												<div className="text-muted-foreground mt-1 text-sm">
-													Bitrate:{' '}
-													{wifiInterface.bitrate
-														? wifiInterface.bitrate / 1000
-														: '?'}{' '}
-													Mbit/s · Power: {wifiInterface.txpower} dBm
-												</div>
-											</div>
-											<div className="ml-auto mt-3 flex flex-wrap items-center gap-2 md:ml-4 md:mt-0">
-												<Button
-													disabled={isLoading}
-													variant="outline"
-													size="sm"
-													onClick={() => {
-														disableEnabledWifiAP({
-															disabled: wifiInterface.disabled ? true : false,
-															ip: wifiInterface.ip,
-															configSection: wifiInterface.configSection,
-															parentConfigSection:
-																wifiInterface.parentConfigSection
-														});
-													}}
-												>
-													{wifiInterface.disabled ? 'Enable' : 'Disable'}
-												</Button>
-												{/* <Button variant="destructive" size="sm">
-													Remove
-												</Button> */}
+							allAPsWithSameSSID.map((wifiInterface, idx) => (
+								<div
+									key={
+										wifiInterface.ip +
+										wifiInterface.channel +
+										wifiInterface.band +
+										wifiInterface.htmode +
+										wifiInterface.txpower +
+										idx
+									}
+									className="bg-background w-full rounded-md border px-3 py-3"
+								>
+									<div className="flex flex-col gap-3 md:flex-row md:items-center">
+										<div className="flex-shrink-0">
+											<div className="bg-muted rounded-md p-2">
+												<WifiIcon className="text-muted-foreground h-5 w-5" />
 											</div>
 										</div>
+										<div className="flex min-w-0 flex-1 flex-col">
+											<div className="flex items-center justify-between gap-2">
+												<div className="truncate">
+													<div className="flex items-center gap-2">
+														<span className="truncate text-lg font-semibold">
+															{ssid}
+														</span>
+														<span className="text-muted-foreground truncate text-sm">
+															on {wifiInterface.ip}
+														</span>
+													</div>
+												</div>
+											</div>
+											<div className="text-muted-foreground mt-1 text-sm md:mt-0">
+												Channel: {wifiInterface.channel} · Band:{' '}
+												{wifiInterface.band} · Width: {wifiInterface.htmode}
+											</div>
+											<div className="text-muted-foreground mt-1 text-sm">
+												Bitrate:{' '}
+												{wifiInterface.bitrate
+													? wifiInterface.bitrate / 1000
+													: '?'}{' '}
+												Mbit/s · Power: {wifiInterface.txpower} dBm
+											</div>
+										</div>
+										<div className="ml-auto mt-3 flex flex-wrap items-center gap-2 md:ml-4 md:mt-0">
+											<Button
+												disabled={isLoading}
+												variant="outline"
+												size="sm"
+												onClick={() => {
+													disableEnabledWifiAP({
+														disabled: wifiInterface.disabled ? true : false,
+														ip: wifiInterface.ip,
+														configSection: wifiInterface.configSection,
+														parentConfigSection:
+															wifiInterface.parentConfigSection
+													});
+												}}
+											>
+												{wifiInterface.disabled ? 'Enable' : 'Disable'}
+											</Button>
+											{/* <Button variant="destructive" size="sm">
+													Remove
+												</Button> */}
+										</div>
 									</div>
-								))}
+								</div>
+							))}
 					</div>
 				</div>
 			</DialogContent>

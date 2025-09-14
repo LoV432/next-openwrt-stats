@@ -15,7 +15,7 @@ export async function getWifiAPs() {
 		return allRouters;
 	}
 
-	const wifiAPsPerSSID: {
+	let wifiAPsPerSSID: {
 		[key: string]: {
 			configSection: string;
 			parentConfigSection: string;
@@ -29,7 +29,7 @@ export async function getWifiAPs() {
 		}[];
 	} = {};
 
-	const wifiAPsOverview: {
+	let wifiAPsOverview: {
 		// This is the overview of all wifi APs with the same SSID
 		// Something like this:
 		// {
@@ -178,6 +178,21 @@ export async function getWifiAPs() {
 			}
 		})
 	);
+
+	wifiAPsOverview = Object.keys(wifiAPsOverview)
+		.sort()
+		.reduce((obj: any, key) => {
+			obj[key] = wifiAPsOverview[key];
+			return obj;
+		}, {});
+
+	wifiAPsPerSSID = Object.keys(wifiAPsPerSSID)
+		.sort()
+		.reduce((obj: any, key) => {
+			// TODO: This seems to sort the IPs correctly but what about sorting with the bands as well?
+			obj[key] = wifiAPsPerSSID[key].sort((a, b) => a.ip.localeCompare(b.ip));
+			return obj;
+		}, {});
 
 	return {
 		success: true,
