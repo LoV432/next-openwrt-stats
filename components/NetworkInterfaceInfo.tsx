@@ -33,13 +33,13 @@ export function NetworkInterfaceInfo() {
 									IPv4 Address:
 								</span>
 								<span className="ml-auto font-mono">
-									{activeDevice['ipv4-address']?.[0].address}
+									{activeDevice['ipv4-address']?.[0]?.address}
 								</span>
 							</div>
 							<div className="flex w-full items-center gap-2 text-sm">
 								<span className="text-muted-foreground w-1/4">Gateway IP:</span>
 								<span className="ml-auto font-mono">
-									{activeDevice['ipv4-address']?.[0].ptpaddress || '- - - -'}
+									{activeDevice['ipv4-address']?.[0]?.ptpaddress || '- - - -'}
 								</span>
 							</div>
 							<div className="flex w-full items-center gap-2">

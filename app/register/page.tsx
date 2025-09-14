@@ -5,12 +5,14 @@ import { registerRouter } from '@/lib/server/registerRouter';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function Register() {
 	const [routerIP, setRouterIP] = useState('');
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
+	const queryClient = useQueryClient();
 	const router = useRouter();
 
 	async function register() {
@@ -33,6 +35,7 @@ export default function Register() {
 				richColors: true,
 				duration: 3000
 			});
+			await queryClient.invalidateQueries();
 			router.push('/');
 		} catch (error) {
 			toast.error('Failed to register router, please try again', {

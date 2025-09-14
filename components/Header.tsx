@@ -1,6 +1,6 @@
 'use client';
 
-import { AddRouter } from '@/components/AddRouter';
+import { ManageRouters } from '@/components/ManageRouters';
 import { InterfacePicker } from './InterfacePicker';
 import { useNetwork } from '@/providers/networkContext';
 import { PBRInfo } from './PBRInfo';
@@ -32,7 +32,7 @@ export function Header() {
 							/>
 						)}
 						<PBRInfo />
-						<AddRouter />
+						<ManageRouters />
 					</div>
 
 					<div className="flex items-center md:hidden">
@@ -60,7 +60,7 @@ export function Header() {
 										<PBRInfo />
 									</div>
 									<div>
-										<AddRouter />
+										<ManageRouters />
 									</div>
 								</div>
 							</DialogContent>

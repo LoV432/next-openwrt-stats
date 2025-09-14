@@ -8,13 +8,6 @@ export async function getRouters() {
 		const allRouters = await db
 			.select({ routerIP: routersTable.routerIP })
 			.from(routersTable);
-		if (!allRouters.length) {
-			console.log('[INFO] No routers found');
-			return {
-				success: false,
-				error: 'No routers found'
-			} as const;
-		}
 		return {
 			success: true,
 			data: allRouters
@@ -38,7 +31,8 @@ export async function getRouter(routerIP: string) {
 				username: routersTable.username,
 				password: routersTable.password,
 				session: routersTable.session,
-				isPrimary: routersTable.isPrimary
+				isPrimary: routersTable.isPrimary,
+				id: routersTable.id
 			})
 			.from(routersTable)
 			.where(eq(routersTable.routerIP, routerIP))
