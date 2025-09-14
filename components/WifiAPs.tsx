@@ -1,6 +1,6 @@
 'use client';
 
-import { disableWifiAP, getWifiAPs } from '@/lib/server/wifiAPs';
+import { disableWifiAP, enabledWifiAP, getWifiAPs } from '@/lib/server/wifiAPs';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Settings2, WifiIcon } from 'lucide-react';
@@ -12,6 +12,8 @@ import {
 	DialogTitle,
 	DialogTrigger
 } from '@/components/ui/dialog';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 export function WifiAPs() {
 	const wifiAPsQuery = useQuery({
@@ -56,7 +58,7 @@ export function WifiAPs() {
 
 	if (
 		wifiAPsQuery.data &&
-		Object.keys(wifiAPsQuery.data.wifiInterfaces).length === 0
+		Object.keys(wifiAPsQuery.data.wifiAPsPerSSID).length === 0
 	) {
 		return <></>;
 	}
@@ -65,7 +67,7 @@ export function WifiAPs() {
 		<div className="w-full border-y-2 border-zinc-800 py-4">
 			<div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 				{wifiAPsQuery.data &&
-					Object.entries(wifiAPsQuery.data.wifiInterfacesMerged).map(
+					Object.entries(wifiAPsQuery.data.wifiAPsOverview).map(
 						([ssid, data]) => (
 							<Card key={ssid} className="w-full">
 								<CardHeader>
@@ -73,8 +75,11 @@ export function WifiAPs() {
 										<WifiIcon className="mb-1 mr-1 inline-block" /> {ssid}
 										<div className="ml-auto">
 											<DetailedWifiAPs
-												wifiInterfaces={wifiAPsQuery.data.wifiInterfaces[ssid]}
+												allAPsWithSameSSID={
+													wifiAPsQuery.data.wifiAPsPerSSID[ssid]
+												}
 												ssid={ssid}
+												refetchWifiAPs={wifiAPsQuery.refetch}
 											/>
 										</div>
 									</h3>
@@ -88,7 +93,11 @@ export function WifiAPs() {
 									<div className="space-y-1.5 text-sm">
 										<p className="flex justify-between">
 											<span className="text-muted-foreground">Channel:</span>
-											<span>{Array.from(data.channel).join(' / ')}</span>
+											<span>
+												{Array.from(data.channel)
+													.filter((value) => value !== 0)
+													.join(' / ')}
+											</span>
 										</p>
 										<p className="flex justify-between">
 											<span className="text-muted-foreground">Band:</span>
@@ -106,7 +115,12 @@ export function WifiAPs() {
 										</p>
 										<p className="flex justify-between">
 											<span className="text-muted-foreground">Power:</span>
-											<span>{Array.from(data.txpower).join(' / ')} dBm</span>
+											<span>
+												{Array.from(data.txpower)
+													.filter((value) => value !== 0)
+													.join(' / ')}{' '}
+												dBm
+											</span>
 										</p>
 									</div>
 								</CardContent>
@@ -119,20 +133,61 @@ export function WifiAPs() {
 }
 
 function DetailedWifiAPs({
-	wifiInterfaces,
-	ssid
+	allAPsWithSameSSID,
+	ssid,
+	refetchWifiAPs
 }: {
-	wifiInterfaces: {
+	allAPsWithSameSSID: {
 		configSection: string;
+		parentConfigSection: string;
 		ip: string;
 		channel: number;
 		band: string;
 		htmode: string;
 		txpower: number;
 		bitrate?: number;
+		disabled?: boolean;
 	}[];
 	ssid: string;
+	refetchWifiAPs: () => Promise<any>;
 }) {
+	const [isLoading, setIsLoading] = useState(false);
+
+	async function disableEnabledWifiAP({
+		disabled,
+		ip,
+		configSection,
+		parentConfigSection
+	}: {
+		disabled: boolean;
+		ip: string;
+		configSection: string;
+		parentConfigSection: string;
+	}) {
+		setIsLoading(true);
+		try {
+			if (disabled) {
+				await enabledWifiAP({
+					routerIP: ip,
+					configSection: [configSection, parentConfigSection]
+				});
+			} else {
+				await disableWifiAP({
+					routerIP: ip,
+					configSection: configSection
+				});
+			}
+			await refetchWifiAPs();
+			toast.success('Wifi AP updated', {
+				richColors: true
+			});
+		} catch (err) {
+			toast.error('Something went wrong', {
+				richColors: true
+			});
+		}
+		setIsLoading(false);
+	}
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
@@ -147,8 +202,8 @@ function DetailedWifiAPs({
 
 				<div className="w-full overflow-y-auto py-4">
 					<div className="flex w-full flex-col gap-4">
-						{wifiInterfaces &&
-							wifiInterfaces
+						{allAPsWithSameSSID &&
+							allAPsWithSameSSID
 								.sort((a, b) => a.ip.localeCompare(b.ip))
 								.map((wifiInterface, idx) => (
 									<div
@@ -195,20 +250,24 @@ function DetailedWifiAPs({
 											</div>
 											<div className="ml-auto mt-3 flex flex-wrap items-center gap-2 md:ml-4 md:mt-0">
 												<Button
+													disabled={isLoading}
 													variant="outline"
 													size="sm"
-													onClick={() =>
-														disableWifiAP({
-															routerIP: wifiInterface.ip,
-															configSection: wifiInterface.configSection
-														})
-													}
+													onClick={() => {
+														disableEnabledWifiAP({
+															disabled: wifiInterface.disabled ? true : false,
+															ip: wifiInterface.ip,
+															configSection: wifiInterface.configSection,
+															parentConfigSection:
+																wifiInterface.parentConfigSection
+														});
+													}}
 												>
-													Disable
-												</Button>{' '}
-												<Button variant="destructive" size="sm">
-													Remove
+													{wifiInterface.disabled ? 'Enable' : 'Disable'}
 												</Button>
+												{/* <Button variant="destructive" size="sm">
+													Remove
+												</Button> */}
 											</div>
 										</div>
 									</div>

@@ -84,7 +84,7 @@ export const dhcpDevicesSchema = z.object({
 	])
 });
 
-const radioSchema = z.object({
+const wifiAPLiveData = z.object({
 	config: z.object({
 		band: z.string(),
 		htmode: z.string()
@@ -93,25 +93,56 @@ const radioSchema = z.object({
 		.array(
 			z.object({
 				section: z.string(),
-				ifname: z.string(),
-				iwinfo: z.object({
-					channel: z.number(),
-					phy: z.string(),
-					txpower: z.number(),
-					ssid: z.string(),
-					bitrate: z.number().optional()
-				})
+				ifname: z.string().optional(),
+				iwinfo: z
+					.object({
+						channel: z.number(),
+						txpower: z.number(),
+						ssid: z.string(),
+						bitrate: z.number().optional()
+					})
+					.optional()
 			})
 		)
 		.nullable()
 });
 
-export type Radio = z.infer<typeof radioSchema>;
-
-export const wifiAPsSchema = z.object({
+export const wifiAPsLiveDataSchema = z.object({
 	jsonrpc: z.string(),
 	id: z.number(),
-	result: z.tuple([z.literal(0), z.record(z.string(), radioSchema)])
+	result: z.tuple([z.literal(0), z.record(z.string(), wifiAPLiveData)])
+});
+
+const wifiConfig = z.object({
+	'.type': z.literal('wifi-iface'),
+	'.name': z.string(),
+	ssid: z.string(),
+	device: z.string(),
+	disabled: z.string().optional()
+});
+
+const wifiConfigParent = z.object({
+	'.type': z.literal('wifi-device'),
+	'.name': z.string(),
+	channel: z.string(),
+	band: z.string(),
+	htmode: z.string(),
+	txpower: z.string().optional(),
+	disabled: z.string().optional()
+});
+
+export const wifiConfigSchema = z.object({
+	jsonrpc: z.string(),
+	id: z.number(),
+	result: z.tuple([
+		z.literal(0),
+		z.object({
+			values: z.record(
+				z.string(),
+				z.discriminatedUnion('.type', [wifiConfig, wifiConfigParent])
+			)
+		})
+	])
 });
 
 export const wifiClientsSchema = z.object({
