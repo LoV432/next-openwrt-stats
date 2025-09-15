@@ -42,8 +42,7 @@ export async function ubusCall({
 
 		const checkFailedSession = failedSessionSchema.safeParse(parsedResponse);
 		if (checkFailedSession.success) {
-			console.log('[INFO] Session expired, logging in again');
-			const newLogin = await login({
+			const newLogin = await dedupedLogin({
 				routerIP,
 				username: session[0].username,
 				password: session[0].password
@@ -119,6 +118,29 @@ export async function ubusCall({
 				"Fetch request threw an error during ubus call, Please check your router's IP"
 		} as const;
 	}
+}
+
+const loginPromises = new Map<string, ReturnType<typeof login>>();
+async function dedupedLogin({
+	routerIP,
+	username,
+	password
+}: {
+	routerIP: string;
+	username: string;
+	password: string;
+}) {
+	if (loginPromises.has(routerIP)) {
+		return loginPromises.get(routerIP)!;
+	}
+
+	console.log('[INFO] Starting login for router', routerIP);
+	const promise = login({ routerIP, username, password }).finally(() => {
+		loginPromises.delete(routerIP);
+	});
+
+	loginPromises.set(routerIP, promise);
+	return promise;
 }
 
 export async function login({
