@@ -1,11 +1,12 @@
 import { db } from '@/lib/server/dbDriver';
-import { routersTable } from '@/db/schema';
+import { routersTable } from '@/drizzle/schema/schema';
 import { redirect } from 'next/navigation';
 import { RealtimeTraffic } from '@/components/RealtimeTraffic';
 import ClientCards from '@/components/ClientCards';
 import { WifiAPs } from '@/components/WifiAPs';
 import { Header } from '@/components/Header';
 import { NetworkInterfaceInfo } from '@/components/NetworkInterfaceInfo';
+export const dynamic = 'force-dynamic';
 
 export default async function Home() {
 	const routers = await db.select().from(routersTable);

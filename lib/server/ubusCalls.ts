@@ -1,6 +1,6 @@
 import { failedSessionSchema, loginSchema } from '@/types/ubusCalls';
 import { db } from './dbDriver';
-import { routersTable } from '@/db/schema';
+import { routersTable } from '@/drizzle/schema/schema';
 import { eq } from 'drizzle-orm';
 import 'server-only';
 

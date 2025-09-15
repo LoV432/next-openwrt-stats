@@ -1,6 +1,6 @@
 'use server';
 
-import { routersTable } from '@/db/schema';
+import { routersTable } from '@/drizzle/schema/schema';
 import { db } from './dbDriver';
 import { login } from './ubusCalls';
 import { eq, ne } from 'drizzle-orm';
