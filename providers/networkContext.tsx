@@ -53,9 +53,29 @@ export function NetworkProvider({ children }: { children: ReactNode }) {
 				(device) => device.device === activeDevice?.device
 			) === -1
 		) {
-			setActiveDevice(networkInterfaces[0]);
+			const localStorageActiveDevice = localStorage.getItem('activeDevice');
+			if (localStorageActiveDevice) {
+				const localStorageActiveDeviceParsed = JSON.parse(
+					localStorageActiveDevice
+				);
+				const activeDevice = networkInterfaces?.find(
+					(device) => device.device === localStorageActiveDeviceParsed.device
+				);
+				if (!activeDevice) {
+					setActiveDevice(networkInterfaces[0]);
+				}
+				setActiveDevice(activeDevice);
+			} else {
+				setActiveDevice(networkInterfaces[0]);
+			}
 		}
 	}, [networkInterfaces, activeDevice]);
+
+	useEffect(() => {
+		if (activeDevice) {
+			localStorage.setItem('activeDevice', JSON.stringify(activeDevice));
+		}
+	}, [activeDevice]);
 
 	return (
 		<NetworkContext.Provider
