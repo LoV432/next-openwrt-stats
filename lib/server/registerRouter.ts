@@ -32,6 +32,7 @@ export async function registerRouter(
 				username,
 				password,
 				session: checkCredentials.data.ubus_rpc_session,
+				lastAccessed: Date.now(),
 				isPrimary: isPrimary ? 1 : 0
 			});
 			if (isPrimary) {

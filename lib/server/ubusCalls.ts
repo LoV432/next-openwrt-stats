@@ -15,17 +15,40 @@ export async function ubusCall({
 		.select({
 			sessionKey: routersTable.session,
 			username: routersTable.username,
-			password: routersTable.password
+			password: routersTable.password,
+			lastAccessed: routersTable.lastAccessed
 		})
 		.from(routersTable)
 		.where(eq(routersTable.routerIP, routerIP))
 		.limit(1);
+	let sessionKey = session[0].sessionKey;
+	let lastAccessed = session[0].lastAccessed;
 
+	if (loginPromises.has(routerIP)) {
+		const response = await loginPromises.get(routerIP)!;
+		if (response.success) {
+			sessionKey = response.data.ubus_rpc_session;
+			lastAccessed = Date.now();
+		}
+	} else if (session[0].lastAccessed + 3500000 < Date.now()) {
+		const newLogin = await dedupedLogin({
+			routerIP,
+			username: session[0].username,
+			password: session[0].password
+		});
+		if (!newLogin.success) {
+			return {
+				success: false,
+				error: newLogin.error
+			} as const;
+		}
+		sessionKey = newLogin.data.ubus_rpc_session;
+	}
 	const ubusObject = {
 		jsonrpc: '2.0',
 		id: 1,
 		method: 'call',
-		params: [session[0].sessionKey, ...params]
+		params: [sessionKey, ...params]
 	};
 
 	try {
@@ -41,6 +64,28 @@ export async function ubusCall({
 		const parsedResponse = await response.json();
 
 		const checkFailedSession = failedSessionSchema.safeParse(parsedResponse);
+		if (!checkFailedSession.success) {
+			try {
+				await db
+					.update(routersTable)
+					.set({
+						lastAccessed: Date.now()
+					})
+					.where(eq(routersTable.routerIP, routerIP));
+			} catch (error) {
+				console.log(
+					'[ERROR] Failed to update lastAccessed in DB after a successful ubus call',
+					{
+						routerIP,
+						error
+					}
+				);
+			}
+			return {
+				success: true,
+				data: parsedResponse
+			} as const;
+		}
 		if (checkFailedSession.success) {
 			const newLogin = await dedupedLogin({
 				routerIP,
@@ -95,16 +140,30 @@ export async function ubusCall({
 					error: 'Relogin attempt failed for unknown reason'
 				} as const;
 			}
-
+			try {
+				await db
+					.update(routersTable)
+					.set({
+						lastAccessed: Date.now()
+					})
+					.where(eq(routersTable.routerIP, routerIP));
+			} catch (error) {
+				console.log(
+					'[ERROR] Failed to update lastAccessed in DB after a failed ubus call',
+					{
+						routerIP,
+						error
+					}
+				);
+			}
 			return {
 				success: true,
 				data: parsedResponse
 			} as const;
 		}
-
 		return {
-			success: true,
-			data: parsedResponse
+			success: false,
+			error: '[ERROR] Something went wrong during ubus call'
 		} as const;
 	} catch (error) {
 		console.log('[ERROR] fetch request threw an error during ubus call', {
@@ -146,11 +205,13 @@ async function dedupedLogin({
 export async function login({
 	routerIP,
 	username,
-	password
+	password,
+	isNew
 }: {
 	routerIP: string;
 	username: string;
 	password: string;
+	isNew?: boolean;
 }) {
 	const ubusObject = {
 		jsonrpc: '2.0',
@@ -163,7 +224,7 @@ export async function login({
 			{
 				username,
 				password,
-				timeout: 30
+				timeout: 3600
 			}
 		]
 	};
@@ -202,6 +263,31 @@ export async function login({
 				success: false,
 				error: 'Login failed due to bad credentials'
 			} as const;
+		}
+
+		if (!isNew) {
+			try {
+				await db
+					.update(routersTable)
+					.set({
+						lastAccessed: Date.now(),
+						session: parsedUbusResponse.data.result[1].ubus_rpc_session
+					})
+					.where(eq(routersTable.routerIP, routerIP));
+			} catch (error) {
+				console.log(
+					'[ERROR] Failed to update session key in DB after a successful login',
+					{
+						routerIP,
+						username,
+						error
+					}
+				);
+				return {
+					success: false,
+					error: 'Failed to update session key in DB after a successful login'
+				} as const;
+			}
 		}
 
 		return {

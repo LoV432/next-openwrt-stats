@@ -1,0 +1,1 @@
+ALTER TABLE `routers` ADD `lastAccessed` integer DEFAULT 0 NOT NULL;
