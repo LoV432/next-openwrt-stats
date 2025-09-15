@@ -7,7 +7,7 @@ import {
 	DialogTitle,
 	DialogTrigger
 } from './ui/dialog';
-import { getWireguardInterfaces } from '@/lib/server/routerInterfaces';
+import { WireguardInterfaces } from '@/lib/server/routerInterfaces';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Button } from './ui/button';
@@ -23,7 +23,9 @@ export function WireguardInfo({ interfaceName }: WireguardInfoProps) {
 	const wireguardQuery = useQuery({
 		queryKey: ['wireguard', interfaceName],
 		queryFn: async () => {
-			const response = await getWireguardInterfaces();
+			const response = await fetch('api/routers/primary/wireguard').then(
+				(res) => res.json() as Promise<WireguardInterfaces>
+			);
 			if (!response.success) {
 				throw new Error(response.error);
 			}

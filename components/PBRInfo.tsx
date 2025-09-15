@@ -12,8 +12,8 @@ import { Card } from './ui/card';
 import { useQuery } from '@tanstack/react-query';
 import {
 	deletePBRPolicy,
-	getPBRInterfaces,
-	getPBRPolicy
+	PbrInterfaces,
+	PbrPolicy
 } from '@/lib/server/pbrCalls';
 import { PBRIcon } from './PBRIcons';
 import { AddEditRule } from './AddPBRPolicy';
@@ -56,7 +56,9 @@ export function PBRInfo() {
 	const { data, refetch: refetchPolicies } = useQuery({
 		queryKey: ['pbrPolicy'],
 		queryFn: async () => {
-			const pbrData = await getPBRPolicy();
+			const pbrData = await fetch('/api/pbr/pbr-policy').then(
+				(res) => res.json() as Promise<PbrPolicy>
+			);
 			if (!pbrData.success) {
 				throw new Error(pbrData.error);
 			}
@@ -67,7 +69,9 @@ export function PBRInfo() {
 	const { data: interfaces } = useQuery({
 		queryKey: ['pbrInterfaces'],
 		queryFn: async () => {
-			const pbrData = await getPBRInterfaces();
+			const pbrData = await fetch('/api/pbr/pbr-interfaces').then(
+				(res) => res.json() as Promise<PbrInterfaces>
+			);
 			if (!pbrData.success) throw new Error(pbrData.error);
 			return pbrData.data;
 		}

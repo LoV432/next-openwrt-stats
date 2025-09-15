@@ -1,6 +1,10 @@
 'use client';
 
-import { disableWifiAP, enabledWifiAP, getWifiAPs } from '@/lib/server/wifiAPs';
+import {
+	disableWifiAP,
+	enabledWifiAP,
+	type WifiAPs
+} from '@/lib/server/wifiAPs';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Settings2, WifiIcon } from 'lucide-react';
@@ -19,7 +23,9 @@ export function WifiAPs() {
 	const wifiAPsQuery = useQuery({
 		queryKey: ['wifiAPs'],
 		queryFn: async () => {
-			const wifiAPs = await getWifiAPs();
+			const wifiAPs = await fetch('/api/routers/all/wifi/aps').then(
+				(res) => res.json() as Promise<WifiAPs>
+			);
 			if (!wifiAPs.success) {
 				throw new Error(wifiAPs.error);
 			}
@@ -83,14 +89,14 @@ export function WifiAPs() {
 											/>
 										</div>
 									</h3>
-									<p>{Array.from(data.ip).join(' / ')}</p>
+									<p>{data.ip.join(' / ')}</p>
 								</CardHeader>
 								<CardContent>
 									<div className="space-y-1.5 text-sm">
 										<p className="flex justify-between">
 											<span className="text-muted-foreground">Channel:</span>
 											<span>
-												{Array.from(data.channel)
+												{data.channel
 													.filter((value) => value !== 0)
 													.join(' / ')}
 											</span>
@@ -98,7 +104,7 @@ export function WifiAPs() {
 										<p className="flex justify-between">
 											<span className="text-muted-foreground">Band:</span>
 											<span>
-												{Array.from(data.band)
+												{data.band
 													.join(' / ')
 													.replace('2g', '2.4')
 													.replace('5g', '5')}{' '}
@@ -107,12 +113,12 @@ export function WifiAPs() {
 										</p>
 										<p className="flex justify-between">
 											<span className="text-muted-foreground">Width:</span>
-											<span>{Array.from(data.htmode).join(' / ')}</span>
+											<span>{data.htmode.join(' / ')}</span>
 										</p>
 										<p className="flex justify-between">
 											<span className="text-muted-foreground">Power:</span>
 											<span>
-												{Array.from(data.txpower)
+												{data.txpower
 													.filter((value) => value !== 0)
 													.join(' / ')}{' '}
 												dBm

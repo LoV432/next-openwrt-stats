@@ -8,6 +8,9 @@ import { ubusCall } from './ubusCalls';
 import { calcMbps } from '../utils';
 import { getPrimaryRouter } from './routerDB';
 
+export type NetworkInterfaces = Awaited<
+	ReturnType<typeof getNetworkInterfaces>
+>;
 export async function getNetworkInterfaces() {
 	const primaryRouter = await getPrimaryRouter();
 	if (!primaryRouter.success) {
@@ -59,6 +62,7 @@ export async function getNetworkInterfaces() {
 	} as const;
 }
 
+export type RealTimeTraffic = Awaited<ReturnType<typeof getRealTimeTraffic>>;
 export async function getRealTimeTraffic(device: string) {
 	const primaryRouter = await getPrimaryRouter();
 	if (!primaryRouter.success) {
@@ -118,6 +122,9 @@ export async function getRealTimeTraffic(device: string) {
 	} as const;
 }
 
+export type WireguardInterfaces = Awaited<
+	ReturnType<typeof getWireguardInterfaces>
+>;
 export async function getWireguardInterfaces() {
 	const primaryRouter = await getPrimaryRouter();
 	if (!primaryRouter.success) {

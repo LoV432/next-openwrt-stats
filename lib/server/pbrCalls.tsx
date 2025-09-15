@@ -7,6 +7,7 @@ import {
 import { ubusCall } from './ubusCalls';
 import { getPrimaryRouter } from './routerDB';
 
+export type PbrPolicy = Awaited<ReturnType<typeof getPBRPolicy>>;
 export async function getPBRPolicy() {
 	const primaryRouter = await getPrimaryRouter();
 	if (!primaryRouter.success) {
@@ -55,6 +56,7 @@ export async function getPBRPolicy() {
 	} as const;
 }
 
+export type PbrInterfaces = Awaited<ReturnType<typeof getPBRInterfaces>>;
 export async function getPBRInterfaces() {
 	const primaryRouter = await getPrimaryRouter();
 	if (!primaryRouter.success) {

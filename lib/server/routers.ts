@@ -3,6 +3,7 @@
 import { db } from './dbDriver';
 import { routersTable } from '@/drizzle/schema/schema';
 
+export type Routers = Awaited<ReturnType<typeof getRouters>>;
 export async function getRouters() {
 	try {
 		const allRouters = await db

@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getRouters } from '@/lib/server/routers';
+import { Routers } from '@/lib/server/routers';
 import { RouterIcon, TrashIcon } from 'lucide-react';
 
 export function ManageRouters() {
@@ -29,7 +29,9 @@ export function ManageRouters() {
 		queryKey: ['getRouters'],
 		queryFn: async () => {
 			try {
-				const routers = await getRouters();
+				const routers = await fetch('/api/routers/all').then(
+					(res) => res.json() as Promise<Routers>
+				);
 				if (!routers.success) {
 					throw new Error(routers.error);
 				}

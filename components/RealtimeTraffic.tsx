@@ -1,5 +1,5 @@
 'use client';
-import { getRealTimeTraffic } from '@/lib/server/routerInterfaces';
+import { RealTimeTraffic } from '@/lib/server/routerInterfaces';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import {
@@ -46,9 +46,10 @@ export function RealtimeTraffic() {
 			if (!activeDevice) {
 				throw new Error('No interface selected' + error?.message);
 			}
-			const trafficData = await getRealTimeTraffic(
-				activeDevice.device || activeDevice.l3_device
-			);
+			const trafficData = await fetch(
+				'/api/routers/primary/realtime-traffic?device=' +
+					(activeDevice.device || activeDevice.l3_device)
+			).then((res) => res.json() as Promise<RealTimeTraffic>);
 			if (!trafficData.success) {
 				throw new Error(trafficData.error);
 			}

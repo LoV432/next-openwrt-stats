@@ -1,9 +1,9 @@
 'use client';
-import { getDhcpDevices } from '@/lib/server/devices';
+import { DhcpDevices } from '@/lib/server/devices';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { User2Icon, Wifi } from 'lucide-react';
-import { getWifiClients } from '@/lib/server/wifiAPs';
+import { WifiClients } from '@/lib/server/wifiAPs';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { formatBytes, secondsToHumanReadable } from '@/lib/utils';
 
@@ -11,7 +11,9 @@ export default function ClientCards() {
 	const dhcpDevicesQuery = useQuery({
 		queryKey: ['dhcpDevices'],
 		queryFn: async () => {
-			const dhcpDevices = await getDhcpDevices();
+			const dhcpDevices = await fetch('/api/routers/all/dhcp-devices').then(
+				(res) => res.json() as Promise<DhcpDevices>
+			);
 			if (!dhcpDevices.success) {
 				throw new Error(dhcpDevices.error);
 			}
@@ -25,7 +27,9 @@ export default function ClientCards() {
 	const wifiClientsQuery = useQuery({
 		queryKey: ['wifiClients'],
 		queryFn: async () => {
-			const wifiClients = await getWifiClients();
+			const wifiClients = await fetch('/api/routers/all/wifi/clients').then(
+				(res) => res.json() as Promise<WifiClients>
+			);
 			if (!wifiClients.success) {
 				throw new Error(wifiClients.error);
 			}

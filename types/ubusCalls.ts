@@ -172,7 +172,7 @@ export const wifiClientsSchema = z.object({
 	])
 });
 
-export type WifiClients = z.infer<typeof wifiClientsSchema>;
+export type WifiClientsType = z.infer<typeof wifiClientsSchema>;
 
 const wireguardPeerSchema = z.object({
 	name: z.string(),

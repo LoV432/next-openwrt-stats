@@ -4,6 +4,7 @@ import { ubusCall } from './ubusCalls';
 import { dhcpDevicesSchema } from '@/types/ubusCalls';
 import { getRouters } from './routerDB';
 
+export type DhcpDevices = Awaited<ReturnType<typeof getDhcpDevices>>;
 export async function getDhcpDevices() {
 	const allRouters = await getRouters();
 	if (!allRouters.success) {

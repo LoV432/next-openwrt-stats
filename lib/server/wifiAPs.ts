@@ -4,11 +4,12 @@ import { getRouter, getRouters } from './routerDB';
 import { ubusCall } from './ubusCalls';
 import {
 	wifiAPsLiveDataSchema,
-	WifiClients,
+	WifiClientsType,
 	wifiClientsSchema,
 	wifiConfigSchema
 } from '@/types/ubusCalls';
 
+export type WifiAPs = Awaited<ReturnType<typeof getWifiAPs>>;
 export async function getWifiAPs() {
 	const allRouters = await getRouters();
 	if (!allRouters.success) {
@@ -47,7 +48,6 @@ export async function getWifiAPs() {
 			htmode: Set<string>;
 			txpower: Set<number>;
 			bitrate: Set<number>;
-			disabled: Set<boolean>;
 		};
 	} = {};
 
@@ -147,8 +147,7 @@ export async function getWifiAPs() {
 							band: new Set(),
 							htmode: new Set(),
 							txpower: new Set(),
-							bitrate: new Set(),
-							disabled: new Set()
+							bitrate: new Set()
 						};
 					}
 					wifiAPsOverview[wifiConfig.ssid].ip.add(router.routerIP);
@@ -164,11 +163,6 @@ export async function getWifiAPs() {
 							Number(wifiConfigParent.txpower) ||
 							0
 					);
-					wifiAPsOverview[wifiConfig.ssid].disabled.add(
-						wifiConfigParent.disabled === '1' || wifiConfig.disabled === '1'
-							? true
-							: false
-					);
 					if (!allIfname[router.routerIP]) {
 						allIfname[router.routerIP] = [];
 					}
@@ -179,12 +173,29 @@ export async function getWifiAPs() {
 		})
 	);
 
-	wifiAPsOverview = Object.keys(wifiAPsOverview)
-		.sort()
-		.reduce((obj: any, key) => {
-			obj[key] = wifiAPsOverview[key];
-			return obj;
-		}, {});
+	const wifiAPsOverviewFinal: {
+		// Sets are not JSON serializable
+		// So we convert them to arrays
+		[key: string]: {
+			ip: string[];
+			channel: number[];
+			band: string[];
+			htmode: string[];
+			txpower: number[];
+			bitrate: number[];
+		};
+	} = {};
+	for (const ssid of Object.keys(wifiAPsOverview).sort()) {
+		const entry = wifiAPsOverview[ssid];
+		wifiAPsOverviewFinal[ssid] = {
+			ip: Array.from(entry.ip),
+			channel: Array.from(entry.channel),
+			band: Array.from(entry.band),
+			htmode: Array.from(entry.htmode),
+			txpower: Array.from(entry.txpower),
+			bitrate: Array.from(entry.bitrate)
+		};
+	}
 
 	wifiAPsPerSSID = Object.keys(wifiAPsPerSSID)
 		.sort()
@@ -197,16 +208,17 @@ export async function getWifiAPs() {
 	return {
 		success: true,
 		data: {
-			wifiAPsOverview,
+			wifiAPsOverview: wifiAPsOverviewFinal,
 			allIfname,
 			wifiAPsPerSSID
 		}
 	} as const;
 }
 
+export type WifiClients = Awaited<ReturnType<typeof getWifiClients>>;
 export async function getWifiClients() {
 	const wifiUsers: {
-		[key: string]: WifiClients['result'][1]['results'][0] & {
+		[key: string]: WifiClientsType['result'][1]['results'][0] & {
 			ip: string;
 		};
 	} = {};

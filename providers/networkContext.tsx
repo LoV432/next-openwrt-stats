@@ -1,6 +1,6 @@
 'use client';
 import { NetworkInterface } from '@/types/ubusCalls';
-import { getNetworkInterfaces } from '@/lib/server/routerInterfaces';
+import { NetworkInterfaces } from '@/lib/server/routerInterfaces';
 import { useQuery } from '@tanstack/react-query';
 import {
 	createContext,
@@ -30,7 +30,9 @@ export function NetworkProvider({ children }: { children: ReactNode }) {
 	} = useQuery({
 		queryKey: ['networkInterfaces'],
 		queryFn: async () => {
-			const networkInterfaces = await getNetworkInterfaces();
+			const networkInterfaces = await fetch(
+				'/api/routers/primary/interfaces'
+			).then((res) => res.json() as Promise<NetworkInterfaces>);
 			if (!networkInterfaces.success) {
 				throw new Error(networkInterfaces.error);
 			}
