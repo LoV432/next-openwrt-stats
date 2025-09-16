@@ -22,13 +22,11 @@ export async function ubusCall({
 		.where(eq(routersTable.routerIP, routerIP))
 		.limit(1);
 	let sessionKey = session[0].sessionKey;
-	let lastAccessed = session[0].lastAccessed;
 
 	if (loginPromises.has(routerIP)) {
 		const response = await loginPromises.get(routerIP)!;
 		if (response.success) {
 			sessionKey = response.data.ubus_rpc_session;
-			lastAccessed = Date.now();
 		}
 	} else if (session[0].lastAccessed + 3500000 < Date.now()) {
 		const newLogin = await dedupedLogin({
