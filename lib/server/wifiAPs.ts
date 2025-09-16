@@ -188,12 +188,12 @@ export async function getWifiAPs() {
 	for (const ssid of Object.keys(wifiAPsOverview).sort()) {
 		const entry = wifiAPsOverview[ssid];
 		wifiAPsOverviewFinal[ssid] = {
-			ip: Array.from(entry.ip),
-			channel: Array.from(entry.channel),
-			band: Array.from(entry.band),
-			htmode: Array.from(entry.htmode),
-			txpower: Array.from(entry.txpower),
-			bitrate: Array.from(entry.bitrate)
+			ip: Array.from(entry.ip).sort(),
+			channel: Array.from(entry.channel).sort(),
+			band: Array.from(entry.band).sort(),
+			htmode: Array.from(entry.htmode).sort(),
+			txpower: Array.from(entry.txpower).sort(),
+			bitrate: Array.from(entry.bitrate).sort()
 		};
 	}
 
@@ -333,6 +333,7 @@ export async function disableWifiAP({
 			error: confirmResponse.error
 		} as const;
 	}
+	console.log(JSON.stringify(confirmResponse.data));
 
 	return {
 		success: true,
@@ -411,6 +412,7 @@ export async function enabledWifiAP({
 			error: confirmResponse.error
 		} as const;
 	}
+	console.log(JSON.stringify(confirmResponse.data));
 
 	return {
 		success: true,
