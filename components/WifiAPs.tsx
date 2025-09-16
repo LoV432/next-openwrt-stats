@@ -168,21 +168,28 @@ function DetailedWifiAPs({
 	}) {
 		setIsLoading(true);
 		try {
+			let response;
 			if (disabled) {
-				await enabledWifiAP({
+				response = await enabledWifiAP({
 					routerIP: ip,
 					configSection: [configSection, parentConfigSection]
 				});
 			} else {
-				await disableWifiAP({
+				response = await disableWifiAP({
 					routerIP: ip,
 					configSection: configSection
 				});
 			}
 			await refetchWifiAPs();
-			toast.success('Wifi AP updated', {
-				richColors: true
-			});
+			if (response.success) {
+				toast.success('Wifi AP updated', {
+					richColors: true
+				});
+			} else {
+				toast.error(`Failed to update wifi AP: ${response.error}`, {
+					richColors: true
+				});
+			}
 		} catch (err) {
 			toast.error('Something went wrong', {
 				richColors: true
