@@ -27,6 +27,10 @@ export function RouterPicker({
 						{activeDevice || 'Select Router'}
 					</span>
 				</button>
+				{/* <button className="border-1 flex h-9 w-fit items-center gap-1 rounded-md border-neutral-700 bg-neutral-800 px-2 text-white hover:bg-neutral-700">
+					<RouterIcon className="inline-block h-5 w-5" />
+					<span className="text-sm">{activeDevice || 'Select Router'}</span>
+				</button> */}
 			</PopoverTrigger>
 			<PopoverContent className="w-80 p-0" align="end">
 				<div className="grid">

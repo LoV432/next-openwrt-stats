@@ -110,7 +110,7 @@ function ClientCard({
 		<Card className="w-full">
 			<CardHeader className="pb-2">
 				<div className="flex items-center justify-between overflow-hidden">
-					<h3 className="w-3/5 overflow-hidden text-ellipsis whitespace-nowrap text-lg font-semibold">
+					<h3 className="mr-2 overflow-hidden text-ellipsis whitespace-nowrap text-lg font-semibold">
 						<UserIcon className="mb-1 mr-2 inline-block" />
 						{device.deviceName || 'Unknown Device'}
 					</h3>
