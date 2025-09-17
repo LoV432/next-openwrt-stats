@@ -25,6 +25,51 @@ export const failedSessionSchema = z.object({
 	})
 });
 
+export const failedSessionBatchedSchema = z.array(failedSessionSchema);
+
+export const routerInfoSchema = z.object({
+	localtime: z.number(),
+	uptime: z.number(),
+	load: z.array(z.number()),
+	memory: z.object({
+		total: z.number(),
+		free: z.number(),
+		shared: z.number(),
+		buffered: z.number(),
+		available: z.number(),
+		cached: z.number()
+	}),
+	root: z.object({
+		total: z.number(),
+		free: z.number(),
+		used: z.number(),
+		avail: z.number()
+	}),
+	tmp: z.object({
+		total: z.number(),
+		free: z.number(),
+		used: z.number(),
+		avail: z.number()
+	}),
+	swap: z.object({ total: z.number(), free: z.number() }),
+	kernel: z.string(),
+	hostname: z.string(),
+	system: z.string(),
+	model: z.string(),
+	board_name: z.string(),
+	rootfs_type: z.string(),
+	release: z.object({
+		distribution: z.string(),
+		version: z.string(),
+		revision: z.string(),
+		target: z.string(),
+		description: z.string(),
+		builddate: z.string()
+	}),
+	revision: z.string(),
+	branch: z.string()
+});
+
 const networkInterface = z.object({
 	interface: z.string(),
 	l3_device: z.string(),

@@ -6,6 +6,7 @@ import ClientCards from '@/components/ClientCards';
 import { WifiAPs } from '@/components/WifiAPs';
 import { Header } from '@/components/Header';
 import { NetworkInterfaceInfo } from '@/components/NetworkInterfaceInfo';
+import { RouterInfo } from '@/components/RouterInfo';
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
@@ -20,6 +21,7 @@ export default async function Home() {
 			<div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
 				<RealtimeTraffic />
 				<NetworkInterfaceInfo />
+				<RouterInfo />
 			</div>
 			<WifiAPs />
 			<ClientCards />
