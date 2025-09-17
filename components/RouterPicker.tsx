@@ -6,7 +6,6 @@ import {
 } from '@/components/ui/popover';
 import { RouterIcon } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from './ui/button';
 
 export function RouterPicker({
 	allRouters,
@@ -42,6 +41,7 @@ export function RouterPicker({
 							<button
 								onClick={() => {
 									setActiveDevice(router.routerIP);
+									localStorage.setItem('activeRouter', router.routerIP);
 									setIsOpen(false);
 								}}
 								key={router.routerIP}

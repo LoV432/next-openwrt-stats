@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { secondsToHumanReadable } from '@/lib/utils';
 import { RouterPicker } from './RouterPicker';
-import { ServerIcon } from 'lucide-react';
+import { RouterIcon, ServerIcon } from 'lucide-react';
 
 export function RouterInfo() {
 	const [activeRouter, setActiveRouter] = useState<string | undefined>(
@@ -31,7 +31,15 @@ export function RouterInfo() {
 
 	useEffect(() => {
 		if (allRouters.data && !activeRouter) {
-			setActiveRouter(allRouters.data[1].routerIP);
+			const savedRouter = localStorage.getItem('activeRouter');
+			const savedRuterIsValid = allRouters.data.find(
+				(router) => router.routerIP === savedRouter
+			);
+			if (!savedRouter || !savedRuterIsValid) {
+				setActiveRouter(allRouters.data[0].routerIP);
+			} else {
+				setActiveRouter(savedRouter);
+			}
 		}
 	}, [allRouters.data]);
 
@@ -54,7 +62,7 @@ export function RouterInfo() {
 	});
 
 	if (routerInfo.isLoading || allRouters.isLoading) {
-		return <LoadingError />;
+		return <LoadingError activeRouter={activeRouter} />;
 	}
 
 	if (routerInfo.isError || allRouters.isError) {
@@ -131,7 +139,13 @@ export function RouterInfo() {
 	);
 }
 
-function LoadingError({ error }: { error?: string }) {
+function LoadingError({
+	error,
+	activeRouter
+}: {
+	error?: string;
+	activeRouter?: string;
+}) {
 	return (
 		<Card className="w-full">
 			<CardHeader>
@@ -140,6 +154,12 @@ function LoadingError({ error }: { error?: string }) {
 						<ServerIcon className="mb-1 mr-2 inline-block" />
 						Router Info
 					</h3>
+					<button className="border-1 flex w-fit items-center justify-center gap-1.5 rounded-md border-neutral-700 bg-neutral-800 px-2 py-1.5 text-sm text-white hover:bg-neutral-700">
+						<RouterIcon className="inline-block h-4 w-4" />
+						<span className="text-muted-foreground text-sm">
+							{activeRouter || 'Select Router'}
+						</span>
+					</button>
 				</div>
 			</CardHeader>
 			<CardContent>
