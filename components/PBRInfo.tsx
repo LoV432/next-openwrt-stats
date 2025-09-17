@@ -19,7 +19,7 @@ import { PBRIcon } from './PBRIcons';
 import { AddEditRule } from './AddPBRPolicy';
 import { toast } from 'sonner';
 import { useState } from 'react';
-import { Trash2Icon } from 'lucide-react';
+import { ShieldIcon, Trash2Icon } from 'lucide-react';
 
 function Field({ label, value }: { label: string; value: string }) {
 	const values = value.split(' ').map((v) => {
@@ -101,7 +101,10 @@ export function PBRInfo() {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button variant="outline">PBR</Button>
+				<Button variant="outline">
+					<ShieldIcon className="h-4 w-4" />
+					Policy Based Routing
+				</Button>
 			</DialogTrigger>
 			<DialogContent className="flex h-full max-h-[80vh] max-w-3xl flex-col overflow-hidden">
 				<DialogHeader>

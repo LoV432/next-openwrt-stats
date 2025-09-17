@@ -38,7 +38,7 @@ export function WifiAPs() {
 
 	if (wifiAPsQuery.isError) {
 		return (
-			<div className="w-full border-y-2 border-zinc-800 py-4">
+			<div className="w-full border-zinc-800 py-4">
 				<div className="grid h-44 w-full place-items-center text-xl">
 					<div className="flex h-full w-full flex-col items-center justify-center">
 						<WifiIcon className="h-12 w-12 animate-pulse" />
@@ -51,7 +51,7 @@ export function WifiAPs() {
 
 	if (wifiAPsQuery.isLoading) {
 		return (
-			<div className="w-full border-y-2 border-zinc-800 py-4">
+			<div className="w-full border-zinc-800 py-4">
 				<div className="grid h-44 w-full place-items-center text-xl">
 					<div className="flex h-full w-full flex-col items-center justify-center">
 						<WifiIcon className="h-12 w-12 animate-pulse" />
@@ -70,7 +70,7 @@ export function WifiAPs() {
 	}
 
 	return (
-		<div className="w-full border-y-2 border-zinc-800 py-4">
+		<div className="w-full border-zinc-800 py-4">
 			<div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 				{wifiAPsQuery.data &&
 					Object.entries(wifiAPsQuery.data.wifiAPsOverview).map(
@@ -78,7 +78,7 @@ export function WifiAPs() {
 							<Card key={ssid} className="w-full">
 								<CardHeader>
 									<h3 className="flex text-lg font-semibold">
-										<WifiIcon className="mb-1 mr-1 inline-block" /> {ssid}
+										<WifiIcon className="mb-1 mr-2 inline-block" /> {ssid}
 										<div className="ml-auto">
 											<DetailedWifiAPs
 												allAPsWithSameSSID={
@@ -92,7 +92,7 @@ export function WifiAPs() {
 									<p>{data.ip.join(' / ')}</p>
 								</CardHeader>
 								<CardContent>
-									<div className="space-y-1.5 text-sm">
+									<div className="space-y-2 text-sm">
 										<p className="flex justify-between">
 											<span className="text-muted-foreground">Channel:</span>
 											<span>
@@ -200,9 +200,9 @@ function DetailedWifiAPs({
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button variant="outline">
-					<Settings2 className="h-4 w-4" />
-				</Button>
+				<button className="border-1 grid h-9 w-9 place-items-center rounded-md border-neutral-700 bg-neutral-800 text-white hover:bg-neutral-700">
+					<Settings2 className="h-5 w-5" />
+				</button>
 			</DialogTrigger>
 			<DialogContent className="h-[80vh] sm:max-w-[700px]">
 				<DialogHeader>
@@ -222,7 +222,7 @@ function DetailedWifiAPs({
 										wifiInterface.txpower +
 										idx
 									}
-									className="bg-background w-full rounded-md border px-3 py-3"
+									className="bg-card w-full rounded-md border px-3 py-3"
 								>
 									<div className="flex flex-col gap-3 md:flex-row md:items-center">
 										<div className="flex-shrink-0">

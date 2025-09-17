@@ -11,17 +11,22 @@ import {
 	DialogTitle,
 	DialogTrigger
 } from '@/components/ui/dialog';
-import { Menu } from 'lucide-react';
+import { Menu, RouterIcon } from 'lucide-react';
 import { Button } from './ui/button';
 
 export function Header() {
 	const { networkInterfaces, activeDevice, setActiveDevice } = useNetwork();
 
 	return (
-		<header className="w-full">
+		<header className="bg-card sticky top-0 z-10 w-full border-b border-neutral-800">
 			<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 				<div className="flex h-16 items-center justify-between">
-					<div className="text-xl font-semibold sm:text-2xl">OpenWrt Stats</div>
+					<div className="flex items-center gap-3">
+						<div className="rounded-lg bg-neutral-800 p-2">
+							<RouterIcon className="h-6 w-6 text-white" />
+						</div>
+						<h1 className="text-2xl font-bold text-white">OpenWrt Stats</h1>
+					</div>
 
 					<div className="hidden items-center gap-4 md:flex">
 						{networkInterfaces && networkInterfaces.length > 1 && (

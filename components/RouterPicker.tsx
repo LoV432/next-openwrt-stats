@@ -21,10 +21,12 @@ export function RouterPicker({
 	return (
 		<Popover open={isOpen} onOpenChange={setIsOpen}>
 			<PopoverTrigger asChild>
-				<Button variant="ghost">
-					<RouterIcon className="h-4 w-4" />
-					<span>{activeDevice || 'Select Router'}</span>
-				</Button>
+				<button className="border-1 flex w-fit items-center justify-center gap-1.5 rounded-md border-neutral-700 bg-neutral-800 px-2 py-1.5 text-sm text-white hover:bg-neutral-700">
+					<RouterIcon className="inline-block h-4 w-4" />
+					<span className="text-muted-foreground text-sm">
+						{activeDevice || 'Select Router'}
+					</span>
+				</button>
 			</PopoverTrigger>
 			<PopoverContent className="w-80 p-0" align="end">
 				<div className="grid">

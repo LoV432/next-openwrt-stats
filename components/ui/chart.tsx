@@ -234,7 +234,7 @@ function ChartTooltipContent({
 												{itemConfig?.label || item.name}
 											</span>
 										</div>
-										<span className="text-foreground font-mono font-medium tabular-nums">
+										<span className="text-foreground  font-medium tabular-nums">
 											{item.value?.toLocaleString() || '0'} {unit}
 										</span>
 									</div>

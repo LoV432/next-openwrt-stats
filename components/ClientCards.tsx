@@ -2,7 +2,7 @@
 import { DhcpDevices } from '@/lib/server/devices';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
-import { User2Icon, Wifi } from 'lucide-react';
+import { User2Icon, UserIcon, Wifi } from 'lucide-react';
 import { WifiClients } from '@/lib/server/wifiAPs';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { formatBytes, secondsToHumanReadable } from '@/lib/utils';
@@ -111,16 +111,17 @@ function ClientCard({
 			<CardHeader className="pb-2">
 				<div className="flex items-center justify-between">
 					<h3 className="text-lg font-semibold">
+						<UserIcon className="mb-1 mr-2 inline-block" />
 						{device.deviceName || 'Unknown Device'}
 					</h3>
 					{wifiData && (
 						<div className="flex items-center gap-2">
 							<Popover>
 								<PopoverTrigger>
-									<div className="hover:bg-muted flex items-center gap-2 rounded-md p-1">
+									<div className="border-1 flex items-center gap-1.5 rounded-md border-neutral-700 bg-neutral-800 p-1 px-2 hover:bg-neutral-700">
 										<Wifi className="h-4 w-4" />
 										<span className="text-muted-foreground text-sm">
-											{wifiData.signal} dBm
+											{wifiData.ip}
 										</span>
 									</div>
 								</PopoverTrigger>
@@ -134,7 +135,7 @@ function ClientCard({
 												<span className="text-muted-foreground">
 													Router IP:
 												</span>
-												<span className="font-mono">{wifiData.ip}</span>
+												<span>{wifiData.ip}</span>
 											</p>
 											<p className="flex justify-between text-sm">
 												<span className="text-muted-foreground">
@@ -186,11 +187,11 @@ function ClientCard({
 				<div className="space-y-2 text-sm">
 					<p className="flex justify-between">
 						<span className="text-muted-foreground">IP Address:</span>
-						<span className="font-mono">{device.ipAddress}</span>
+						<span>{device.ipAddress}</span>
 					</p>
 					<p className="flex justify-between">
 						<span className="text-muted-foreground">MAC Address:</span>
-						<span className="font-mono">{device.macAddress}</span>
+						<span>{device.macAddress}</span>
 					</p>
 				</div>
 			</CardContent>

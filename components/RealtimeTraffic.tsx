@@ -20,7 +20,12 @@ import {
 	DialogTitle,
 	DialogTrigger
 } from './ui/dialog';
-import { ChartAreaIcon } from 'lucide-react';
+import {
+	ActivityIcon,
+	ChartAreaIcon,
+	DownloadIcon,
+	UploadIcon
+} from 'lucide-react';
 
 const chartConfig = {
 	rx: {
@@ -100,12 +105,15 @@ export function RealtimeTraffic() {
 		<Card className="w-full">
 			<CardHeader>
 				<div className="flex h-4 items-center justify-between">
-					<h3 className="text-lg font-semibold">Realtime Traffic</h3>
+					<h3 className="text-lg font-semibold">
+						<ActivityIcon className="mb-1 mr-2 inline-block" />
+						Realtime Traffic
+					</h3>
 					<Dialog>
 						<DialogTrigger asChild>
-							<Button variant="outline" size="sm">
-								<ChartAreaIcon className="h-3 w-3" />
-							</Button>
+							<button className="border-1 grid h-9 w-9 place-items-center rounded-md border-neutral-700 bg-neutral-800 text-white hover:bg-neutral-700">
+								<ChartAreaIcon className="h-5 w-5" />
+							</button>
 						</DialogTrigger>
 						<DialogContent className="w-full max-w-[95vw] sm:max-w-2xl md:max-w-3xl">
 							<DialogHeader>
@@ -149,15 +157,21 @@ export function RealtimeTraffic() {
 			<CardContent>
 				<div className="space-y-4 text-sm">
 					<div className="flex w-full items-center gap-2">
-						<span className="text-muted-foreground w-1/4">Download:</span>
-						<span className="ml-auto font-mono">
+						<span className="text-muted-foreground flex w-2/4 items-center gap-1.5">
+							<DownloadIcon className="inline-block h-4 w-4" />
+							Download:
+						</span>
+						<span className="ml-auto ">
 							{realtimeTrafficQuery.data?.rxMbps} Mbps
 						</span>
 					</div>
 					<Progress className="w-full" value={downloadPercent} />
 					<div className="flex w-full items-center gap-2">
-						<span className="text-muted-foreground w-1/4">Upload:</span>
-						<span className="ml-auto font-mono">
+						<span className="text-muted-foreground flex w-2/4 items-center gap-1.5">
+							<UploadIcon className="inline-block h-4 w-4" />
+							Upload:
+						</span>
+						<span className="ml-auto ">
 							{realtimeTrafficQuery.data?.txMbps} Mbps
 						</span>
 					</div>
@@ -173,7 +187,10 @@ function LoadingErrorCard({ error }: { error?: string }) {
 		<Card className="w-full">
 			<CardHeader>
 				<div className="flex h-4 w-full items-center justify-between">
-					<h3 className="text-lg font-semibold">Realtime Traffic</h3>
+					<h3 className="text-lg font-semibold">
+						<ActivityIcon className="mb-1 mr-2 inline-block" />
+						Realtime Traffic
+					</h3>
 				</div>
 			</CardHeader>
 			<CardContent>
@@ -181,19 +198,19 @@ function LoadingErrorCard({ error }: { error?: string }) {
 					<div className="space-y-2 text-sm">
 						<div className="flex w-full items-center gap-2">
 							<span className="text-muted-foreground w-1/4">Error:</span>
-							<span className="ml-auto font-mono">{error}</span>
+							<span className="ml-auto ">{error}</span>
 						</div>
 					</div>
 				) : (
 					<div className="space-y-4 text-sm">
 						<div className="flex w-full items-center gap-2">
 							<span className="text-muted-foreground w-1/4">Download:</span>
-							<span className="ml-auto font-mono">{0} Mbps</span>
+							<span className="ml-auto ">{0} Mbps</span>
 						</div>
 						<Progress className="w-full" value={0} />
 						<div className="flex w-full items-center gap-2">
 							<span className="text-muted-foreground w-1/4">Upload:</span>
-							<span className="ml-auto font-mono">{0} Mbps</span>
+							<span className="ml-auto ">{0} Mbps</span>
 						</div>
 						<Progress className="w-full" value={0} />
 					</div>

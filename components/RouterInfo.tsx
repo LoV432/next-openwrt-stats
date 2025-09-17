@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { secondsToHumanReadable } from '@/lib/utils';
 import { RouterPicker } from './RouterPicker';
+import { ServerIcon } from 'lucide-react';
 
 export function RouterInfo() {
 	const [activeRouter, setActiveRouter] = useState<string | undefined>(
@@ -72,7 +73,10 @@ export function RouterInfo() {
 		<Card className="w-full">
 			<CardHeader>
 				<div className="flex h-4 w-full items-center justify-between">
-					<h3 className="text-lg font-semibold">Router Info</h3>
+					<h3 className="text-lg font-semibold">
+						<ServerIcon className="mb-1 mr-2 inline-block" />
+						Router Info
+					</h3>
 					{allRouters.data && (
 						<RouterPicker
 							allRouters={allRouters.data}
@@ -83,24 +87,24 @@ export function RouterInfo() {
 				</div>
 			</CardHeader>
 			<CardContent>
-				<div className="space-y-2 text-sm">
+				<div className="space-y-3 text-sm">
 					{routerInfo.data && (
 						<>
 							<div className="flex w-full items-center gap-2">
 								<span className="text-muted-foreground w-2/4">Model Name:</span>
-								<span className="ml-auto overflow-hidden text-ellipsis whitespace-nowrap font-mono">
+								<span className="ml-auto overflow-hidden text-ellipsis whitespace-nowrap ">
 									{routerInfo.data.model}
 								</span>
 							</div>
 							<div className="flex w-full items-center gap-2 text-sm">
 								<span className="text-muted-foreground w-1/4">Uptime</span>
-								<span className="ml-auto font-mono">
+								<span className="ml-auto ">
 									{secondsToHumanReadable(routerInfo.data.uptime)}
 								</span>
 							</div>
 							<div className="flex w-full items-center gap-2">
 								<span className="text-muted-foreground w-1/4">Load Avg:</span>
-								<span className="ml-auto font-mono">
+								<span className="ml-auto ">
 									{routerInfo.data.load
 										.map((load) => `${(Number(load) / 65535).toFixed(2)}`)
 										.join(', ')}
@@ -110,7 +114,7 @@ export function RouterInfo() {
 								<span className="text-muted-foreground w-2/4">
 									Free Memory:
 								</span>
-								<span className="ml-auto font-mono">
+								<span className="ml-auto ">
 									{(
 										Number(routerInfo.data.memory.available) /
 										1024 /
@@ -132,29 +136,37 @@ function LoadingError({ error }: { error?: string }) {
 		<Card className="w-full">
 			<CardHeader>
 				<div className="flex h-4 w-full items-center justify-between">
-					<h3 className="text-lg font-semibold">Router Info</h3>
+					<h3 className="text-lg font-semibold">
+						<ServerIcon className="mb-1 mr-2 inline-block" />
+						Router Info
+					</h3>
 				</div>
 			</CardHeader>
 			<CardContent>
 				{error ? (
-					<div>{error}</div>
+					<div className="space-y-3 text-sm">
+						<div className="flex w-full items-center gap-2">
+							<span className="text-muted-foreground w-1/4">Error:</span>
+							<span className="ml-auto ">{error}</span>
+						</div>
+					</div>
 				) : (
-					<div className="space-y-2 text-sm">
+					<div className="space-y-3 text-sm">
 						<div className="flex w-full items-center gap-2">
 							<span className="text-muted-foreground w-1/4">Model Name:</span>
-							<span className="ml-auto font-mono">- - - -</span>
+							<span className="ml-auto ">- - - -</span>
 						</div>
 						<div className="flex w-full items-center gap-2 text-sm">
 							<span className="text-muted-foreground w-1/4">Uptime</span>
-							<span className="ml-auto font-mono">- - - -</span>
+							<span className="ml-auto ">- - - -</span>
 						</div>
 						<div className="flex w-full items-center gap-2">
 							<span className="text-muted-foreground w-1/4">Load Avg:</span>
-							<span className="ml-auto font-mono">- - - -</span>
+							<span className="ml-auto ">- - - -</span>
 						</div>
 						<div className="flex w-full items-center gap-2">
 							<span className="text-muted-foreground w-2/4">Free Memory:</span>
-							<span className="ml-auto font-mono">- - - -</span>
+							<span className="ml-auto ">- - - -</span>
 						</div>
 					</div>
 				)}

@@ -54,13 +54,13 @@ export function WireguardInfo({ interfaceName }: WireguardInfoProps) {
 						<div className="space-y-4 break-words">
 							<div className="space-y-2">
 								<h4 className="font-semibold">Interface</h4>
-								<div className="grid grid-cols-[0.5fr_1fr] gap-2 text-sm">
-									<span className="text-muted-foreground">Public Key:</span>
-									<span className="font-mono">
-										{wireguardQuery.data.public_key}
-									</span>
-									<span className="text-muted-foreground">Listen Port:</span>
-									<span>{wireguardQuery.data.listen_port}</span>
+								<div className="bg-card space-y-2 rounded-lg border p-3">
+									<div className="grid grid-cols-[0.5fr_1fr] gap-2 text-sm">
+										<span className="text-muted-foreground">Public Key:</span>
+										<span>{wireguardQuery.data.public_key}</span>
+										<span className="text-muted-foreground">Listen Port:</span>
+										<span>{wireguardQuery.data.listen_port}</span>
+									</div>
 								</div>
 							</div>
 							{wireguardQuery.data.peers &&
@@ -70,13 +70,15 @@ export function WireguardInfo({ interfaceName }: WireguardInfoProps) {
 										{wireguardQuery.data.peers.map((peer) => (
 											<div
 												key={peer.public_key}
-												className="space-y-2 rounded-lg border p-3"
+												className="bg-card space-y-2 rounded-lg border p-3"
 											>
 												<div className="grid grid-cols-[0.5fr_1fr] gap-2 text-sm">
+													<span className="text-muted-foreground">Name:</span>
+													<span>{peer.name}</span>
 													<span className="text-muted-foreground">
 														Public Key:
 													</span>
-													<span className="font-mono">{peer.public_key}</span>
+													<span>{peer.public_key}</span>
 													<span className="text-muted-foreground">
 														Endpoint:
 													</span>
@@ -101,9 +103,7 @@ export function WireguardInfo({ interfaceName }: WireguardInfoProps) {
 													<span className="text-muted-foreground">
 														Allowed IPs:
 													</span>
-													<span className="font-mono">
-														{peer.allowed_ips.join(', ')}
-													</span>
+													<span>{peer.allowed_ips.join(', ')}</span>
 												</div>
 											</div>
 										))}

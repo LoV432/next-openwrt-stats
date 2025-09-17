@@ -19,7 +19,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Routers } from '@/lib/server/routers';
-import { RouterIcon, TrashIcon } from 'lucide-react';
+import { RouterIcon, SettingsIcon, TrashIcon } from 'lucide-react';
 
 export function ManageRouters() {
 	const [isLoading, setIsLoading] = useState(false);
@@ -77,7 +77,10 @@ export function ManageRouters() {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button variant="outline">Manage Routers</Button>
+				<Button variant="outline">
+					<SettingsIcon className="h-4 w-4" />
+					Manage Routers
+				</Button>
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
@@ -89,7 +92,7 @@ export function ManageRouters() {
 							getRoutersQuery.data.map((router) => (
 								<div
 									key={router.routerIP}
-									className="flex items-center gap-2 rounded-md border border-zinc-800 px-3 py-2"
+									className="bg-card flex items-center gap-2 rounded-md border px-3 py-2"
 								>
 									<div className="flex-shrink-0">
 										<div className="bg-muted rounded-md p-2">
