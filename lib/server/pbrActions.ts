@@ -1,105 +1,11 @@
 'use server';
-import {
-	addPolicyForm,
-	pbrInterfacesSchema,
-	pbrPolicySchema
-} from '@/types/ubusCalls';
+import 'server-only';
+import { addPolicyForm } from '@/types/ubusCalls';
 import { ubusCall } from './ubusCalls';
-import { getPrimaryRouter } from './routerDB';
+import { getPrimaryRouter } from './router';
+import { getPBRPolicy } from './pbr';
 
-export type PbrPolicy = Awaited<ReturnType<typeof getPBRPolicy>>;
-export async function getPBRPolicy() {
-	const primaryRouter = await getPrimaryRouter();
-	if (!primaryRouter.success) {
-		return primaryRouter;
-	}
-
-	const pbrPolicyResponse = await ubusCall({
-		routerIP: primaryRouter.data.routerIP,
-		params: [
-			'uci',
-			'get',
-			{
-				config: 'pbr'
-			}
-		]
-	});
-
-	if (!pbrPolicyResponse.success) {
-		console.log('[ERROR] ubus call to get pbr policy threw an error', {
-			routerIP: primaryRouter.data.routerIP,
-			error: pbrPolicyResponse.error
-		});
-		return {
-			success: false,
-			error: pbrPolicyResponse.error
-		} as const;
-	}
-
-	const parsedPbrPolicyResponse = pbrPolicySchema.safeParse(
-		pbrPolicyResponse.data
-	);
-	if (!parsedPbrPolicyResponse.success) {
-		console.log('[ERROR] Failed to parse pbr policy response', {
-			routerIP: primaryRouter.data.routerIP,
-			error: parsedPbrPolicyResponse.error
-		});
-		return {
-			success: false,
-			error: 'Failed to parse pbr policy response'
-		} as const;
-	}
-
-	return {
-		success: true,
-		data: parsedPbrPolicyResponse.data.result[1].values
-	} as const;
-}
-
-export type PbrInterfaces = Awaited<ReturnType<typeof getPBRInterfaces>>;
-export async function getPBRInterfaces() {
-	const primaryRouter = await getPrimaryRouter();
-	if (!primaryRouter.success) {
-		return primaryRouter;
-	}
-
-	const pbrInterfacesResponse = await ubusCall({
-		routerIP: primaryRouter.data.routerIP,
-		params: ['luci.pbr', 'getInterfaces', {}]
-	});
-
-	if (!pbrInterfacesResponse.success) {
-		console.log('[ERROR] ubus call to get pbr interfaces threw an error', {
-			routerIP: primaryRouter.data.routerIP,
-			error: pbrInterfacesResponse.error
-		});
-		return {
-			success: false,
-			error: pbrInterfacesResponse.error
-		} as const;
-	}
-
-	const parsedPbrPolicyResponse = pbrInterfacesSchema.safeParse(
-		pbrInterfacesResponse.data
-	);
-	if (!parsedPbrPolicyResponse.success) {
-		console.log('[ERROR] Failed to parse pbr policy response', {
-			routerIP: primaryRouter.data.routerIP,
-			error: parsedPbrPolicyResponse.error
-		});
-		return {
-			success: false,
-			error: 'Failed to parse pbr policy response'
-		} as const;
-	}
-
-	return {
-		success: true,
-		data: parsedPbrPolicyResponse.data.result[1].pbr.interfaces
-	} as const;
-}
-
-export async function setPBRPolicy({
+export async function setPBRPolicyAction({
 	values
 }: {
 	values: {
@@ -175,7 +81,7 @@ export async function setPBRPolicy({
 	} as const;
 }
 
-export async function editPBRPolicy({
+export async function editPBRPolicyAction({
 	values,
 	policy
 }: {
@@ -305,7 +211,7 @@ export async function editPBRPolicy({
 	} as const;
 }
 
-export async function deletePBRPolicy({ name }: { name: string }) {
+export async function deletePBRPolicyAction({ name }: { name: string }) {
 	const primaryRouter = await getPrimaryRouter();
 	if (!primaryRouter.success) {
 		return primaryRouter;

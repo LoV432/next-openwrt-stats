@@ -1,5 +1,5 @@
 'use client';
-import { DhcpDevices } from '@/lib/server/devices';
+import { DhcpDevices } from '@/lib/server/dhcpActions';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { User2Icon, UserIcon, Wifi } from 'lucide-react';

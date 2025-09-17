@@ -2,10 +2,10 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-	deleteRouter,
-	registerRouter,
-	updateRouter
-} from '@/lib/server/registerRouter';
+	deleteRouterAction,
+	registerRouterAction,
+	updateRouterAction
+} from '@/lib/server/routersActions';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Routers } from '@/lib/server/routers';
+import { Routers } from '@/lib/server/routersActions';
 import { RouterIcon, SettingsIcon, TrashIcon } from 'lucide-react';
 
 export function ManageRouters() {
@@ -42,11 +42,11 @@ export function ManageRouters() {
 		}
 	});
 
-	async function deleteRouterAction(routerToDelete: string) {
+	async function deleteRouter(routerToDelete: string) {
 		// TODO: Add confirmation dialog
 		setIsLoading(true);
 		try {
-			const deleteRouterRequest = await deleteRouter(routerToDelete);
+			const deleteRouterRequest = await deleteRouterAction(routerToDelete);
 			if (!deleteRouterRequest.success) {
 				toast.error(deleteRouterRequest.error, {
 					richColors: true,
@@ -114,7 +114,7 @@ export function ManageRouters() {
 											variant="destructive"
 											disabled={isLoading}
 											size="icon"
-											onClick={() => deleteRouterAction(router.routerIP)}
+											onClick={() => deleteRouter(router.routerIP)}
 										>
 											<TrashIcon className="h-4 w-4" />
 										</Button>
@@ -156,7 +156,7 @@ function EditRouter({
 	async function register() {
 		setIsLoading(true);
 		try {
-			const addRouterRequest = await updateRouter({
+			const addRouterRequest = await updateRouterAction({
 				routerToUpdate,
 				routerIP,
 				username,
@@ -270,7 +270,7 @@ function AddRouter() {
 	async function register() {
 		setIsLoading(true);
 		try {
-			const addRouterRequest = await registerRouter(
+			const addRouterRequest = await registerRouterAction(
 				routerIP,
 				username,
 				password,

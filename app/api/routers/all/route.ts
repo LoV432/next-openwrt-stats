@@ -1,8 +1,8 @@
-import { getRouters } from '@/lib/server/routers';
+import { getRoutersAction } from '@/lib/server/routersActions';
 
 export async function GET() {
 	try {
-		const response = await getRouters();
+		const response = await getRoutersAction();
 		if (!response.success) {
 			return new Response(JSON.stringify(response), {
 				status: 400,

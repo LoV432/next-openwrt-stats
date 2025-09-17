@@ -1,4 +1,4 @@
-import { getPBRInterfaces } from '@/lib/server/pbrCalls';
+import { getPBRInterfaces } from '@/lib/server/pbr';
 
 export async function GET() {
 	try {

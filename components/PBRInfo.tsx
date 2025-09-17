@@ -10,11 +10,8 @@ import {
 } from './ui/dialog';
 import { Card } from './ui/card';
 import { useQuery } from '@tanstack/react-query';
-import {
-	deletePBRPolicy,
-	PbrInterfaces,
-	PbrPolicy
-} from '@/lib/server/pbrCalls';
+import { PbrInterfaces, PbrPolicy } from '@/lib/server/pbr';
+import { deletePBRPolicyAction } from '@/lib/server/pbrActions';
 import { PBRIcon } from './PBRIcons';
 import { AddEditRule } from './AddPBRPolicy';
 import { toast } from 'sonner';
@@ -226,7 +223,7 @@ function DeletePolicy({
 	async function deleteAction() {
 		setIsLoading(true);
 		try {
-			const deleteResponse = await deletePBRPolicy({
+			const deleteResponse = await deletePBRPolicyAction({
 				name: policyName
 			});
 			if (!deleteResponse.success) {

@@ -1,4 +1,4 @@
-import { getPBRPolicy } from '@/lib/server/pbrCalls';
+import { getPBRPolicy } from '@/lib/server/pbr';
 
 export async function GET() {
 	try {

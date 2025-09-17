@@ -1,11 +1,11 @@
 'use server';
-
+import 'server-only';
 import { ubusCall } from './ubusCalls';
 import { dhcpDevicesSchema } from '@/types/ubusCalls';
-import { getRouters } from './routerDB';
+import { getRouters } from './router';
 
-export type DhcpDevices = Awaited<ReturnType<typeof getDhcpDevices>>;
-export async function getDhcpDevices() {
+export type DhcpDevices = Awaited<ReturnType<typeof getDhcpDevicesAction>>;
+export async function getDhcpDevicesAction() {
 	const allRouters = await getRouters();
 	if (!allRouters.success) {
 		return {

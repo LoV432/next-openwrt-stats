@@ -1,10 +1,10 @@
 'use client';
 
 import {
-	disableWifiAP,
-	enabledWifiAP,
-	type WifiAPs
-} from '@/lib/server/wifiAPs';
+	disableWifiAPAction,
+	enabledWifiAPAction
+} from '@/lib/server/wifiAPsActions';
+import { type WifiAPs } from '@/lib/server/wifiAPs';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Settings2, WifiIcon } from 'lucide-react';
@@ -170,12 +170,12 @@ function DetailedWifiAPs({
 		try {
 			let response;
 			if (disabled) {
-				response = await enabledWifiAP({
+				response = await enabledWifiAPAction({
 					routerIP: ip,
 					configSection: [configSection, parentConfigSection]
 				});
 			} else {
-				response = await disableWifiAP({
+				response = await disableWifiAPAction({
 					routerIP: ip,
 					configSection: configSection
 				});

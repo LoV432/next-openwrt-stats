@@ -1,7 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { registerRouter } from '@/lib/server/registerRouter';
+import { registerRouterAction } from '@/lib/server/routersActions';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -18,7 +18,7 @@ export default function Register() {
 	async function register() {
 		setIsLoading(true);
 		try {
-			const addRouterRequest = await registerRouter(
+			const addRouterRequest = await registerRouterAction(
 				routerIP,
 				username,
 				password,

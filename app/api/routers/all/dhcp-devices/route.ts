@@ -1,8 +1,8 @@
-import { getDhcpDevices } from '@/lib/server/devices';
+import { getDhcpDevicesAction } from '@/lib/server/dhcpActions';
 
 export async function GET() {
 	try {
-		const response = await getDhcpDevices();
+		const response = await getDhcpDevicesAction();
 		if (!response.success) {
 			return new Response(JSON.stringify(response), {
 				status: 400,

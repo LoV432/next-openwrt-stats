@@ -1,3 +1,4 @@
+import 'server-only';
 import {
 	failedSessionBatchedSchema,
 	failedSessionSchema,
@@ -6,7 +7,6 @@ import {
 import { db } from './dbDriver';
 import { routersTable } from '@/drizzle/schema/schema';
 import { eq } from 'drizzle-orm';
-import 'server-only';
 
 export async function ubusCall({
 	routerIP,

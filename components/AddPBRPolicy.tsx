@@ -29,7 +29,10 @@ import {
 	SelectValue
 } from '@/components/ui/select';
 import { useEffect, useState } from 'react';
-import { editPBRPolicy, setPBRPolicy } from '@/lib/server/pbrCalls';
+import {
+	editPBRPolicyAction,
+	setPBRPolicyAction
+} from '@/lib/server/pbrActions';
 import {
 	Accordion,
 	AccordionContent,
@@ -126,7 +129,7 @@ export function AddEditRule({
 			}
 
 			if (!policy) {
-				const pbrData = await setPBRPolicy({
+				const pbrData = await setPBRPolicyAction({
 					values: parsedSubmitValues.data
 				});
 				if (!pbrData.success) {
@@ -134,7 +137,7 @@ export function AddEditRule({
 					return;
 				}
 			} else {
-				const pbrData = await editPBRPolicy({
+				const pbrData = await editPBRPolicyAction({
 					values: parsedSubmitValues.data,
 					policy
 				});

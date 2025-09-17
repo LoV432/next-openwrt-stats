@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 import {
 	getNetworkInterfacesSchema,
 	getRealTimeStatsSchema,
@@ -6,7 +6,7 @@ import {
 } from '@/types/ubusCalls';
 import { ubusCall } from './ubusCalls';
 import { calcMbps } from '../utils';
-import { getPrimaryRouter } from './routerDB';
+import { getPrimaryRouter } from './router';
 
 export type NetworkInterfaces = Awaited<
 	ReturnType<typeof getNetworkInterfaces>

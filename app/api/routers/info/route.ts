@@ -1,4 +1,4 @@
-import { getRouter } from '@/lib/server/routerDB';
+import { getRouter } from '@/lib/server/router';
 import { ubusBatchCall } from '@/lib/server/ubusCalls';
 import { routerInfoSchema } from '@/types/ubusCalls';
 import { NextRequest } from 'next/server';
