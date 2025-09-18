@@ -9,6 +9,7 @@ import {
 	ReactNode,
 	useEffect
 } from 'react';
+import { usePathname } from 'next/navigation';
 
 type NetworkContextType = {
 	networkInterfaces?: NetworkInterface[];
@@ -22,7 +23,7 @@ const NetworkContext = createContext<NetworkContextType | undefined>(undefined);
 
 export function NetworkProvider({ children }: { children: ReactNode }) {
 	const [activeDevice, setActiveDevice] = useState<NetworkInterface>();
-
+	const pathname = usePathname();
 	const {
 		data: networkInterfaces,
 		isLoading,
@@ -42,7 +43,8 @@ export function NetworkProvider({ children }: { children: ReactNode }) {
 			return networkInterfaces.data;
 		},
 		refetchInterval: false,
-		retry: 1
+		retry: 1,
+		enabled: pathname !== '/register'
 	});
 
 	useEffect(() => {
