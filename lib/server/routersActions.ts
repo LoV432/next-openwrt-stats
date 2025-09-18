@@ -2,7 +2,7 @@
 import 'server-only';
 import { routersTable } from '@/drizzle/schema/schema';
 import { db } from './dbDriver';
-import { login } from './ubusCalls';
+import { login, ubusCall } from './ubusCalls';
 import { eq, ne } from 'drizzle-orm';
 import { getRouter, getRouters } from './router';
 
@@ -207,6 +207,72 @@ export async function deleteRouterAction(routerToDelete: string) {
 		return {
 			success: false,
 			error: 'Failed to delete router'
+		} as const;
+	}
+}
+
+export async function rebootRouterAction(routerToReboot: string) {
+	try {
+		const router = await getRouter(routerToReboot);
+		if (!router.success) {
+			return {
+				success: false,
+				error: `Failed to get router with routerIP ${routerToReboot}`
+			} as const;
+		}
+		const reboot = await ubusCall({
+			routerIP: router.data.routerIP,
+			params: ['system', 'reboot', {}]
+		});
+
+		if (!reboot.success) {
+			return {
+				success: false,
+				error: reboot.error
+			} as const;
+		}
+		return {
+			success: true,
+			data: 'Successfully rebooted router'
+		} as const;
+	} catch {
+		return {
+			success: false,
+			error: 'Failed to reboot router'
+		} as const;
+	}
+}
+
+export async function checkRouterStatusAction(routerToCheck: string) {
+	try {
+		const router = await getRouter(routerToCheck);
+		if (!router.success) {
+			return {
+				success: false,
+				error: `Failed to get router with routerIP ${routerToCheck}`
+			} as const;
+		}
+		const loginAction = await login({
+			routerIP: router.data.routerIP,
+			username: router.data.username,
+			password: router.data.password
+		});
+
+		if (!loginAction.success) {
+			return {
+				success: false,
+				error: 'Router is offline'
+			} as const;
+		}
+
+		return {
+			success: true,
+			error: 'Router is online'
+		} as const;
+	} catch {
+		return {
+			success: false,
+			error: 'Failed to check router status'
 		} as const;
 	}
 }

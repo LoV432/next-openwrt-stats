@@ -2,7 +2,9 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
+	checkRouterStatusAction,
 	deleteRouterAction,
+	rebootRouterAction,
 	registerRouterAction,
 	updateRouterAction
 } from '@/lib/server/routersActions';
@@ -19,7 +21,23 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Routers } from '@/lib/server/routersActions';
-import { RouterIcon, SettingsIcon, TrashIcon } from 'lucide-react';
+import {
+	RefreshCcwIcon,
+	RouterIcon,
+	SettingsIcon,
+	TrashIcon
+} from 'lucide-react';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger
+} from '@/components/ui/alert-dialog';
 
 export function ManageRouters() {
 	const [isLoading, setIsLoading] = useState(false);
@@ -118,6 +136,7 @@ export function ManageRouters() {
 										>
 											<TrashIcon className="h-4 w-4" />
 										</Button>
+										<RebootRouter routerToReboot={router.routerIP} />
 									</div>
 								</div>
 							))}
@@ -126,6 +145,106 @@ export function ManageRouters() {
 				<AddRouter />
 			</DialogContent>
 		</Dialog>
+	);
+}
+
+function RebootRouter({ routerToReboot }: { routerToReboot: string }) {
+	const [isLoading, setIsLoading] = useState(false);
+	const [isOpen, setIsOpen] = useState(false);
+	const tanstackQueryClient = useQueryClient();
+	const router = useRouter();
+
+	async function rebootRouter() {
+		if (isLoading) {
+			return;
+		}
+		setIsLoading(true);
+		try {
+			const response = await rebootRouterAction(routerToReboot);
+			if (!response.success) {
+				toast.error('Failed to reboot router, please try again', {
+					richColors: true,
+					duration: 3000
+				});
+				return;
+			}
+			toast.success('Reboot In Progress! Please wait...', {
+				richColors: true,
+				duration: 3000
+			});
+			let routerStatus = false;
+			let tries = 0;
+			while (!routerStatus && tries < 10) {
+				const status = await checkRouterStatusAction(routerToReboot);
+				if (status.success) {
+					routerStatus = true;
+					toast.success('Router rebooted successfully', {
+						richColors: true,
+						duration: 3000
+					});
+					continue;
+				}
+				tries++;
+				if (tries === 10) {
+					toast.error(
+						'Router reboot was initiated, but it never came back online. Please manually check your router',
+						{
+							richColors: true,
+							duration: 3000
+						}
+					);
+					continue;
+				}
+				await new Promise((resolve) => setTimeout(resolve, 3000));
+			}
+			setIsOpen(false);
+		} finally {
+			await tanstackQueryClient.invalidateQueries();
+			router.refresh();
+			setIsLoading(false);
+		}
+	}
+
+	function handleOpenClose(newSate: boolean) {
+		if (newSate) {
+			setIsOpen(true);
+		} else if (!newSate && !isLoading) {
+			setIsOpen(false);
+		}
+	}
+
+	return (
+		<AlertDialog open={isOpen} onOpenChange={handleOpenClose}>
+			<AlertDialogTrigger asChild>
+				<Button onClick={() => setIsOpen(true)} variant="outline">
+					<RefreshCcwIcon className="h-4 w-4" />
+				</Button>
+			</AlertDialogTrigger>
+			<AlertDialogContent>
+				<AlertDialogHeader>
+					<AlertDialogTitle>Reboot - {routerToReboot}</AlertDialogTitle>
+					<AlertDialogDescription>
+						Are you sure you want to reboot {routerToReboot}?
+					</AlertDialogDescription>
+				</AlertDialogHeader>
+				<AlertDialogFooter>
+					<AlertDialogCancel>Cancel</AlertDialogCancel>
+					<AlertDialogAction asChild>
+						<Button
+							disabled={isLoading}
+							onClick={(event) => {
+								event.preventDefault();
+								rebootRouter();
+							}}
+							variant="destructive"
+							className="text-white"
+						>
+							{isLoading ? 'Rebooting...' : 'Reboot'}
+						</Button>
+					</AlertDialogAction>
+				</AlertDialogFooter>
+			</AlertDialogContent>
+		</AlertDialog>
 	);
 }
 
