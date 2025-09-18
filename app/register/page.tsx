@@ -54,44 +54,86 @@ export default function Register() {
 	}, []);
 
 	return (
-		<div className="mt-20 flex flex-col items-center justify-center">
-			<h1 className="text-3xl font-bold">Welcome to Openwrt Stats</h1>
-			<p className="text-xl">
-				Please register your primary router to get started
-			</p>
-			<form
-				className="w-xs mt-10 flex flex-col items-center justify-center gap-4"
-				onSubmit={(e) => {
-					e.preventDefault();
-					register();
-				}}
-			>
-				<Input
-					className="h-11"
-					placeholder="Router IP"
-					required
-					value={routerIP}
-					onChange={(e) => setRouterIP(e.target.value)}
-				/>
-				<Input
-					className="h-11"
-					placeholder="Username"
-					required
-					value={username}
-					onChange={(e) => setUsername(e.target.value)}
-				/>
-				<Input
-					className="h-11"
-					placeholder="Password"
-					required
-					value={password}
-					onChange={(e) => setPassword(e.target.value)}
-					type="password"
-				/>
-				<Button className="h-10 w-full" disabled={isLoading}>
-					{isLoading ? 'Registering...' : 'Register'}
-				</Button>
-			</form>
+		<div className="flex min-h-screen items-center justify-center bg-black p-6 text-white">
+			<div className="w-full max-w-md">
+				<div className="mb-8 text-center">
+					<h1 className="mb-2 text-3xl font-bold">Welcome to OpenWrt Stats</h1>
+					<p className="text-lg text-neutral-400">
+						Please register your primary router to get started
+					</p>
+				</div>
+
+				<div className="mb-8 rounded-lg border border-red-800 bg-red-950 p-4">
+					<div className="text-center">
+						<h2 className="mb-2 text-lg font-bold text-red-400">
+							⚠️ Security Warning
+						</h2>
+						<p className="text-sm leading-relaxed text-red-300">
+							This panel can make destructive changes to your router and comes
+							with no built-in authentication. You must put this panel behind
+							proper authentication before use.
+						</p>
+					</div>
+				</div>
+
+				<div className="rounded-lg border border-neutral-800 bg-neutral-900 p-6">
+					<form
+						className="space-y-4"
+						onSubmit={(e) => {
+							e.preventDefault();
+							register();
+						}}
+					>
+						<div>
+							<label className="mb-2 block text-sm font-medium text-neutral-300">
+								Router IP Address
+							</label>
+							<Input
+								className="h-11 border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus:border-slate-600 focus:ring-slate-600"
+								placeholder="192.168.1.1"
+								required
+								value={routerIP}
+								onChange={(e) => setRouterIP(e.target.value)}
+							/>
+						</div>
+
+						<div>
+							<label className="mb-2 block text-sm font-medium text-neutral-300">
+								Username
+							</label>
+							<Input
+								className="h-11 border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus:border-slate-600 focus:ring-slate-600"
+								placeholder="root"
+								required
+								value={username}
+								onChange={(e) => setUsername(e.target.value)}
+							/>
+						</div>
+
+						<div>
+							<label className="mb-2 block text-sm font-medium text-neutral-300">
+								Password
+							</label>
+							<Input
+								className="h-11 border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus:border-slate-600 focus:ring-slate-600"
+								placeholder="Enter your router password"
+								required
+								value={password}
+								onChange={(e) => setPassword(e.target.value)}
+								type="password"
+							/>
+						</div>
+
+						<Button
+							className="mt-6 h-11 w-full font-medium"
+							variant={'outline'}
+							disabled={isLoading}
+						>
+							{isLoading ? 'Registering...' : 'Register Router'}
+						</Button>
+					</form>
+				</div>
+			</div>
 		</div>
 	);
 }
