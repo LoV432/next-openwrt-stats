@@ -94,12 +94,18 @@ export async function GET(request: NextRequest) {
 			);
 		}
 
-		return new Response(JSON.stringify(parsedResponse.data), {
-			status: 200,
-			headers: {
-				'Content-Type': 'application/json'
+		return new Response(
+			JSON.stringify({
+				success: true,
+				data: parsedResponse.data
+			}),
+			{
+				status: 200,
+				headers: {
+					'Content-Type': 'application/json'
+				}
 			}
-		});
+		);
 	} catch (error) {
 		console.log('[ERROR] Failed to get router info', {
 			error
