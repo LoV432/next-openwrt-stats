@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { registerRouterAction } from '@/lib/server/routersActions';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
@@ -47,6 +47,11 @@ export default function Register() {
 			setIsLoading(false);
 		}
 	}
+
+	useEffect(() => {
+		localStorage.removeItem('activeRouter');
+		localStorage.removeItem('activeDevice');
+	}, []);
 
 	return (
 		<div className="mt-20 flex flex-col items-center justify-center">
