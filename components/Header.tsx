@@ -36,7 +36,7 @@ export function Header() {
 								setActiveDevice={setActiveDevice}
 							/>
 						)}
-						<PBRInfo />
+						{process.env.NEXT_PUBLIC_PBR_ENABLED === 'true' && <PBRInfo />}
 						<ManageRouters />
 					</div>
 
@@ -62,7 +62,9 @@ export function Header() {
 										</div>
 									)}
 									<div>
-										<PBRInfo />
+										{process.env.NEXT_PUBLIC_PBR_ENABLED === 'true' && (
+											<PBRInfo />
+										)}
 									</div>
 									<div>
 										<ManageRouters />
