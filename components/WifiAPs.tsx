@@ -7,7 +7,7 @@ import {
 import { type WifiAPs } from '@/lib/server/wifiAPs';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
-import { Settings2, WifiIcon } from 'lucide-react';
+import { LoaderCircle, Settings2, WifiIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
@@ -38,10 +38,9 @@ export function WifiAPs() {
 
 	if (wifiAPsQuery.isError) {
 		return (
-			<div className="w-full border-zinc-800 py-4">
+			<div className="w-fullpy-4">
 				<div className="grid h-44 w-full place-items-center text-xl">
 					<div className="flex h-full w-full flex-col items-center justify-center">
-						<WifiIcon className="h-12 w-12 animate-pulse" />
 						Error: {wifiAPsQuery.error?.message}
 					</div>
 				</div>
@@ -51,11 +50,10 @@ export function WifiAPs() {
 
 	if (wifiAPsQuery.isLoading) {
 		return (
-			<div className="w-full border-zinc-800 py-4">
+			<div className="w-full py-4">
 				<div className="grid h-44 w-full place-items-center text-xl">
 					<div className="flex h-full w-full flex-col items-center justify-center">
-						<WifiIcon className="h-12 w-12 animate-pulse" />
-						Loading Wifi APs...
+						<LoaderCircle className="h-12 w-12 animate-spin" />
 					</div>
 				</div>
 			</div>
@@ -70,7 +68,7 @@ export function WifiAPs() {
 	}
 
 	return (
-		<div className="w-full border-zinc-800 py-4">
+		<div className="w-full border-zinc-800">
 			<div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 				{wifiAPsQuery.data &&
 					Object.entries(wifiAPsQuery.data.wifiAPsOverview).map(

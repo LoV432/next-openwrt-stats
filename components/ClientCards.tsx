@@ -2,7 +2,7 @@
 import { DhcpDevices } from '@/lib/server/dhcpActions';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
-import { User2Icon, UserIcon, Wifi } from 'lucide-react';
+import { LoaderCircle, UserIcon, Wifi } from 'lucide-react';
 import { WifiClients } from '@/lib/server/wifiAPs';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { formatBytes, secondsToHumanReadable } from '@/lib/utils';
@@ -42,10 +42,9 @@ export default function ClientCards() {
 
 	if (dhcpDevicesQuery.isError || wifiClientsQuery.isError) {
 		return (
-			<div className="w-full border-y-2 border-zinc-800 py-4">
+			<div className="w-full py-4">
 				<div className="grid h-44 w-full place-items-center text-xl">
 					<div className="flex h-full w-full flex-col items-center justify-center">
-						<User2Icon className="h-12 w-12 animate-pulse" />
 						<div>Error: {dhcpDevicesQuery.error?.message}</div>
 						<div>Error: {wifiClientsQuery.error?.message}</div>
 					</div>
@@ -56,11 +55,10 @@ export default function ClientCards() {
 
 	if (dhcpDevicesQuery.isLoading || wifiClientsQuery.isLoading) {
 		return (
-			<div className="w-full border-y-2 border-zinc-800 py-4">
+			<div className="w-full py-4">
 				<div className="grid h-44 w-full place-items-center text-xl">
 					<div className="flex h-full w-full flex-col items-center justify-center">
-						<User2Icon className="h-12 w-12 animate-pulse" />
-						Loading DHCP and Wifi Clients...
+						<LoaderCircle className="h-12 w-12 animate-spin" />
 					</div>
 				</div>
 			</div>
