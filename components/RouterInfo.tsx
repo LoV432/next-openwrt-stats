@@ -1,6 +1,6 @@
 'use client';
 import { getRouterInfo } from '@/app/api/routers/info/route';
-import { Routers } from '@/lib/server/routersActions';
+import { Routers } from '@/lib/server/router';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader } from './ui/card';

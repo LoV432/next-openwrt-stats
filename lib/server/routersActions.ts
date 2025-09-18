@@ -6,37 +6,6 @@ import { login, ubusCall } from './ubusCalls';
 import { eq, ne } from 'drizzle-orm';
 import { getRouter, getRouters } from './router';
 
-export type Routers = Awaited<ReturnType<typeof getRoutersAction>>;
-export async function getRoutersAction() {
-	try {
-		const allRouters = await db
-			.select({
-				routerIP: routersTable.routerIP,
-				isPrimary: routersTable.isPrimary
-			})
-			.from(routersTable);
-		if (!allRouters.length) {
-			console.log('[INFO] No routers found');
-			return {
-				success: false,
-				error: 'No routers found'
-			} as const;
-		}
-		return {
-			success: true,
-			data: allRouters
-		} as const;
-	} catch (error) {
-		console.log('[ERROR] DB query to get routers threw an error', {
-			error
-		});
-		return {
-			success: false,
-			error: 'DB query to get routers threw an error'
-		} as const;
-	}
-}
-
 export async function registerRouterAction(
 	routerIP: string,
 	username: string,

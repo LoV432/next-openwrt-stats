@@ -3,10 +3,14 @@ import { db } from './dbDriver';
 import { routersTable } from '@/drizzle/schema/schema';
 import { eq } from 'drizzle-orm';
 
+export type Routers = Awaited<ReturnType<typeof getRouters>>;
 export async function getRouters() {
 	try {
 		const allRouters = await db
-			.select({ routerIP: routersTable.routerIP })
+			.select({
+				routerIP: routersTable.routerIP,
+				isPrimary: routersTable.isPrimary
+			})
 			.from(routersTable);
 		return {
 			success: true,

@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Routers } from '@/lib/server/routersActions';
+import { Routers } from '@/lib/server/router';
 import {
 	PencilIcon,
 	RefreshCcwIcon,
