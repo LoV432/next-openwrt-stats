@@ -20,6 +20,7 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 ENV NEXT_TELEMETRY_DISABLED 1
 
+RUN mkdir -p /app/drizzle/db
 RUN npm run build
 
 # Production image, copy all the files and run next
@@ -38,6 +39,7 @@ RUN mkdir .next
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY ./drizzle ./drizzle
+RUN mkdir -p /app/drizzle/db
 RUN cd ./drizzle && npm install
 
 COPY ./entrypoint.sh ./entrypoint.sh
