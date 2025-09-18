@@ -12,7 +12,6 @@ import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useNetwork } from '@/providers/networkContext';
-import { Button } from './ui/button';
 import {
 	Dialog,
 	DialogContent,
@@ -39,7 +38,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function RealtimeTraffic() {
-	const MAX_TRAFFIC = 120;
+	const MAX_TRAFFIC = Number(process.env.NEXT_PUBLIC_MAX_TRAFFIC) || 100;
 	const [trafficHistory, setTrafficHistory] = useState<
 		Array<{ time: string; rx: number; tx: number }>
 	>([]);
