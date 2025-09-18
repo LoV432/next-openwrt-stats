@@ -22,6 +22,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Routers } from '@/lib/server/routersActions';
 import {
+	PencilIcon,
 	RefreshCcwIcon,
 	RouterIcon,
 	SettingsIcon,
@@ -40,9 +41,6 @@ import {
 } from '@/components/ui/alert-dialog';
 
 export function ManageRouters() {
-	const [isLoading, setIsLoading] = useState(false);
-	const router = useRouter();
-	const queryClient = useQueryClient();
 	const getRoutersQuery = useQuery({
 		queryKey: ['getRouters'],
 		queryFn: async () => {
@@ -60,8 +58,62 @@ export function ManageRouters() {
 		}
 	});
 
-	async function deleteRouter(routerToDelete: string) {
-		// TODO: Add confirmation dialog
+	return (
+		<Dialog>
+			<DialogTrigger asChild>
+				<Button variant="outline">
+					<SettingsIcon className="h-4 w-4" />
+					Manage Routers
+				</Button>
+			</DialogTrigger>
+			<DialogContent className="w-full sm:w-fit">
+				<DialogHeader>
+					<DialogTitle>Manager Routers</DialogTitle>
+				</DialogHeader>
+				<div className="flex flex-col gap-4">
+					<div className="grid gap-4">
+						{getRoutersQuery.data &&
+							getRoutersQuery.data.map((router) => (
+								<div
+									key={router.routerIP}
+									className="bg-card flex flex-wrap items-center gap-2 rounded-md border px-3 py-2"
+								>
+									<div className="flex items-center gap-2">
+										<div className="bg-muted rounded-md p-2">
+											<RouterIcon className="text-muted-foreground h-5 w-5" />
+										</div>
+										{router.routerIP}{' '}
+										{router.isPrimary ? (
+											<span className="text-zinc-500">Primary</span>
+										) : (
+											''
+										)}
+									</div>
+									<div className="ml-auto flex gap-2 pl-12">
+										<EditRouter
+											routerToUpdate={router.routerIP}
+											wasPrimary={router.isPrimary}
+										/>
+										<DeleteRouter routerToDelete={router.routerIP} />
+										<RebootRouter routerToReboot={router.routerIP} />
+									</div>
+								</div>
+							))}
+					</div>
+				</div>
+				<AddRouter />
+			</DialogContent>
+		</Dialog>
+	);
+}
+
+function DeleteRouter({ routerToDelete }: { routerToDelete: string }) {
+	const [isLoading, setIsLoading] = useState(false);
+	const [isOpen, setIsOpen] = useState(false);
+	const queryClient = useQueryClient();
+	const router = useRouter();
+
+	async function deleteRouter() {
 		setIsLoading(true);
 		try {
 			const deleteRouterRequest = await deleteRouterAction(routerToDelete);
@@ -92,59 +144,46 @@ export function ManageRouters() {
 		}
 	}
 
+	function handleOpenClose(newSate: boolean) {
+		if (newSate) {
+			setIsOpen(true);
+		} else if (!newSate && !isLoading) {
+			setIsOpen(false);
+		}
+	}
+
 	return (
-		<Dialog>
-			<DialogTrigger asChild>
-				<Button variant="outline">
-					<SettingsIcon className="h-4 w-4" />
-					Manage Routers
+		<AlertDialog open={isOpen} onOpenChange={handleOpenClose}>
+			<AlertDialogTrigger asChild>
+				<Button onClick={() => setIsOpen(true)} variant="outline">
+					<TrashIcon className="h-4 w-4" />
 				</Button>
-			</DialogTrigger>
-			<DialogContent className="sm:max-w-[425px]">
-				<DialogHeader>
-					<DialogTitle>Manager Routers</DialogTitle>
-				</DialogHeader>
-				<div className="flex flex-col gap-4">
-					<div className="grid gap-4">
-						{getRoutersQuery.data &&
-							getRoutersQuery.data.map((router) => (
-								<div
-									key={router.routerIP}
-									className="bg-card flex items-center gap-2 rounded-md border px-3 py-2"
-								>
-									<div className="flex-shrink-0">
-										<div className="bg-muted rounded-md p-2">
-											<RouterIcon className="text-muted-foreground h-5 w-5" />
-										</div>
-									</div>
-									{router.routerIP}{' '}
-									{router.isPrimary ? (
-										<span className="text-zinc-500">Primary</span>
-									) : (
-										''
-									)}
-									<div className="ml-auto flex gap-2">
-										<EditRouter
-											routerToUpdate={router.routerIP}
-											wasPrimary={router.isPrimary}
-										/>
-										<Button
-											variant="destructive"
-											disabled={isLoading}
-											size="icon"
-											onClick={() => deleteRouter(router.routerIP)}
-										>
-											<TrashIcon className="h-4 w-4" />
-										</Button>
-										<RebootRouter routerToReboot={router.routerIP} />
-									</div>
-								</div>
-							))}
-					</div>
-				</div>
-				<AddRouter />
-			</DialogContent>
-		</Dialog>
+			</AlertDialogTrigger>
+			<AlertDialogContent>
+				<AlertDialogHeader>
+					<AlertDialogTitle>Delete - {routerToDelete}</AlertDialogTitle>
+					<AlertDialogDescription>
+						Are you sure you want to delete {routerToDelete}?
+					</AlertDialogDescription>
+				</AlertDialogHeader>
+				<AlertDialogFooter>
+					<AlertDialogCancel>Cancel</AlertDialogCancel>
+					<AlertDialogAction asChild>
+						<Button
+							disabled={isLoading}
+							onClick={(event) => {
+								event.preventDefault();
+								deleteRouter();
+							}}
+							variant="destructive"
+							className="text-white"
+						>
+							{isLoading ? 'Deleting...' : 'Delete'}
+						</Button>
+					</AlertDialogAction>
+				</AlertDialogFooter>
+			</AlertDialogContent>
+		</AlertDialog>
 	);
 }
 
@@ -310,7 +349,9 @@ function EditRouter({
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen} key={routerToUpdate}>
 			<DialogTrigger asChild>
-				<Button variant="outline">Edit</Button>
+				<Button variant="outline">
+					<PencilIcon className="h-4 w-4" />
+				</Button>
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
