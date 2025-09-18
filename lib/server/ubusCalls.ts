@@ -133,13 +133,16 @@ export async function ubusCall({
 
 			const checkFailedSession = failedSessionSchema.safeParse(parsedResponse);
 			if (checkFailedSession.success) {
-				console.log('[ERROR] Relogin attempt failed for unknown reason', {
-					routerIP,
-					checkFailedSession
-				});
+				console.log(
+					'[ERROR] Relogin was successful but the command still failed',
+					{
+						routerIP,
+						checkFailedSession
+					}
+				);
 				return {
 					success: false,
-					error: 'Relogin attempt failed for unknown reason'
+					error: 'Relogin was successful but the command still failed'
 				} as const;
 			}
 			try {
@@ -296,13 +299,16 @@ export async function ubusBatchCall({
 		const checkRetryFailed =
 			failedSessionBatchedSchema.safeParse(retriedParsed);
 		if (checkRetryFailed.success) {
-			console.log('[ERROR] Relogin batch attempt failed', {
-				routerIP,
-				checkRetryFailed
-			});
+			console.log(
+				'[ERROR] Relogin was successful but the command still failed',
+				{
+					routerIP,
+					checkRetryFailed
+				}
+			);
 			return {
 				success: false,
-				error: 'Relogin batch attempt failed'
+				error: 'Relogin was successful but the command still failed'
 			} as const;
 		}
 
