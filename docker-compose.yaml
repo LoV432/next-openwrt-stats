@@ -5,10 +5,5 @@ services:
     volumes:
       - ./drizzle/db/:/app/drizzle/db/
     ports:
-      - 3001:3000
-    # environment:
-    #   - PASSWORD= # Password given by router_setup.sh. You can keep it empty if you haven't setup the router yet
-    #   - ROUTER_URL=http://192.168.1.1 # URL of your router
-    #   - MAX_UPLOAD_SPEED=20 # Max upload speed in Mbps
-    #   - MAX_DOWNLOAD_SPEED=20 # Max download speed in Mbps
+      - 3000:3000
     restart: unless-stopped
