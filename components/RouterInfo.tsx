@@ -173,7 +173,7 @@ function LoadingError({
 				) : (
 					<div className="space-y-3 text-sm">
 						<div className="flex w-full items-center gap-2">
-							<span className="text-muted-foreground w-1/4">Model Name:</span>
+							<span className="text-muted-foreground w-2/4">Model Name:</span>
 							<span className="ml-auto ">- - - -</span>
 						</div>
 						<div className="flex w-full items-center gap-2 text-sm">
