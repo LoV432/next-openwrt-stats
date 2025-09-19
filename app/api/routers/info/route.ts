@@ -14,8 +14,8 @@ export type getRouterInfo =
 	  };
 export async function GET(request: NextRequest) {
 	try {
-		const routerIp = request.nextUrl.searchParams.get('routerIp');
-		if (!routerIp) {
+		const displayName = request.nextUrl.searchParams.get('displayName');
+		if (!displayName) {
 			return new Response(
 				JSON.stringify({
 					success: false,
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 				}
 			);
 		}
-		const router = await getRouter(routerIp);
+		const router = await getRouter(displayName);
 		if (!router.success) {
 			return new Response(JSON.stringify(router), {
 				status: 400,
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 		}
 
 		const response = await ubusBatchCall({
-			routerIP: router.data.routerIP,
+			displayName: router.data.displayName,
 			calls: [
 				{
 					id: 1,
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
 		const parsedResponse = routerInfoSchema.safeParse(flattenData);
 		if (!parsedResponse.success) {
 			console.log('[ERROR] Failed to parse router info', {
-				routerIP: router.data.routerIP,
+				displayName: router.data.displayName,
 				error: parsedResponse.error
 			});
 			return new Response(

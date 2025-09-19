@@ -30,18 +30,18 @@ export function RouterInfo() {
 	});
 
 	useEffect(() => {
-		if (allRouters.data && !activeRouter) {
+		if (allRouters.data) {
 			const savedRouter = localStorage.getItem('activeRouter');
 			const savedRuterIsValid = allRouters.data.find(
-				(router) => router.routerIP === savedRouter
+				(router) => router.displayName === savedRouter
 			);
-			if (!savedRouter || !savedRuterIsValid) {
-				setActiveRouter(allRouters.data[0].routerIP);
-			} else {
+			if (savedRouter && savedRuterIsValid) {
 				setActiveRouter(savedRouter);
+			} else {
+				setActiveRouter(allRouters.data[0].displayName);
 			}
 		}
-	}, [allRouters.data]);
+	}, [allRouters.dataUpdatedAt]);
 
 	const routerInfo = useQuery({
 		queryKey: ['getRouterInfo', activeRouter],
@@ -50,7 +50,7 @@ export function RouterInfo() {
 				throw new Error('No routers found');
 			}
 			const response = await fetch(
-				`/api/routers/info?routerIp=${activeRouter}`
+				`/api/routers/info?displayName=${activeRouter}`
 			);
 			const data = (await response.json()) as getRouterInfo;
 			if (!data.success) {

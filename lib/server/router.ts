@@ -8,7 +8,7 @@ export async function getRouters() {
 	try {
 		const allRouters = await db
 			.select({
-				routerIP: routersTable.routerIP,
+				displayName: routersTable.displayName,
 				isPrimary: routersTable.isPrimary
 			})
 			.from(routersTable);
@@ -27,10 +27,11 @@ export async function getRouters() {
 	}
 }
 
-export async function getRouter(routerIP: string) {
+export async function getRouter(displayName: string) {
 	try {
 		const router = await db
 			.select({
+				displayName: routersTable.displayName,
 				routerIP: routersTable.routerIP,
 				username: routersTable.username,
 				password: routersTable.password,
@@ -39,12 +40,12 @@ export async function getRouter(routerIP: string) {
 				id: routersTable.id
 			})
 			.from(routersTable)
-			.where(eq(routersTable.routerIP, routerIP))
+			.where(eq(routersTable.displayName, displayName))
 			.limit(1);
 
 		if (!router.length) {
-			console.log('[INFO] No router found with routerIP', {
-				routerIP
+			console.log('[INFO] No router found with router', {
+				displayName
 			});
 			return {
 				success: false,
@@ -58,7 +59,7 @@ export async function getRouter(routerIP: string) {
 		} as const;
 	} catch (error) {
 		console.log('[ERROR] DB query to get router threw an error', {
-			routerIP,
+			displayName,
 			error
 		});
 		return {
@@ -72,7 +73,7 @@ export async function getPrimaryRouter() {
 	try {
 		const primaryRouter = await db
 			.select({
-				routerIP: routersTable.routerIP
+				displayName: routersTable.displayName
 			})
 			.from(routersTable)
 			.where(eq(routersTable.isPrimary, 1))

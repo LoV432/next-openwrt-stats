@@ -4,19 +4,19 @@ import { getRouter } from './router';
 import { ubusCall } from './ubusCalls';
 
 export async function disableWifiAPAction({
-	routerIP,
+	displayName,
 	configSection
 }: {
-	routerIP: string;
+	displayName: string;
 	configSection: string;
 }) {
-	const router = await getRouter(routerIP);
+	const router = await getRouter(displayName);
 	if (!router.success) {
 		return router;
 	}
 
 	const ubusResponse = await ubusCall({
-		routerIP: router.data.routerIP,
+		displayName: router.data.displayName,
 		params: [
 			'uci',
 			'set',
@@ -32,7 +32,7 @@ export async function disableWifiAPAction({
 
 	if (!ubusResponse.success) {
 		console.log('[ERROR] ubus call to disable wifi AP threw an error', {
-			routerIP: router.data.routerIP,
+			displayName,
 			error: ubusResponse.error
 		});
 		return {
@@ -42,7 +42,7 @@ export async function disableWifiAPAction({
 	}
 
 	const confirmResponse = await ubusCall({
-		routerIP: router.data.routerIP,
+		displayName: router.data.displayName,
 		params: [
 			'uci',
 			'commit',
@@ -54,7 +54,7 @@ export async function disableWifiAPAction({
 
 	if (!confirmResponse.success) {
 		console.log('[ERROR] ubus call to commit wifi AP disable threw an error', {
-			routerIP: router.data.routerIP,
+			displayName,
 			error: confirmResponse.error
 		});
 		return {
@@ -71,20 +71,20 @@ export async function disableWifiAPAction({
 }
 
 export async function enabledWifiAPAction({
-	routerIP,
+	displayName,
 	configSection
 }: {
-	routerIP: string;
+	displayName: string;
 	configSection: string[];
 }) {
-	const router = await getRouter(routerIP);
+	const router = await getRouter(displayName);
 	if (!router.success) {
 		return router;
 	}
 
 	const [delte1, delete2] = await Promise.all([
 		ubusCall({
-			routerIP: router.data.routerIP,
+			displayName: router.data.displayName,
 			params: [
 				'uci',
 				'delete',
@@ -96,7 +96,7 @@ export async function enabledWifiAPAction({
 			]
 		}),
 		ubusCall({
-			routerIP: router.data.routerIP,
+			displayName: router.data.displayName,
 			params: [
 				'uci',
 				'delete',
@@ -111,7 +111,7 @@ export async function enabledWifiAPAction({
 
 	if (!delte1.success || !delete2.success) {
 		console.log('[ERROR] ubus call to enable wifi AP threw an error', {
-			routerIP: router.data.routerIP,
+			displayName,
 			error: [delte1.error, delete2.error]
 		});
 		return {
@@ -121,7 +121,7 @@ export async function enabledWifiAPAction({
 	}
 
 	const confirmResponse = await ubusCall({
-		routerIP: router.data.routerIP,
+		displayName: router.data.displayName,
 		params: [
 			'uci',
 			'commit',
@@ -133,7 +133,7 @@ export async function enabledWifiAPAction({
 
 	if (!confirmResponse.success) {
 		console.log('[ERROR] ubus call to commit wifi AP enable threw an error', {
-			routerIP: router.data.routerIP,
+			displayName,
 			error: confirmResponse.error
 		});
 		return {

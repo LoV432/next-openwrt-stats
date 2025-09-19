@@ -24,12 +24,12 @@ export async function getDhcpDevicesAction() {
 	await Promise.all(
 		allRouters.data.map(async (router) => {
 			const dhcpDevicesResponse = await ubusCall({
-				routerIP: router.routerIP,
+				displayName: router.displayName,
 				params: ['luci-rpc', 'getDHCPLeases', {}]
 			});
 			if (!dhcpDevicesResponse.success) {
 				console.log('[ERROR] ubus call to get dhcp devices threw an error', {
-					routerIP: router.routerIP,
+					displayName: router.displayName,
 					error: dhcpDevicesResponse.error
 				});
 				return;
@@ -39,7 +39,7 @@ export async function getDhcpDevicesAction() {
 			);
 			if (!parsedDhcpDevicesResponse.success) {
 				console.log('[ERROR] Failed to parse dhcp devices response', {
-					routerIP: router.routerIP,
+					displayName: router.displayName,
 					error: parsedDhcpDevicesResponse.error
 				});
 				return;

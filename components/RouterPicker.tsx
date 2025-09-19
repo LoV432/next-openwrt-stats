@@ -12,7 +12,7 @@ export function RouterPicker({
 	activeDevice,
 	setActiveDevice
 }: {
-	allRouters: { routerIP: string; isPrimary: number }[];
+	allRouters: { displayName: string; isPrimary: number }[];
 	activeDevice: string | undefined;
 	setActiveDevice: (device: string) => void;
 }) {
@@ -40,14 +40,16 @@ export function RouterPicker({
 						{allRouters.map((router) => (
 							<button
 								onClick={() => {
-									setActiveDevice(router.routerIP);
-									localStorage.setItem('activeRouter', router.routerIP);
+									setActiveDevice(router.displayName);
+									localStorage.setItem('activeRouter', router.displayName);
 									setIsOpen(false);
 								}}
-								key={router.routerIP}
+								key={router.displayName}
 								className="hover:bg-muted flex w-full cursor-pointer items-center justify-between rounded-md px-3 py-2 text-sm"
 							>
-								<span className="text-muted-foreground">{router.routerIP}</span>
+								<span className="text-muted-foreground">
+									{router.displayName}
+								</span>
 							</button>
 						))}
 					</div>

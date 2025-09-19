@@ -18,13 +18,13 @@ export async function getNetworkInterfaces() {
 	}
 
 	const ubusResponse = await ubusCall({
-		routerIP: primaryRouter.data.routerIP,
+		displayName: primaryRouter.data.displayName,
 		params: ['network.interface', 'dump', {}]
 	});
 
 	if (!ubusResponse.success) {
 		console.log('[ERROR] ubus call to get network interfaces threw an error', {
-			routerIP: primaryRouter.data.routerIP,
+			displayName: primaryRouter.data.displayName,
 			error: ubusResponse.error
 		});
 		return {
@@ -38,7 +38,7 @@ export async function getNetworkInterfaces() {
 	);
 	if (!parsedUbusResponse.success) {
 		console.log('[ERROR] Failed to parse ubus response', {
-			routerIP: primaryRouter.data.routerIP,
+			displayName: primaryRouter.data.displayName,
 			error: parsedUbusResponse.error
 		});
 		return {
@@ -70,7 +70,7 @@ export async function getRealTimeTraffic(device: string) {
 	}
 
 	const ubusResponse = await ubusCall({
-		routerIP: primaryRouter.data.routerIP,
+		displayName: primaryRouter.data.displayName,
 		params: [
 			'luci',
 			'getRealtimeStats',
@@ -83,7 +83,7 @@ export async function getRealTimeTraffic(device: string) {
 
 	if (!ubusResponse.success) {
 		console.log('[ERROR] ubus call to get real time traffic threw an error', {
-			routerIP: primaryRouter.data.routerIP,
+			displayName: primaryRouter.data.displayName,
 			error: ubusResponse.error
 		});
 		return {
@@ -98,7 +98,7 @@ export async function getRealTimeTraffic(device: string) {
 
 	if (!parsedUbusResponse.success) {
 		console.log('[ERROR] Failed to parse ubus response', {
-			routerIP: primaryRouter.data.routerIP,
+			displayName: primaryRouter.data.displayName,
 			error: parsedUbusResponse.error
 		});
 		return {
@@ -132,7 +132,7 @@ export async function getWireguardInterfaces() {
 	}
 
 	const ubusResponse = await ubusCall({
-		routerIP: primaryRouter.data.routerIP,
+		displayName: primaryRouter.data.displayName,
 		params: ['luci.wireguard', 'getWgInstances', {}]
 	});
 
@@ -140,7 +140,7 @@ export async function getWireguardInterfaces() {
 		console.log(
 			'[ERROR] ubus call to get wireguard interfaces threw an error',
 			{
-				routerIP: primaryRouter.data.routerIP,
+				displayName: primaryRouter.data.displayName,
 				error: ubusResponse.error
 			}
 		);
@@ -156,7 +156,7 @@ export async function getWireguardInterfaces() {
 
 	if (!parsedUbusResponse.success) {
 		console.log('[ERROR] Failed to parse ubus response', {
-			routerIP: primaryRouter.data.routerIP,
+			displayName: primaryRouter.data.displayName,
 			error: parsedUbusResponse.error
 		});
 		return {

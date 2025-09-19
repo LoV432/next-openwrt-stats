@@ -19,7 +19,7 @@ export async function getWifiAPs() {
 		[key: string]: {
 			configSection: string;
 			parentConfigSection: string;
-			ip: string;
+			displayName: string;
 			channel: number;
 			band: string;
 			htmode: string;
@@ -41,7 +41,7 @@ export async function getWifiAPs() {
 		//   ]
 		// }
 		[key: string]: {
-			ip: Set<string>;
+			displayName: Set<string>;
 			channel: Set<number>;
 			band: Set<string>;
 			htmode: Set<string>;
@@ -58,17 +58,17 @@ export async function getWifiAPs() {
 				// I need the wireless config to get disabled APs
 				// Then to get accruate data of APS i need to get the live data
 				ubusCall({
-					routerIP: router.routerIP,
+					displayName: router.displayName,
 					params: ['uci', 'get', { config: 'wireless' }]
 				}),
 				ubusCall({
-					routerIP: router.routerIP,
+					displayName: router.displayName,
 					params: ['luci-rpc', 'getWirelessDevices', {}]
 				})
 			]);
 			if (!getWifiConfigs.success) {
 				console.log('[ERROR] ubus call to get wirelessConfig threw an error', {
-					routerIP: router.routerIP,
+					displayName: router.displayName,
 					error: getWifiConfigs.error
 				});
 				return;
@@ -78,7 +78,7 @@ export async function getWifiAPs() {
 				console.log(
 					'[ERROR] Failed to parse ubus response from wirelessConfig',
 					{
-						routerIP: router.routerIP,
+						displayName: router.displayName,
 						error: wirelessConfig.error
 					}
 				);
@@ -86,7 +86,7 @@ export async function getWifiAPs() {
 			}
 			if (!getWifiAPsLiveData.success) {
 				console.log('[ERROR] ubus call to get wifi APs threw an error', {
-					routerIP: router.routerIP,
+					displayName: router.displayName,
 					error: getWifiAPsLiveData.error
 				});
 				return;
@@ -96,7 +96,7 @@ export async function getWifiAPs() {
 			);
 			if (!wifiAPsData.success) {
 				console.log('[ERROR] Failed to parse ubus response from wifiAPs', {
-					routerIP: router.routerIP,
+					displayName: router.displayName,
 					error: wifiAPsData.error
 				});
 				return;
@@ -122,7 +122,7 @@ export async function getWifiAPs() {
 					wifiAPsPerSSID[wifiConfig.ssid].push({
 						configSection: wifiConfig['.name'],
 						parentConfigSection: wifiConfig.device,
-						ip: router.routerIP,
+						displayName: router.displayName,
 						channel:
 							wifiLiveData?.iwinfo?.channel ||
 							Number(wifiConfigParent.channel) ||
@@ -141,7 +141,7 @@ export async function getWifiAPs() {
 					});
 					if (!wifiAPsOverview[wifiConfig.ssid]) {
 						wifiAPsOverview[wifiConfig.ssid] = {
-							ip: new Set(),
+							displayName: new Set(),
 							channel: new Set(),
 							band: new Set(),
 							htmode: new Set(),
@@ -149,7 +149,7 @@ export async function getWifiAPs() {
 							bitrate: new Set()
 						};
 					}
-					wifiAPsOverview[wifiConfig.ssid].ip.add(router.routerIP);
+					wifiAPsOverview[wifiConfig.ssid].displayName.add(router.displayName);
 					wifiAPsOverview[wifiConfig.ssid].channel.add(
 						wifiLiveData?.iwinfo?.channel ||
 							Number(wifiConfigParent.channel) ||
@@ -162,11 +162,11 @@ export async function getWifiAPs() {
 							Number(wifiConfigParent.txpower) ||
 							0
 					);
-					if (!allIfname[router.routerIP]) {
-						allIfname[router.routerIP] = [];
+					if (!allIfname[router.displayName]) {
+						allIfname[router.displayName] = [];
 					}
 					if (wifiLiveData?.ifname)
-						allIfname[router.routerIP].push(wifiLiveData.ifname);
+						allIfname[router.displayName].push(wifiLiveData.ifname);
 				}
 			}
 		})
@@ -176,7 +176,7 @@ export async function getWifiAPs() {
 		// Sets are not JSON serializable
 		// So we convert them to arrays
 		[key: string]: {
-			ip: string[];
+			displayName: string[];
 			channel: number[];
 			band: string[];
 			htmode: string[];
@@ -187,7 +187,7 @@ export async function getWifiAPs() {
 	for (const ssid of Object.keys(wifiAPsOverview).sort()) {
 		const entry = wifiAPsOverview[ssid];
 		wifiAPsOverviewFinal[ssid] = {
-			ip: Array.from(entry.ip).sort(),
+			displayName: Array.from(entry.displayName).sort(),
 			channel: Array.from(entry.channel).sort(),
 			band: Array.from(entry.band).sort(),
 			htmode: Array.from(entry.htmode).sort(),
@@ -200,7 +200,9 @@ export async function getWifiAPs() {
 		.sort()
 		.reduce((obj: any, key) => {
 			// TODO: This seems to sort the IPs correctly but what about sorting with the bands as well?
-			obj[key] = wifiAPsPerSSID[key].sort((a, b) => a.ip.localeCompare(b.ip));
+			obj[key] = wifiAPsPerSSID[key].sort((a, b) =>
+				a.displayName.localeCompare(b.displayName)
+			);
 			return obj;
 		}, {});
 
@@ -218,7 +220,7 @@ export type WifiClients = Awaited<ReturnType<typeof getWifiClients>>;
 export async function getWifiClients() {
 	const wifiUsers: {
 		[key: string]: WifiClientsType['result'][1]['results'][0] & {
-			ip: string;
+			displayName: string;
 		};
 	} = {};
 
@@ -237,7 +239,7 @@ export async function getWifiClients() {
 			const allifname = wifiAPs.data.allIfname[router];
 			for (const ifname of allifname) {
 				const ubusResponse = await ubusCall({
-					routerIP: router,
+					displayName: router,
 					params: ['iwinfo', 'assoclist', { device: ifname }]
 				});
 				if (!ubusResponse.success) {
@@ -250,7 +252,7 @@ export async function getWifiClients() {
 					console.log(
 						'[ERROR] Failed to parse ubus response from wifiClients',
 						{
-							routerIP: router,
+							displayName: router,
 							error: parsedUbusResponse.error
 						}
 					);
@@ -260,7 +262,7 @@ export async function getWifiClients() {
 				for (const client of wifiClients) {
 					wifiUsers[client.mac] = {
 						...client,
-						ip: router
+						displayName: router
 					};
 				}
 			}

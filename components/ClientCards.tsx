@@ -101,7 +101,7 @@ function ClientCard({
 			packets: number;
 			bytes: number;
 		};
-		ip: string;
+		displayName: string;
 	} | null;
 }) {
 	return (
@@ -119,7 +119,7 @@ function ClientCard({
 									<div className="border-1 flex items-center gap-1.5 rounded-md border-neutral-700 bg-neutral-800 p-1 px-2 hover:bg-neutral-700">
 										<Wifi className="h-4 w-4" />
 										<span className="text-muted-foreground text-sm">
-											{wifiData.ip}
+											{wifiData.displayName}
 										</span>
 									</div>
 								</PopoverTrigger>
@@ -130,10 +130,8 @@ function ClientCard({
 										</h4>
 										<div className="space-y-1">
 											<p className="mt-2 flex justify-between text-sm">
-												<span className="text-muted-foreground">
-													Router IP:
-												</span>
-												<span>{wifiData.ip}</span>
+												<span className="text-muted-foreground">Router:</span>
+												<span>{wifiData.displayName}</span>
 											</p>
 											<p className="flex justify-between text-sm">
 												<span className="text-muted-foreground">

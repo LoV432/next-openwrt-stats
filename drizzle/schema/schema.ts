@@ -2,7 +2,8 @@ import { int, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 export const routersTable = sqliteTable('routers', {
 	id: int().primaryKey({ autoIncrement: true }),
-	routerIP: text().notNull(),
+	displayName: text().notNull().unique(),
+	routerIP: text().notNull().unique(),
 	username: text().notNull(),
 	password: text().notNull(),
 	session: text().notNull(),

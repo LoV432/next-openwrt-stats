@@ -39,6 +39,13 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue
+} from '@/components/ui/select';
 
 export function ManageRouters() {
 	const getRoutersQuery = useQuery({
@@ -75,14 +82,14 @@ export function ManageRouters() {
 						{getRoutersQuery.data &&
 							getRoutersQuery.data.map((router) => (
 								<div
-									key={router.routerIP}
+									key={router.displayName}
 									className="bg-card flex flex-wrap items-center gap-2 rounded-md border px-3 py-2"
 								>
 									<div className="flex items-center gap-2">
 										<div className="bg-muted rounded-md p-2">
 											<RouterIcon className="text-muted-foreground h-5 w-5" />
 										</div>
-										{router.routerIP}{' '}
+										{router.displayName}{' '}
 										{router.isPrimary ? (
 											<span className="text-zinc-500">Primary</span>
 										) : (
@@ -91,11 +98,11 @@ export function ManageRouters() {
 									</div>
 									<div className="ml-auto flex gap-2 pl-12">
 										<EditRouter
-											routerToUpdate={router.routerIP}
+											routerToUpdate={router.displayName}
 											wasPrimary={router.isPrimary}
 										/>
-										<DeleteRouter routerToDelete={router.routerIP} />
-										<RebootRouter routerToReboot={router.routerIP} />
+										<DeleteRouter routerToDelete={router.displayName} />
+										<RebootRouter routerToReboot={router.displayName} />
 									</div>
 								</div>
 							))}
@@ -294,7 +301,7 @@ function EditRouter({
 	routerToUpdate: string;
 	wasPrimary: number;
 }) {
-	const [routerIP, setRouterIP] = useState('');
+	const [displayName, setDisplayName] = useState('');
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 	const [isPrimary, setIsPrimary] = useState(wasPrimary === 1 ? true : false);
@@ -316,7 +323,7 @@ function EditRouter({
 		try {
 			const addRouterRequest = await updateRouterAction({
 				routerToUpdate,
-				routerIP,
+				displayName,
 				username,
 				password,
 				isPrimary
@@ -328,9 +335,10 @@ function EditRouter({
 				});
 				return;
 			}
+			await queryClient.invalidateQueries({ queryKey: ['getRouters'] });
 			await queryClient.invalidateQueries();
 			router.refresh();
-			toast.success('Router added successfully', {
+			toast.success('Router updated successfully', {
 				richColors: true,
 				duration: 3000
 			});
@@ -367,9 +375,9 @@ function EditRouter({
 					>
 						<div className="grid gap-4">
 							<Input
-								placeholder="Router IP (empty if unchanged)"
-								value={routerIP}
-								onChange={(e) => setRouterIP(e.target.value)}
+								placeholder="Display Name (empty if unchanged)"
+								value={displayName}
+								onChange={(e) => setDisplayName(e.target.value)}
 							/>
 							<Input
 								placeholder="Username (empty if unchanged)"
@@ -409,6 +417,8 @@ function EditRouter({
 }
 
 function AddRouter() {
+	const [displayName, setDisplayName] = useState('');
+	const [protocol, setProtocol] = useState('http://');
 	const [routerIP, setRouterIP] = useState('');
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
@@ -420,6 +430,7 @@ function AddRouter() {
 
 	useEffect(() => {
 		if (isOpen) {
+			setDisplayName('');
 			setRouterIP('');
 			setUsername('');
 			setPassword('');
@@ -431,7 +442,8 @@ function AddRouter() {
 		setIsLoading(true);
 		try {
 			const addRouterRequest = await registerRouterAction(
-				routerIP,
+				displayName,
+				protocol + routerIP,
 				username,
 				password,
 				isPrimary
@@ -480,11 +492,34 @@ function AddRouter() {
 					>
 						<div className="grid gap-4">
 							<Input
-								placeholder="Router IP"
+								placeholder="Display Name"
 								required
-								value={routerIP}
-								onChange={(e) => setRouterIP(e.target.value)}
+								value={displayName}
+								onChange={(e) => setDisplayName(e.target.value)}
 							/>
+							<div className="flex items-center justify-center gap-2">
+								<Select
+									value={protocol}
+									defaultValue="http://"
+									onValueChange={(value) => setProtocol(value)}
+								>
+									<SelectTrigger className="min-h-11 min-w-[90px]">
+										<SelectValue placeholder="http://" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="http://">HTTP</SelectItem>
+										<SelectItem value="https://">HTTPS</SelectItem>
+									</SelectContent>
+								</Select>
+								<p className="text-neutral-300">://</p>
+								<Input
+									className="h-11 border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus:border-slate-600 focus:ring-slate-600"
+									placeholder="192.168.1.1"
+									required
+									value={routerIP}
+									onChange={(e) => setRouterIP(e.target.value)}
+								/>
+							</div>
 							<Input
 								placeholder="Username"
 								required

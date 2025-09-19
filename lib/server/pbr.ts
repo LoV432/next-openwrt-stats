@@ -11,7 +11,7 @@ export async function getPBRPolicy() {
 	}
 
 	const pbrPolicyResponse = await ubusCall({
-		routerIP: primaryRouter.data.routerIP,
+		displayName: primaryRouter.data.displayName,
 		params: [
 			'uci',
 			'get',
@@ -23,7 +23,7 @@ export async function getPBRPolicy() {
 
 	if (!pbrPolicyResponse.success) {
 		console.log('[ERROR] ubus call to get pbr policy threw an error', {
-			routerIP: primaryRouter.data.routerIP,
+			displayName: primaryRouter.data.displayName,
 			error: pbrPolicyResponse.error
 		});
 		return {
@@ -37,7 +37,7 @@ export async function getPBRPolicy() {
 	);
 	if (!parsedPbrPolicyResponse.success) {
 		console.log('[ERROR] Failed to parse pbr policy response', {
-			routerIP: primaryRouter.data.routerIP,
+			displayName: primaryRouter.data.displayName,
 			error: parsedPbrPolicyResponse.error
 		});
 		return {
@@ -60,13 +60,13 @@ export async function getPBRInterfaces() {
 	}
 
 	const pbrInterfacesResponse = await ubusCall({
-		routerIP: primaryRouter.data.routerIP,
+		displayName: primaryRouter.data.displayName,
 		params: ['luci.pbr', 'getInterfaces', {}]
 	});
 
 	if (!pbrInterfacesResponse.success) {
 		console.log('[ERROR] ubus call to get pbr interfaces threw an error', {
-			routerIP: primaryRouter.data.routerIP,
+			displayName: primaryRouter.data.displayName,
 			error: pbrInterfacesResponse.error
 		});
 		return {
@@ -80,7 +80,7 @@ export async function getPBRInterfaces() {
 	);
 	if (!parsedPbrPolicyResponse.success) {
 		console.log('[ERROR] Failed to parse pbr policy response', {
-			routerIP: primaryRouter.data.routerIP,
+			displayName: primaryRouter.data.displayName,
 			error: parsedPbrPolicyResponse.error
 		});
 		return {

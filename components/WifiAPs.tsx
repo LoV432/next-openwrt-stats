@@ -87,7 +87,7 @@ export function WifiAPs() {
 											/>
 										</div>
 									</h3>
-									<p>{data.ip.join(' / ')}</p>
+									<p>{data.displayName.join(' / ')}</p>
 								</CardHeader>
 								<CardContent>
 									<div className="space-y-2 text-sm">
@@ -140,7 +140,7 @@ function DetailedWifiAPs({
 	allAPsWithSameSSID: {
 		configSection: string;
 		parentConfigSection: string;
-		ip: string;
+		displayName: string;
 		channel: number;
 		band: string;
 		htmode: string;
@@ -155,12 +155,12 @@ function DetailedWifiAPs({
 
 	async function disableEnabledWifiAP({
 		disabled,
-		ip,
+		displayName,
 		configSection,
 		parentConfigSection
 	}: {
 		disabled: boolean;
-		ip: string;
+		displayName: string;
 		configSection: string;
 		parentConfigSection: string;
 	}) {
@@ -169,12 +169,12 @@ function DetailedWifiAPs({
 			let response;
 			if (disabled) {
 				response = await enabledWifiAPAction({
-					routerIP: ip,
+					displayName,
 					configSection: [configSection, parentConfigSection]
 				});
 			} else {
 				response = await disableWifiAPAction({
-					routerIP: ip,
+					displayName,
 					configSection: configSection
 				});
 			}
@@ -213,7 +213,7 @@ function DetailedWifiAPs({
 							allAPsWithSameSSID.map((wifiInterface, idx) => (
 								<div
 									key={
-										wifiInterface.ip +
+										wifiInterface.displayName +
 										wifiInterface.channel +
 										wifiInterface.band +
 										wifiInterface.htmode +
@@ -236,7 +236,7 @@ function DetailedWifiAPs({
 															{ssid}
 														</span>
 														<span className="text-muted-foreground truncate text-sm">
-															on {wifiInterface.ip}
+															on {wifiInterface.displayName}
 														</span>
 													</div>
 												</div>
@@ -261,7 +261,7 @@ function DetailedWifiAPs({
 												onClick={() => {
 													disableEnabledWifiAP({
 														disabled: wifiInterface.disabled ? true : false,
-														ip: wifiInterface.ip,
+														displayName: wifiInterface.displayName,
 														configSection: wifiInterface.configSection,
 														parentConfigSection:
 															wifiInterface.parentConfigSection

@@ -9,32 +9,33 @@ import { routersTable } from '@/drizzle/schema/schema';
 import { eq } from 'drizzle-orm';
 
 export async function ubusCall({
-	routerIP,
+	displayName,
 	params
 }: {
-	routerIP: string;
+	displayName: string;
 	params: [string, string, { [key: string]: any }];
 }) {
 	const session = await db
 		.select({
+			routerIP: routersTable.routerIP,
 			sessionKey: routersTable.session,
 			username: routersTable.username,
 			password: routersTable.password,
 			lastAccessed: routersTable.lastAccessed
 		})
 		.from(routersTable)
-		.where(eq(routersTable.routerIP, routerIP))
+		.where(eq(routersTable.displayName, displayName))
 		.limit(1);
 	let sessionKey = session[0].sessionKey;
 
-	if (loginPromises.has(routerIP)) {
-		const response = await loginPromises.get(routerIP)!;
+	if (loginPromises.has(displayName)) {
+		const response = await loginPromises.get(displayName)!;
 		if (response.success) {
 			sessionKey = response.data.ubus_rpc_session;
 		}
 	} else if (session[0].lastAccessed + 3500000 < Date.now()) {
 		const newLogin = await dedupedLogin({
-			routerIP,
+			routerIP: session[0].routerIP,
 			username: session[0].username,
 			password: session[0].password
 		});
@@ -54,7 +55,7 @@ export async function ubusCall({
 	};
 
 	try {
-		const response = await fetch('http://' + routerIP + '/ubus', {
+		const response = await fetch(session[0].routerIP + '/ubus', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -73,12 +74,12 @@ export async function ubusCall({
 					.set({
 						lastAccessed: Date.now()
 					})
-					.where(eq(routersTable.routerIP, routerIP));
+					.where(eq(routersTable.displayName, displayName));
 			} catch (error) {
 				console.log(
 					'[ERROR] Failed to update lastAccessed in DB after a successful ubus call',
 					{
-						routerIP,
+						displayName,
 						error
 					}
 				);
@@ -90,7 +91,7 @@ export async function ubusCall({
 		}
 		if (checkFailedSession.success) {
 			const newLogin = await dedupedLogin({
-				routerIP,
+				routerIP: session[0].routerIP,
 				username: session[0].username,
 				password: session[0].password
 			});
@@ -105,7 +106,7 @@ export async function ubusCall({
 				await db
 					.update(routersTable)
 					.set({ session: newLogin.data.ubus_rpc_session })
-					.where(eq(routersTable.routerIP, routerIP));
+					.where(eq(routersTable.displayName, displayName));
 			} catch (error) {
 				console.log(
 					'[ERROR] Failed to update session key in DB after a successful login'
@@ -121,7 +122,7 @@ export async function ubusCall({
 				method: 'call',
 				params: [newLogin.data.ubus_rpc_session, ...params]
 			};
-			const response = await fetch('http://' + routerIP + '/ubus', {
+			const response = await fetch(session[0].routerIP + '/ubus', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -136,7 +137,7 @@ export async function ubusCall({
 				console.log(
 					'[ERROR] Relogin was successful but the command still failed',
 					{
-						routerIP,
+						displayName,
 						checkFailedSession
 					}
 				);
@@ -151,12 +152,12 @@ export async function ubusCall({
 					.set({
 						lastAccessed: Date.now()
 					})
-					.where(eq(routersTable.routerIP, routerIP));
+					.where(eq(routersTable.displayName, displayName));
 			} catch (error) {
 				console.log(
 					'[ERROR] Failed to update lastAccessed in DB after a failed ubus call',
 					{
-						routerIP,
+						displayName,
 						error
 					}
 				);
@@ -172,7 +173,7 @@ export async function ubusCall({
 		} as const;
 	} catch (error) {
 		console.log('[ERROR] fetch request threw an error during ubus call', {
-			routerIP,
+			displayName,
 			params,
 			error
 		});
@@ -185,10 +186,10 @@ export async function ubusCall({
 }
 
 export async function ubusBatchCall({
-	routerIP,
+	displayName,
 	calls
 }: {
-	routerIP: string;
+	displayName: string;
 	calls: {
 		id: number | string;
 		params: [string, string, { [key: string]: any }];
@@ -196,24 +197,25 @@ export async function ubusBatchCall({
 }) {
 	const session = await db
 		.select({
+			routerIP: routersTable.routerIP,
 			sessionKey: routersTable.session,
 			username: routersTable.username,
 			password: routersTable.password,
 			lastAccessed: routersTable.lastAccessed
 		})
 		.from(routersTable)
-		.where(eq(routersTable.routerIP, routerIP))
+		.where(eq(routersTable.displayName, displayName))
 		.limit(1);
 	let sessionKey = session[0].sessionKey;
 
-	if (loginPromises.has(routerIP)) {
-		const response = await loginPromises.get(routerIP)!;
+	if (loginPromises.has(displayName)) {
+		const response = await loginPromises.get(displayName)!;
 		if (response.success) {
 			sessionKey = response.data.ubus_rpc_session;
 		}
 	} else if (session[0].lastAccessed + 3500000 < Date.now()) {
 		const newLogin = await dedupedLogin({
-			routerIP,
+			routerIP: session[0].routerIP,
 			username: session[0].username,
 			password: session[0].password
 		});
@@ -231,7 +233,7 @@ export async function ubusBatchCall({
 	}));
 
 	try {
-		const response = await fetch('http://' + routerIP + '/ubus', {
+		const response = await fetch(session[0].routerIP + '/ubus', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(ubusObjects),
@@ -247,18 +249,18 @@ export async function ubusBatchCall({
 				await db
 					.update(routersTable)
 					.set({ lastAccessed: Date.now() })
-					.where(eq(routersTable.routerIP, routerIP));
+					.where(eq(routersTable.displayName, displayName));
 			} catch (error) {
 				console.log(
 					'[ERROR] Failed to update lastAccessed in DB after successful ubus batch call',
-					{ routerIP, error }
+					{ displayName, error }
 				);
 			}
 			return { success: true, data: parsedResponse } as const;
 		}
 
 		const newLogin = await dedupedLogin({
-			routerIP,
+			routerIP: session[0].routerIP,
 			username: session[0].username,
 			password: session[0].password
 		});
@@ -270,10 +272,10 @@ export async function ubusBatchCall({
 			await db
 				.update(routersTable)
 				.set({ session: newLogin.data.ubus_rpc_session })
-				.where(eq(routersTable.routerIP, routerIP));
+				.where(eq(routersTable.displayName, displayName));
 		} catch (error) {
 			console.log('[ERROR] Failed to update session key in DB after relogin', {
-				routerIP,
+				displayName,
 				error
 			});
 			return {
@@ -289,7 +291,7 @@ export async function ubusBatchCall({
 			params: [newLogin.data.ubus_rpc_session, ...call.params]
 		}));
 
-		const retryResponse = await fetch('http://' + routerIP + '/ubus', {
+		const retryResponse = await fetch(session[0].routerIP + '/ubus', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(retriedUbusObjects)
@@ -302,7 +304,7 @@ export async function ubusBatchCall({
 			console.log(
 				'[ERROR] Relogin was successful but the command still failed',
 				{
-					routerIP,
+					displayName,
 					checkRetryFailed
 				}
 			);
@@ -316,18 +318,18 @@ export async function ubusBatchCall({
 			await db
 				.update(routersTable)
 				.set({ lastAccessed: Date.now() })
-				.where(eq(routersTable.routerIP, routerIP));
+				.where(eq(routersTable.displayName, displayName));
 		} catch (error) {
 			console.log(
 				'[ERROR] Failed to update lastAccessed in DB after relogin batch call',
-				{ routerIP, error }
+				{ displayName, error }
 			);
 		}
 
 		return { success: true, data: retriedParsed } as const;
 	} catch (error) {
 		console.log('[ERROR] fetch request threw during ubus batch call', {
-			routerIP,
+			displayName,
 			calls,
 			error
 		});
@@ -390,7 +392,7 @@ export async function login({
 	};
 
 	try {
-		const response = await fetch('http://' + routerIP + '/ubus', {
+		const response = await fetch(routerIP + '/ubus', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'

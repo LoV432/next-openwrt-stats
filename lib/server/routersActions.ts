@@ -7,6 +7,7 @@ import { eq, ne } from 'drizzle-orm';
 import { getRouter, getRouters } from './router';
 
 export async function registerRouterAction(
+	displayName: string,
 	routerIP: string,
 	username: string,
 	password: string,
@@ -28,6 +29,7 @@ export async function registerRouterAction(
 	try {
 		return await db.transaction(async (tx) => {
 			const addRouter = await tx.insert(routersTable).values({
+				displayName,
 				routerIP,
 				username,
 				password,
@@ -50,6 +52,7 @@ export async function registerRouterAction(
 		});
 	} catch (error) {
 		console.log('[ERROR] Failed to add router', {
+			displayName,
 			routerIP,
 			username,
 			error
@@ -63,13 +66,13 @@ export async function registerRouterAction(
 
 export async function updateRouterAction({
 	routerToUpdate,
-	routerIP,
+	displayName,
 	username,
 	password,
 	isPrimary
 }: {
 	routerToUpdate: string;
-	routerIP?: string;
+	displayName?: string;
 	username?: string;
 	password?: string;
 	isPrimary: boolean;
@@ -79,19 +82,19 @@ export async function updateRouterAction({
 		if (!router.success) {
 			return {
 				success: false,
-				error: `Failed to get router with routerIP ${routerToUpdate}`
+				error: `Failed to get router with router ${routerToUpdate}`
 			} as const;
 		}
 		await db.transaction(async (tx) => {
 			await tx
 				.update(routersTable)
 				.set({
-					routerIP: routerIP ? routerIP : router.data.routerIP,
+					displayName: displayName ? displayName : router.data.displayName,
 					username: username ? username : router.data.username,
 					password: password ? password : router.data.password,
 					isPrimary: isPrimary ? 1 : 0
 				})
-				.where(eq(routersTable.routerIP, routerToUpdate));
+				.where(eq(routersTable.displayName, routerToUpdate));
 			if (isPrimary) {
 				await tx
 					.update(routersTable)
@@ -122,7 +125,6 @@ export async function updateRouterAction({
 	} catch (error) {
 		console.log('[ERROR] Failed to update router', {
 			routerToUpdate,
-			routerIP,
 			username,
 			error
 		});
@@ -139,7 +141,7 @@ export async function deleteRouterAction(routerToDelete: string) {
 		if (!router.success) {
 			return {
 				success: false,
-				error: `Failed to get router with routerIP ${routerToDelete}`
+				error: `Failed to get router with router ${routerToDelete}`
 			} as const;
 		}
 		await db.transaction(async (tx) => {
@@ -186,11 +188,11 @@ export async function rebootRouterAction(routerToReboot: string) {
 		if (!router.success) {
 			return {
 				success: false,
-				error: `Failed to get router with routerIP ${routerToReboot}`
+				error: `Failed to get router with router ${routerToReboot}`
 			} as const;
 		}
 		const reboot = await ubusCall({
-			routerIP: router.data.routerIP,
+			displayName: router.data.displayName,
 			params: ['system', 'reboot', {}]
 		});
 
@@ -218,7 +220,7 @@ export async function checkRouterStatusAction(routerToCheck: string) {
 		if (!router.success) {
 			return {
 				success: false,
-				error: `Failed to get router with routerIP ${routerToCheck}`
+				error: `Failed to get router with router ${routerToCheck}`
 			} as const;
 		}
 		const loginAction = await login({

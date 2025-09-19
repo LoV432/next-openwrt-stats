@@ -6,8 +6,17 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue
+} from '@/components/ui/select';
 
 export default function Register() {
+	const [displayName, setDisplayName] = useState('');
+	const [protocol, setProtocol] = useState('http://');
 	const [routerIP, setRouterIP] = useState('');
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
@@ -19,7 +28,8 @@ export default function Register() {
 		setIsLoading(true);
 		try {
 			const addRouterRequest = await registerRouterAction(
-				routerIP,
+				displayName,
+				protocol + routerIP,
 				username,
 				password,
 				true
@@ -86,15 +96,43 @@ export default function Register() {
 					>
 						<div>
 							<label className="mb-2 block text-sm font-medium text-neutral-300">
-								Router IP Address
+								Display Name
 							</label>
 							<Input
 								className="h-11 border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus:border-slate-600 focus:ring-slate-600"
-								placeholder="192.168.1.1"
+								placeholder="e.g. Router 1, Main Router, Upstairs AP"
 								required
-								value={routerIP}
-								onChange={(e) => setRouterIP(e.target.value)}
+								value={displayName}
+								onChange={(e) => setDisplayName(e.target.value)}
 							/>
+						</div>
+						<div>
+							<label className="mb-2 block text-sm font-medium text-neutral-300">
+								Router IP Address / Domain
+							</label>
+							<div className="flex items-center justify-center gap-2">
+								<Select
+									value={protocol}
+									defaultValue="http://"
+									onValueChange={(value) => setProtocol(value)}
+								>
+									<SelectTrigger className="min-h-11 min-w-[90px]">
+										<SelectValue placeholder="http://" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="http://">HTTP</SelectItem>
+										<SelectItem value="https://">HTTPS</SelectItem>
+									</SelectContent>
+								</Select>
+								<p className="text-neutral-300">://</p>
+								<Input
+									className="h-11 border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus:border-slate-600 focus:ring-slate-600"
+									placeholder="192.168.1.1"
+									required
+									value={routerIP}
+									onChange={(e) => setRouterIP(e.target.value)}
+								/>
+							</div>
 						</div>
 
 						<div>
