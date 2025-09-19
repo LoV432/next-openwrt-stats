@@ -189,6 +189,12 @@ function ClientCard({
 						<span className="text-muted-foreground">MAC Address:</span>
 						<span>{device.macAddress}</span>
 					</p>
+					<p className="flex justify-between">
+						<span className="text-muted-foreground">Lease Time:</span>
+						<span>
+							{secondsToHumanReadable(Number(device.leaseTime)) || 'Infinite'}
+						</span>
+					</p>
 				</div>
 			</CardContent>
 		</Card>
