@@ -68,6 +68,7 @@ export function Header() {
 											<PBRInfo />
 										)}
 									</div>
+									<RouterLogs />
 									<div>
 										<ManageRouters />
 									</div>

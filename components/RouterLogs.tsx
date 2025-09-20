@@ -146,14 +146,14 @@ export function RouterLogs() {
 					Logs
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="h-[95vh] min-w-fit max-w-[1200px] border-neutral-800 bg-neutral-900">
+			<DialogContent className="h-[95vh] w-[90vw] border-neutral-800 bg-neutral-900 sm:max-w-[1200px]">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2 text-white">
 						<FileText className="h-5 w-5" />
 						System Logs
 					</DialogTitle>
 				</DialogHeader>
-				<div className="space-y-4">
+				<div className="w-full space-y-4 overflow-hidden">
 					<div className="flex items-center gap-2">
 						<Select
 							value={selectedRouter}
@@ -206,8 +206,8 @@ export function RouterLogs() {
 								))}
 						</div>
 					</ScrollArea> */}
-					<div className="h-[calc(95vh-160px)] overflow-scroll rounded-md border border-neutral-800 bg-black p-4">
-						<pre className="w-[90vw] max-w-[1200px]">{routerLogs.data}</pre>
+					<div className="h-[calc(95vh-160px)] overflow-x-scroll rounded-md border border-neutral-800 bg-black">
+						<pre className="overflow-y-scroll p-4">{routerLogs.data}</pre>
 					</div>
 				</div>
 			</DialogContent>
