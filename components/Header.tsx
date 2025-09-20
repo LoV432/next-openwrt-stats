@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Menu, RouterIcon } from 'lucide-react';
 import { Button } from './ui/button';
+import { RouterLogs } from './RouterLogs';
 
 export function Header() {
 	const { networkInterfaces, activeDevice, setActiveDevice } = useNetwork();
@@ -37,6 +38,7 @@ export function Header() {
 							/>
 						)}
 						{process.env.NEXT_PUBLIC_PBR_ENABLED === 'true' && <PBRInfo />}
+						<RouterLogs />
 						<ManageRouters />
 					</div>
 
