@@ -137,14 +137,19 @@ export function RouterLogs() {
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogTrigger asChild>
-				<Button
-					variant="outline"
-					size="sm"
-					className="gap-2 border-neutral-700 bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
-				>
-					<FileText className="h-4 w-4" />
-					Logs
-				</Button>
+				<div>
+					<Button variant="outline" className="hidden md:flex">
+						<FileText className="h-4 w-4" />
+						Logs
+					</Button>
+					<Button
+						variant="ghost"
+						className="border-accent w-full justify-start rounded-none border-b-2 pb-4 pt-0 md:hidden"
+					>
+						<FileText className="h-4 w-4" />
+						Logs
+					</Button>
+				</div>
 			</DialogTrigger>
 			<DialogContent className="h-[95vh] w-[90vw] border-neutral-800 bg-neutral-900 sm:max-w-[1200px]">
 				<DialogHeader>

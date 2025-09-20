@@ -5,12 +5,10 @@ import { InterfacePicker } from './InterfacePicker';
 import { useNetwork } from '@/providers/networkContext';
 import { PBRInfo } from './PBRInfo';
 import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger
-} from '@/components/ui/dialog';
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 import { Menu, RouterIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import { RouterLogs } from './RouterLogs';
@@ -43,38 +41,33 @@ export function Header() {
 					</div>
 
 					<div className="flex items-center md:hidden">
-						<Dialog>
-							<DialogTrigger asChild>
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
 								<Button variant="outline" size="sm" aria-label="Open menu">
 									<Menu className="h-4 w-4" />
 								</Button>
-							</DialogTrigger>
-							<DialogContent className="sm:max-w-[320px]">
-								<DialogHeader>
-									<DialogTitle>Menu</DialogTitle>
-								</DialogHeader>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent className="sm:max-w-[320px]">
 								<div className="mt-2 flex flex-col gap-3">
 									{networkInterfaces && networkInterfaces.length > 1 && (
-										<div>
+										<>
 											<InterfacePicker
 												networkInterfaces={networkInterfaces}
 												activeDevice={activeDevice}
 												setActiveDevice={setActiveDevice}
 											/>
-										</div>
+										</>
 									)}
-									<div>
-										{process.env.NEXT_PUBLIC_PBR_ENABLED === 'true' && (
+									{process.env.NEXT_PUBLIC_PBR_ENABLED === 'true' && (
+										<>
 											<PBRInfo />
-										)}
-									</div>
+										</>
+									)}
 									<RouterLogs />
-									<div>
-										<ManageRouters />
-									</div>
+									<ManageRouters />
 								</div>
-							</DialogContent>
-						</Dialog>
+							</DropdownMenuContent>
+						</DropdownMenu>
 					</div>
 				</div>
 			</div>

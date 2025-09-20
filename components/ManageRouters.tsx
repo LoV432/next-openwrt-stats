@@ -68,10 +68,19 @@ export function ManageRouters() {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button variant="outline">
-					<SettingsIcon className="h-4 w-4" />
-					Manage Routers
-				</Button>
+				<div className="grid place-items-center">
+					<Button variant="outline" className="hidden md:flex">
+						<SettingsIcon className="h-4 w-4" />
+						Manage Routers
+					</Button>
+					<Button
+						variant="ghost"
+						className="borderbg-accent w-full justify-start rounded-none pb-2 pt-0 md:hidden"
+					>
+						<SettingsIcon className="h-4 w-4" />
+						Manage Routers
+					</Button>
+				</div>
 			</DialogTrigger>
 			<DialogContent className="w-full sm:w-fit">
 				<DialogHeader>

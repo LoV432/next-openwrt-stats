@@ -22,14 +22,19 @@ export function InterfacePicker({
 	return (
 		<Popover open={isOpen} onOpenChange={setIsOpen}>
 			<PopoverTrigger asChild>
-				<Button variant="outline">
-					<GlobeIcon className="h-4 w-4" />
-					<span>
-						{activeDevice?.device ||
-							activeDevice?.l3_device ||
-							'Select Interface'}
-					</span>
-				</Button>
+				<div>
+					<Button variant="outline" className="hidden md:flex">
+						<GlobeIcon className="h-4 w-4" />
+						{activeDevice?.interface || 'Network Interfaces'}
+					</Button>
+					<Button
+						variant="ghost"
+						className="border-accent w-full justify-start rounded-none border-b-2 pb-4 pt-0 md:hidden"
+					>
+						<GlobeIcon className="h-4 w-4" />
+						{activeDevice?.interface || 'Network Interfaces'}
+					</Button>
+				</div>
 			</PopoverTrigger>
 			<PopoverContent className="w-80 p-0" align="end">
 				<div className="grid">

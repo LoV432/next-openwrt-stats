@@ -98,10 +98,19 @@ export function PBRInfo() {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button variant="outline">
-					<ShieldIcon className="h-4 w-4" />
-					Policy Based Routing
-				</Button>
+				<div>
+					<Button variant="outline" className="hidden md:flex">
+						<ShieldIcon className="h-4 w-4" />
+						Policy Based Routing
+					</Button>
+					<Button
+						variant="ghost"
+						className="border-accent w-full justify-start rounded-none border-b-2 pb-4 pt-0 md:hidden"
+					>
+						<ShieldIcon className="h-4 w-4" />
+						Policy Based Routing
+					</Button>
+				</div>
 			</DialogTrigger>
 			<DialogContent className="flex h-full max-h-[80vh] max-w-3xl flex-col overflow-hidden">
 				<DialogHeader>
