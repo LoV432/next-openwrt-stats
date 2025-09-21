@@ -102,6 +102,8 @@ function ClientCard({
 			bytes: number;
 		};
 		displayName: string;
+		ssid: string;
+		band: string;
 	} | null;
 }) {
 	return (
@@ -132,6 +134,14 @@ function ClientCard({
 											<p className="mt-2 flex justify-between text-sm">
 												<span className="text-muted-foreground">Router:</span>
 												<span>{wifiData.displayName}</span>
+											</p>
+											<p className="flex justify-between text-sm">
+												<span className="text-muted-foreground">SSID:</span>
+												<span>{wifiData.ssid}</span>
+											</p>
+											<p className="flex justify-between text-sm">
+												<span className="text-muted-foreground">Band:</span>
+												<span>{wifiData.band === '2g' ? '2.4' : '5'} GHz</span>
 											</p>
 											<p className="flex justify-between text-sm">
 												<span className="text-muted-foreground">

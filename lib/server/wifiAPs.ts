@@ -50,7 +50,13 @@ export async function getWifiAPs() {
 		};
 	} = {};
 
-	const allIfname: { [key: string]: string[] } = {};
+	const allIfname: {
+		[key: string]: {
+			ifname: string;
+			ssid: string;
+			band: string;
+		}[];
+	} = {};
 
 	await Promise.all(
 		allRouters.data.map(async (router) => {
@@ -158,7 +164,11 @@ export async function getWifiAPs() {
 						allIfname[router.displayName] = [];
 					}
 					if (wifiLiveData?.ifname)
-						allIfname[router.displayName].push(wifiLiveData.ifname);
+						allIfname[router.displayName].push({
+							ifname: wifiLiveData.ifname,
+							ssid: wifiConfig.ssid,
+							band: wifiConfigParent.band
+						});
 				}
 			}
 		})
@@ -213,6 +223,8 @@ export async function getWifiClients() {
 	const wifiUsers: {
 		[key: string]: WifiClientsType['result'][1]['results'][0] & {
 			displayName: string;
+			ssid: string;
+			band: string;
 		};
 	} = {};
 
@@ -230,7 +242,7 @@ export async function getWifiClients() {
 			for (const ifname of allifname) {
 				const ubusResponse = await ubusCall({
 					displayName: router,
-					params: ['iwinfo', 'assoclist', { device: ifname }]
+					params: ['iwinfo', 'assoclist', { device: ifname.ifname }]
 				});
 				if (!ubusResponse.success) {
 					continue;
@@ -252,7 +264,9 @@ export async function getWifiClients() {
 				for (const client of wifiClients) {
 					wifiUsers[client.mac] = {
 						...client,
-						displayName: router
+						displayName: router,
+						ssid: ifname.ssid,
+						band: ifname.band
 					};
 				}
 			}
