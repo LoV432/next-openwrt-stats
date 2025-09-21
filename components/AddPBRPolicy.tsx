@@ -133,7 +133,7 @@ export function AddEditRule({
 					values: parsedSubmitValues.data
 				});
 				if (!pbrData.success) {
-					toast.error(pbrData.error);
+					toast.error(pbrData.error, { richColors: true });
 					return;
 				}
 			} else {
@@ -142,7 +142,7 @@ export function AddEditRule({
 					policy
 				});
 				if (!pbrData.success) {
-					toast.error(pbrData.error);
+					toast.error(pbrData.error, { richColors: true });
 					return;
 				}
 			}

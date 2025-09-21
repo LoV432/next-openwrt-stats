@@ -59,7 +59,8 @@ export async function setPBRPolicyAction({
 		});
 		return {
 			success: false,
-			error: pbrPolicyResponse.error
+			error:
+				'Something went wrong while adding the policy. Please see logs for more details'
 		} as const;
 	}
 
@@ -71,7 +72,8 @@ export async function setPBRPolicyAction({
 		});
 		return {
 			success: false,
-			error: commitChangesResponse.error
+			error:
+				'Something went wrong while committing the changes. Please see logs for more details'
 		} as const;
 	}
 
@@ -108,7 +110,8 @@ export async function editPBRPolicyAction({
 		});
 		return {
 			success: false,
-			error: currentPolicies.error
+			error:
+				'Something went wrong while getting the current policies. Please see logs for more details'
 		} as const;
 	}
 
@@ -153,7 +156,8 @@ export async function editPBRPolicyAction({
 			});
 			return {
 				success: false,
-				error: deleteResponse.error
+				error:
+					'Something went wrong while editing the policy. Please see logs for more details'
 			} as const;
 		}
 	}
@@ -185,7 +189,8 @@ export async function editPBRPolicyAction({
 			});
 			return {
 				success: false,
-				error: pbrPolicyResponse.error
+				error:
+					'Something went wrong while editing the policy. Please see logs for more details'
 			} as const;
 		}
 	}
@@ -201,7 +206,8 @@ export async function editPBRPolicyAction({
 		);
 		return {
 			success: false,
-			error: commitChangesResponse.error
+			error:
+				'Something went wrong while committing the changes. Please see logs for more details'
 		} as const;
 	}
 
@@ -265,7 +271,10 @@ export async function deletePBRPolicyAction({ name }: { name: string }) {
 async function commitPBRchanges() {
 	const primaryRouter = await getPrimaryRouter();
 	if (!primaryRouter.success) {
-		return primaryRouter;
+		return {
+			success: false,
+			error: 'Failed to commmit pbr changes. Please see logs for more details'
+		};
 	}
 
 	const commitChangesResponse = await ubusCall({
@@ -276,17 +285,36 @@ async function commitPBRchanges() {
 			{
 				config: 'pbr'
 			}
-		]
+		],
+		// All pending changes are nuked on relogin, so if we retry the command will succeed but the changes will be lost
+		attemptRetry: false
 	});
 
 	if (!commitChangesResponse.success) {
 		console.log('[ERROR] Failed to commit pbr changes', {
 			commitChangesResponse
 		});
+		const revertChangesResponse = await ubusCall({
+			displayName: primaryRouter.data.displayName,
+			params: [
+				'uci',
+				'revert',
+				{
+					config: 'pbr'
+				}
+			],
+			attemptRetry: false
+		});
+		if (!revertChangesResponse.success) {
+			console.log('[ERROR] Failed to revert pbr changes after failed commit', {
+				revertChangesResponse
+			});
+		}
 		return {
 			success: false,
-			error: commitChangesResponse.error
-		} as const;
+			error:
+				'Something went wrong while committing the changes. Please see logs for more details'
+		};
 	}
 
 	return {

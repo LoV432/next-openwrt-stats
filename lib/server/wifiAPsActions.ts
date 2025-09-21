@@ -49,7 +49,8 @@ export async function disableWifiAPAction({
 			{
 				config: 'wireless'
 			}
-		]
+		],
+		attemptRetry: false
 	});
 
 	if (!confirmResponse.success) {
@@ -62,7 +63,6 @@ export async function disableWifiAPAction({
 			error: confirmResponse.error
 		} as const;
 	}
-	console.log(JSON.stringify(confirmResponse.data));
 
 	return {
 		success: true,
@@ -128,7 +128,8 @@ export async function enabledWifiAPAction({
 			{
 				config: 'wireless'
 			}
-		]
+		],
+		attemptRetry: false
 	});
 
 	if (!confirmResponse.success) {

@@ -16,16 +16,13 @@ export const loginSchema = z.object({
 	])
 });
 
-export const failedSessionSchema = z.object({
+export const validResponseSchema = z.object({
 	jsonrpc: z.string(),
 	id: z.number(),
-	error: z.object({
-		code: z.number(),
-		message: z.string()
-	})
+	result: z.tuple([z.number(), z.any()])
 });
 
-export const failedSessionBatchedSchema = z.array(failedSessionSchema);
+export const validBatchResponseSchema = z.array(validResponseSchema);
 
 export const routerInfoSchema = z.object({
 	localtime: z.number(),
