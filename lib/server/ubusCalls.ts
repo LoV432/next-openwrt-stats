@@ -19,25 +19,42 @@ export async function ubusCall({
 }) {
 	try {
 		const session = await getSession(displayName);
+		if (!session.success) {
+			console.log('[ERROR] Failed to get session', {
+				displayName,
+				params,
+				session
+			});
+			return {
+				success: false,
+				error: session.errorMessage
+			} as const;
+		}
 		const ubusObject = {
 			jsonrpc: '2.0',
 			id: 1,
 			method: 'call',
-			params: [session.sessionKey, ...params]
+			params: [session.data.sessionKey, ...params]
 		};
 
-		let parsedResponse = await sendUbus(session.routerIP, ubusObject);
+		let parsedResponse = await sendUbus(session.data.routerIP, ubusObject);
 		if (!parsedResponse.success && attemptRetry) {
 			const newLogin = await dedupedLogin({
-				routerIP: session.routerIP,
-				username: session.username,
-				password: session.password
+				routerIP: session.data.routerIP,
+				username: session.data.username,
+				password: session.data.password
 			});
 
 			if (!newLogin.success) {
+				console.log('[ERROR] Failed to relogin', {
+					displayName,
+					params,
+					session,
+					newLogin
+				});
 				return {
 					success: false,
-					error: newLogin.error
+					error: newLogin.errorMessage
 				} as const;
 			}
 			const newUbusObject = {
@@ -46,35 +63,42 @@ export async function ubusCall({
 				method: 'call',
 				params: [newLogin.data.ubus_rpc_session, ...params]
 			};
-			parsedResponse = await sendUbus(session.routerIP, newUbusObject);
+			parsedResponse = await sendUbus(session.data.routerIP, newUbusObject);
 			if (!parsedResponse.success) {
 				console.log(
 					'[ERROR] Relogin was successful but the command still failed',
 					{
 						displayName,
 						parsedResponse,
-						params
+						params,
+						newLogin
 					}
 				);
 				return {
 					success: false,
-					error: 'Something went while executing the command'
+					error: parsedResponse.errorMessage
 				} as const;
 			}
 		}
-		if (parsedResponse.success) {
-			await updateLastAccessed(displayName);
+		if (!parsedResponse.success) {
+			console.log('[ERROR] Failed to execute command', {
+				displayName,
+				params,
+				session,
+				parsedResponse
+			});
 			return {
-				success: true,
-				data: parsedResponse.data
+				success: false,
+				error: parsedResponse.errorMessage
 			} as const;
 		}
+		await updateLastAccessed(displayName);
 		return {
-			success: false,
-			error: 'Something went wrong while executing the command'
+			success: true,
+			data: parsedResponse.data
 		} as const;
 	} catch (error) {
-		console.log('[ERROR] fetch request threw an error during ubus call', {
+		console.log('[ERROR] Something went wrong while executing the command', {
 			displayName,
 			params,
 			error
@@ -82,7 +106,7 @@ export async function ubusCall({
 		return {
 			success: false,
 			error:
-				"Fetch request threw an error during ubus call, Please check your router's IP"
+				'Something went wrong while executing the command. Please see logs for more details'
 		} as const;
 	}
 }
@@ -101,22 +125,45 @@ export async function ubusBatchCall({
 }) {
 	try {
 		const session = await getSession(displayName);
+		if (!session.success) {
+			console.log('[ERROR] Failed to get session', {
+				displayName,
+				calls,
+				session
+			});
+			return {
+				success: false,
+				error: session.errorMessage
+			} as const;
+		}
 		const ubusObjects = calls.map((call) => ({
 			jsonrpc: '2.0',
 			id: call.id,
 			method: 'call',
-			params: [session.sessionKey, ...call.params]
+			params: [session.data.sessionKey, ...call.params]
 		}));
 
-		let parsedResponse = await sendUbusBatch(session.routerIP, ubusObjects);
+		let parsedResponse = await sendUbusBatch(
+			session.data.routerIP,
+			ubusObjects
+		);
 		if (!parsedResponse.success && attemptRetry) {
 			const newLogin = await dedupedLogin({
-				routerIP: session.routerIP,
-				username: session.username,
-				password: session.password
+				routerIP: session.data.routerIP,
+				username: session.data.username,
+				password: session.data.password
 			});
 			if (!newLogin.success) {
-				return { success: false, error: newLogin.error } as const;
+				console.log('[ERROR] Failed to relogin', {
+					displayName,
+					calls,
+					session,
+					newLogin
+				});
+				return {
+					success: false,
+					error: newLogin.errorMessage
+				} as const;
 			}
 
 			const retriedUbusObjects = calls.map((call) => ({
@@ -127,7 +174,7 @@ export async function ubusBatchCall({
 			}));
 
 			parsedResponse = await sendUbusBatch(
-				session.routerIP,
+				session.data.routerIP,
 				retriedUbusObjects
 			);
 			if (!parsedResponse.success) {
@@ -136,26 +183,32 @@ export async function ubusBatchCall({
 					{
 						displayName,
 						parsedResponse,
-						calls
+						calls,
+						newLogin
 					}
 				);
 				return {
 					success: false,
-					error:
-						'Something went wrong while executing the command. Please see logs for more details'
+					error: parsedResponse.errorMessage
 				} as const;
 			}
 		}
-		if (parsedResponse.success) {
-			await updateLastAccessed(displayName);
-			return { success: true, data: parsedResponse.data } as const;
+		if (!parsedResponse.success) {
+			console.log('[ERROR] Failed to execute command', {
+				displayName,
+				calls,
+				session,
+				parsedResponse
+			});
+			return {
+				success: false,
+				error: parsedResponse.errorMessage
+			} as const;
 		}
-		return {
-			success: false,
-			error: 'Something went wrong while executing the command'
-		} as const;
+		await updateLastAccessed(displayName);
+		return { success: true, data: parsedResponse.data } as const;
 	} catch (error) {
-		console.log('[ERROR] fetch request threw during ubus batch call', {
+		console.log('[ERROR] Something went wrong while executing the command', {
 			displayName,
 			calls,
 			error
@@ -163,7 +216,7 @@ export async function ubusBatchCall({
 		return {
 			success: false,
 			error:
-				"Fetch request threw an error during ubus batch call, Please check your router's IP"
+				'Something went wrong while executing the command. Please see logs for more details'
 		} as const;
 	}
 }
@@ -181,8 +234,6 @@ async function dedupedLogin({
 	if (loginPromises.has(routerIP)) {
 		return loginPromises.get(routerIP)!;
 	}
-
-	console.log('[INFO] Starting login for router', routerIP);
 	const promise = login({ routerIP, username, password }).finally(() => {
 		loginPromises.delete(routerIP);
 	});
@@ -231,54 +282,29 @@ export async function login({
 		const ubusResponse = await response.json();
 		const parsedUbusResponse = loginSchema.safeParse(ubusResponse);
 		if (!parsedUbusResponse.success) {
-			console.log('[ERROR] Unknown ubus response from login the call', {
-				routerIP,
-				username,
-				parsedUbusResponse
-			});
 			return {
 				success: false,
-				error:
-					'Something went wrong during login. Please see logs for more details'
+				error: parsedUbusResponse.error,
+				errorMessage: 'Failed to parse ubus login response'
 			} as const;
 		}
 
 		if (parsedUbusResponse.data.result[0] === 6) {
-			console.log('[ERROR] Login failed due to bad credentials', {
-				routerIP,
-				username,
-				password
-			});
 			return {
 				success: false,
-				error: 'Login failed due to bad credentials'
+				error: '',
+				errorMessage: 'Login failed due to bad credentials'
 			} as const;
 		}
 
 		if (!isNew) {
-			try {
-				await db
-					.update(routersTable)
-					.set({
-						lastAccessed: Date.now(),
-						session: parsedUbusResponse.data.result[1].ubus_rpc_session
-					})
-					.where(eq(routersTable.routerIP, routerIP));
-			} catch (error) {
-				console.log(
-					'[ERROR] Failed to update session key in DB after a successful login',
-					{
-						routerIP,
-						username,
-						error
-					}
-				);
-				return {
-					success: false,
-					error:
-						'Failed to update session key in DB after successful login. Please see logs for more details'
-				} as const;
-			}
+			await db
+				.update(routersTable)
+				.set({
+					lastAccessed: Date.now(),
+					session: parsedUbusResponse.data.result[1].ubus_rpc_session
+				})
+				.where(eq(routersTable.routerIP, routerIP));
 		}
 
 		return {
@@ -286,15 +312,10 @@ export async function login({
 			data: parsedUbusResponse.data.result[1]
 		} as const;
 	} catch (error) {
-		console.log('[ERROR] fetch request threw an error during ubus login call', {
-			routerIP,
-			username,
-			error
-		});
 		return {
 			success: false,
-			error:
-				"Fetch request threw an error during ubus login call, Please check your router's IP"
+			error,
+			errorMessage: 'Something went wrong during ubus login call'
 		} as const;
 	}
 }
@@ -314,34 +335,51 @@ async function updateLastAccessed(displayName: string) {
 }
 
 async function getSession(displayName: string) {
-	const [session] = await db
-		.select({
-			routerIP: routersTable.routerIP,
-			sessionKey: routersTable.session,
-			username: routersTable.username,
-			password: routersTable.password,
-			lastAccessed: routersTable.lastAccessed
-		})
-		.from(routersTable)
-		.where(eq(routersTable.displayName, displayName))
-		.limit(1);
+	try {
+		const [session] = await db
+			.select({
+				routerIP: routersTable.routerIP,
+				sessionKey: routersTable.session,
+				username: routersTable.username,
+				password: routersTable.password,
+				lastAccessed: routersTable.lastAccessed
+			})
+			.from(routersTable)
+			.where(eq(routersTable.displayName, displayName))
+			.limit(1);
 
-	let sessionKey = session.sessionKey;
+		let sessionKey = session.sessionKey;
 
-	if (loginPromises.has(displayName)) {
-		const response = await loginPromises.get(displayName)!;
-		if (response.success) sessionKey = response.data.ubus_rpc_session;
-	} else if (session.lastAccessed + 3_500_000 < Date.now()) {
-		const newLogin = await dedupedLogin({
-			routerIP: session.routerIP,
-			username: session.username,
-			password: session.password
-		});
-		if (!newLogin.success) throw new Error(newLogin.error);
-		sessionKey = newLogin.data.ubus_rpc_session;
+		if (loginPromises.has(displayName)) {
+			const response = await loginPromises.get(displayName)!;
+			if (response.success) sessionKey = response.data.ubus_rpc_session;
+		} else if (session.lastAccessed + 3_500_000 < Date.now()) {
+			const newLogin = await dedupedLogin({
+				routerIP: session.routerIP,
+				username: session.username,
+				password: session.password
+			});
+			if (!newLogin.success) {
+				return {
+					success: false,
+					error: newLogin.error,
+					errorMessage: 'Failed to get session'
+				} as const;
+			}
+			sessionKey = newLogin.data.ubus_rpc_session;
+		}
+
+		return {
+			success: true,
+			data: { ...session, sessionKey }
+		} as const;
+	} catch (error) {
+		return {
+			success: false,
+			error,
+			errorMessage: 'Failed to get session'
+		} as const;
 	}
-
-	return { ...session, sessionKey };
 }
 
 async function sendUbus(routerIP: string, ubusObject: object, timeout = 2000) {
@@ -353,15 +391,24 @@ async function sendUbus(routerIP: string, ubusObject: object, timeout = 2000) {
 			signal: AbortSignal.timeout(timeout)
 		});
 		const jsonResponse = await response.json();
-		return validResponseSchema.safeParse(jsonResponse);
+		const parsedResponse = validResponseSchema.safeParse(jsonResponse);
+		if (!parsedResponse.success) {
+			return {
+				success: false,
+				error: parsedResponse.error,
+				errorMessage: 'Failed to parse ubus response'
+			} as const;
+		}
+		return {
+			success: true,
+			data: parsedResponse.data
+		} as const;
 	} catch (error) {
-		console.log('[ERROR] fetch request threw during ubus call', {
-			routerIP,
-			error
-		});
-		throw new Error(
-			"Fetch request threw an error during ubus call, Please check your router's IP"
-		);
+		return {
+			success: false,
+			error,
+			errorMessage: 'Fetch request failed. Please check your router IP'
+		} as const;
 	}
 }
 
@@ -378,14 +425,23 @@ async function sendUbusBatch(
 			signal: AbortSignal.timeout(timeout)
 		});
 		const jsonResponse = await response.json();
-		return validBatchResponseSchema.safeParse(jsonResponse);
+		const parsedResponse = validBatchResponseSchema.safeParse(jsonResponse);
+		if (!parsedResponse.success) {
+			return {
+				success: false,
+				error: parsedResponse.error,
+				errorMessage: 'Failed to parse ubus batch response'
+			} as const;
+		}
+		return {
+			success: true,
+			data: parsedResponse.data
+		} as const;
 	} catch (error) {
-		console.log('[ERROR] fetch request threw during ubus batch call', {
-			routerIP,
-			error
-		});
-		throw new Error(
-			"Fetch request threw an error during ubus batch call, Please check your router's IP"
-		);
+		return {
+			success: false,
+			error,
+			errorMessage: 'Fetch request failed. Please check your router IP'
+		} as const;
 	}
 }

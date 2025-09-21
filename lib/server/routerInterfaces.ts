@@ -23,13 +23,10 @@ export async function getNetworkInterfaces() {
 	});
 
 	if (!ubusResponse.success) {
-		console.log('[ERROR] ubus call to get network interfaces threw an error', {
-			displayName: primaryRouter.data.displayName,
-			error: ubusResponse.error
-		});
 		return {
 			success: false,
-			error: ubusResponse.error
+			error:
+				'Something went wrong while getting the network interfaces. Please see logs for more details'
 		} as const;
 	}
 
@@ -82,13 +79,10 @@ export async function getRealTimeTraffic(device: string) {
 	});
 
 	if (!ubusResponse.success) {
-		console.log('[ERROR] ubus call to get real time traffic threw an error', {
-			displayName: primaryRouter.data.displayName,
-			error: ubusResponse.error
-		});
 		return {
 			success: false,
-			error: ubusResponse.error
+			error:
+				'Something went wrong while getting the real time traffic. Please see logs for more details'
 		} as const;
 	}
 
@@ -137,16 +131,10 @@ export async function getWireguardInterfaces() {
 	});
 
 	if (!ubusResponse.success) {
-		console.log(
-			'[ERROR] ubus call to get wireguard interfaces threw an error',
-			{
-				displayName: primaryRouter.data.displayName,
-				error: ubusResponse.error
-			}
-		);
 		return {
 			success: false,
-			error: ubusResponse.error
+			error:
+				'Something went wrong while getting the wireguard interfaces. Please see logs for more details'
 		} as const;
 	}
 

@@ -31,13 +31,10 @@ export async function disableWifiAPAction({
 	});
 
 	if (!ubusResponse.success) {
-		console.log('[ERROR] ubus call to disable wifi AP threw an error', {
-			displayName,
-			error: ubusResponse.error
-		});
 		return {
 			success: false,
-			error: ubusResponse.error
+			error:
+				'Something went wrong while disabling the wifi AP. Please see logs for more details'
 		} as const;
 	}
 
@@ -54,10 +51,6 @@ export async function disableWifiAPAction({
 	});
 
 	if (!confirmResponse.success) {
-		console.log('[ERROR] ubus call to commit wifi AP disable threw an error', {
-			displayName,
-			error: confirmResponse.error
-		});
 		return {
 			success: false,
 			error: confirmResponse.error
@@ -66,7 +59,7 @@ export async function disableWifiAPAction({
 
 	return {
 		success: true,
-		data: ubusResponse.data
+		data: true
 	} as const;
 }
 
@@ -110,13 +103,10 @@ export async function enabledWifiAPAction({
 	]);
 
 	if (!delte1.success || !delete2.success) {
-		console.log('[ERROR] ubus call to enable wifi AP threw an error', {
-			displayName,
-			error: [delte1.error, delete2.error]
-		});
 		return {
 			success: false,
-			error: [delte1.error, delete2.error]
+			error:
+				'Something went wrong while enabling the wifi AP. Please see logs for more details'
 		} as const;
 	}
 
@@ -133,19 +123,15 @@ export async function enabledWifiAPAction({
 	});
 
 	if (!confirmResponse.success) {
-		console.log('[ERROR] ubus call to commit wifi AP enable threw an error', {
-			displayName,
-			error: confirmResponse.error
-		});
 		return {
 			success: false,
-			error: confirmResponse.error
+			error:
+				'Something went wrong while committing the changes. Please see logs for more details'
 		} as const;
 	}
-	console.log(JSON.stringify(confirmResponse.data));
 
 	return {
 		success: true,
-		data: [delte1.data, delete2.data, confirmResponse.data]
+		data: true
 	} as const;
 }

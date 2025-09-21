@@ -28,10 +28,6 @@ export async function getDhcpDevicesAction() {
 				params: ['luci-rpc', 'getDHCPLeases', {}]
 			});
 			if (!dhcpDevicesResponse.success) {
-				console.log('[ERROR] ubus call to get dhcp devices threw an error', {
-					displayName: router.displayName,
-					error: dhcpDevicesResponse.error
-				});
 				return;
 			}
 			const parsedDhcpDevicesResponse = dhcpDevicesSchema.safeParse(

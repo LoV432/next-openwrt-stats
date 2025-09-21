@@ -67,10 +67,6 @@ export async function getWifiAPs() {
 				})
 			]);
 			if (!getWifiConfigs.success) {
-				console.log('[ERROR] ubus call to get wirelessConfig threw an error', {
-					displayName: router.displayName,
-					error: getWifiConfigs.error
-				});
 				return;
 			}
 			const wirelessConfig = wifiConfigSchema.safeParse(getWifiConfigs.data);
@@ -85,10 +81,6 @@ export async function getWifiAPs() {
 				return;
 			}
 			if (!getWifiAPsLiveData.success) {
-				console.log('[ERROR] ubus call to get wifi APs threw an error', {
-					displayName: router.displayName,
-					error: getWifiAPsLiveData.error
-				});
 				return;
 			}
 			const wifiAPsData = wifiAPsLiveDataSchema.safeParse(
@@ -226,12 +218,10 @@ export async function getWifiClients() {
 
 	const wifiAPs = await getWifiAPs();
 	if (!wifiAPs.success) {
-		console.log('[ERROR] getWifiAPs threw an error', {
-			wifiAPs
-		});
 		return {
 			success: false,
-			error: wifiAPs.error
+			error:
+				'Something went wrong while getting the wifi clients. Please see logs for more details'
 		} as const;
 	}
 	await Promise.all(

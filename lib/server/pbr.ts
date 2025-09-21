@@ -22,13 +22,10 @@ export async function getPBRPolicy() {
 	});
 
 	if (!pbrPolicyResponse.success) {
-		console.log('[ERROR] ubus call to get pbr policy threw an error', {
-			displayName: primaryRouter.data.displayName,
-			error: pbrPolicyResponse.error
-		});
 		return {
 			success: false,
-			error: pbrPolicyResponse.error
+			error:
+				'Something went wrong while getting the pbr policy. Please see logs for more details'
 		} as const;
 	}
 
@@ -65,13 +62,10 @@ export async function getPBRInterfaces() {
 	});
 
 	if (!pbrInterfacesResponse.success) {
-		console.log('[ERROR] ubus call to get pbr interfaces threw an error', {
-			displayName: primaryRouter.data.displayName,
-			error: pbrInterfacesResponse.error
-		});
 		return {
 			success: false,
-			error: pbrInterfacesResponse.error
+			error:
+				'Something went wrong while getting the pbr interfaces. Please see logs for more details'
 		} as const;
 	}
 

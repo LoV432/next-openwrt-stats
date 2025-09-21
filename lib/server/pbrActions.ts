@@ -52,11 +52,6 @@ export async function setPBRPolicyAction({
 		]
 	});
 	if (!pbrPolicyResponse.success) {
-		console.log('[ERROR] ubus call to add policy threw an error', {
-			displayName: primaryRouter.data.displayName,
-			parsedForm,
-			pbrPolicyResponse
-		});
 		return {
 			success: false,
 			error:
@@ -66,10 +61,6 @@ export async function setPBRPolicyAction({
 
 	const commitChangesResponse = await commitPBRchanges();
 	if (!commitChangesResponse.success) {
-		console.log('[ERROR] attempt to commit add policy changes threw an error', {
-			displayName: primaryRouter.data.displayName,
-			error: commitChangesResponse.error
-		});
 		return {
 			success: false,
 			error:
@@ -104,10 +95,6 @@ export async function editPBRPolicyAction({
 
 	const currentPolicies = await getPBRPolicy();
 	if (currentPolicies.error) {
-		console.log('[ERROR] getPBRPolicy threw an error', {
-			displayName: primaryRouter.data.displayName,
-			error: currentPolicies.error
-		});
 		return {
 			success: false,
 			error:
@@ -149,11 +136,6 @@ export async function editPBRPolicyAction({
 			]
 		});
 		if (!deleteResponse.success) {
-			console.log('[ERROR] ubus call to delete policy threw an error', {
-				displayName: primaryRouter.data.displayName,
-				policy,
-				error: deleteResponse.error
-			});
 			return {
 				success: false,
 				error:
@@ -182,11 +164,6 @@ export async function editPBRPolicyAction({
 			]
 		});
 		if (!pbrPolicyResponse.success) {
-			console.log('[ERROR] ubus call to edit policy threw an error', {
-				displayName: primaryRouter.data.displayName,
-				policy,
-				error: pbrPolicyResponse.error
-			});
 			return {
 				success: false,
 				error:
@@ -197,13 +174,6 @@ export async function editPBRPolicyAction({
 
 	const commitChangesResponse = await commitPBRchanges();
 	if (!commitChangesResponse.success) {
-		console.log(
-			'[ERROR] attempt to commit edit policy changes threw an error',
-			{
-				displayName: primaryRouter.data.displayName,
-				error: commitChangesResponse.error
-			}
-		);
 		return {
 			success: false,
 			error:
@@ -236,11 +206,6 @@ export async function deletePBRPolicyAction({ name }: { name: string }) {
 		]
 	});
 	if (!pbrPolicyResponse.success) {
-		console.log('[ERROR] ubus call to delete policy threw an error', {
-			displayName: primaryRouter.data.displayName,
-			name,
-			error: pbrPolicyResponse.error
-		});
 		return {
 			success: false,
 			error: pbrPolicyResponse.error
@@ -249,13 +214,6 @@ export async function deletePBRPolicyAction({ name }: { name: string }) {
 
 	const commitChangesResponse = await commitPBRchanges();
 	if (!commitChangesResponse.success) {
-		console.log(
-			'[ERROR] attempt to commit delete policy changes threw an error',
-			{
-				displayName: primaryRouter.data.displayName,
-				error: commitChangesResponse.error
-			}
-		);
 		return {
 			success: false,
 			error: commitChangesResponse.error
@@ -291,10 +249,7 @@ async function commitPBRchanges() {
 	});
 
 	if (!commitChangesResponse.success) {
-		console.log('[ERROR] Failed to commit pbr changes', {
-			commitChangesResponse
-		});
-		const revertChangesResponse = await ubusCall({
+		await ubusCall({
 			displayName: primaryRouter.data.displayName,
 			params: [
 				'uci',
@@ -305,11 +260,6 @@ async function commitPBRchanges() {
 			],
 			attemptRetry: false
 		});
-		if (!revertChangesResponse.success) {
-			console.log('[ERROR] Failed to revert pbr changes after failed commit', {
-				revertChangesResponse
-			});
-		}
 		return {
 			success: false,
 			error:
