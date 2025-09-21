@@ -22,7 +22,7 @@ export async function registerRouterAction(
 	if (!checkCredentials.success) {
 		return {
 			success: false,
-			error: checkCredentials.error
+			error: checkCredentials.errorMessage
 		} as const;
 	}
 
