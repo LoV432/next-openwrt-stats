@@ -116,7 +116,7 @@ export default function Register() {
 									defaultValue="http://"
 									onValueChange={(value) => setProtocol(value)}
 								>
-									<SelectTrigger className="min-h-11 min-w-[90px]">
+									<SelectTrigger className="min-h-11 min-w-[95px]">
 										<SelectValue placeholder="http://" />
 									</SelectTrigger>
 									<SelectContent>

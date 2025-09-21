@@ -68,18 +68,15 @@ export function ManageRouters() {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<div className="grid place-items-center">
+				<div>
 					<Button variant="outline" className="hidden md:flex">
 						<SettingsIcon className="h-4 w-4" />
 						Manage Routers
 					</Button>
-					<Button
-						variant="ghost"
-						className="borderbg-accent w-full justify-start rounded-none pb-2 pt-0 md:hidden"
-					>
+					<button className="flex w-full items-center justify-start gap-2 rounded-none p-2 md:hidden">
 						<SettingsIcon className="h-4 w-4" />
 						Manage Routers
-					</Button>
+					</button>
 				</div>
 			</DialogTrigger>
 			<DialogContent className="w-full sm:w-fit">
@@ -512,7 +509,7 @@ function AddRouter() {
 									defaultValue="http://"
 									onValueChange={(value) => setProtocol(value)}
 								>
-									<SelectTrigger className="min-h-11 min-w-[90px]">
+									<SelectTrigger className="min-h-11 min-w-[95px]">
 										<SelectValue placeholder="http://" />
 									</SelectTrigger>
 									<SelectContent>

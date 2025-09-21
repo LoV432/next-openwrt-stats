@@ -27,13 +27,10 @@ export function InterfacePicker({
 						<GlobeIcon className="h-4 w-4" />
 						{activeDevice?.interface || 'Network Interfaces'}
 					</Button>
-					<Button
-						variant="ghost"
-						className="border-accent w-full justify-start rounded-none border-b-2 pb-4 pt-0 md:hidden"
-					>
+					<button className="flex w-full items-center justify-start gap-2 rounded-none border-b-2 p-2 md:hidden">
 						<GlobeIcon className="h-4 w-4" />
 						{activeDevice?.interface || 'Network Interfaces'}
-					</Button>
+					</button>
 				</div>
 			</PopoverTrigger>
 			<PopoverContent className="w-80 p-0" align="end">

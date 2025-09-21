@@ -142,17 +142,14 @@ export function RouterLogs() {
 						<FileText className="h-4 w-4" />
 						Logs
 					</Button>
-					<Button
-						variant="ghost"
-						className="border-accent w-full justify-start rounded-none border-b-2 pb-4 pt-0 md:hidden"
-					>
+					<button className="flex w-full items-center justify-start gap-2 rounded-none border-b-2 p-2 md:hidden">
 						<FileText className="h-4 w-4" />
 						Logs
-					</Button>
+					</button>
 				</div>
 			</DialogTrigger>
-			<DialogContent className="h-[95vh] w-[90vw] border-neutral-800 bg-neutral-900 sm:max-w-[1200px]">
-				<DialogHeader>
+			<DialogContent className="h-[95dvh] w-[90vw] border-neutral-800 bg-neutral-900 px-2 sm:max-w-[1200px] sm:px-6">
+				<DialogHeader className="px-4 sm:px-0">
 					<DialogTitle className="flex items-center gap-2 text-white">
 						<FileText className="h-5 w-5" />
 						System Logs
@@ -211,7 +208,7 @@ export function RouterLogs() {
 								))}
 						</div>
 					</ScrollArea> */}
-					<div className="h-[calc(95vh-160px)] overflow-x-scroll rounded-md border border-neutral-800 bg-black">
+					<div className="h-[calc(95dvh-160px)] overflow-x-scroll rounded-md border border-neutral-800 bg-black">
 						<pre className="overflow-y-scroll p-4">{routerLogs.data}</pre>
 					</div>
 				</div>

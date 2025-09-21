@@ -177,7 +177,7 @@ export function AddEditRule({
 					{policy ? <PencilLine /> : 'Add Rule'}
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="flex h-full max-h-[80vh] max-w-3xl flex-col">
+			<DialogContent className="flex h-full max-h-[80vh] w-[90vw] max-w-3xl flex-col">
 				<DialogHeader>
 					<DialogTitle>Add Rule</DialogTitle>
 				</DialogHeader>

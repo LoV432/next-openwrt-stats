@@ -7,7 +7,10 @@ import { PBRInfo } from './PBRInfo';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
-	DropdownMenuTrigger
+	DropdownMenuTrigger,
+	DropdownMenuSeparator,
+	DropdownMenuItem,
+	DropdownMenuLabel
 } from '@/components/ui/dropdown-menu';
 import { Menu, RouterIcon } from 'lucide-react';
 import { Button } from './ui/button';
@@ -47,21 +50,21 @@ export function Header() {
 									<Menu className="h-4 w-4" />
 								</Button>
 							</DropdownMenuTrigger>
-							<DropdownMenuContent className="sm:max-w-[320px]">
-								<div className="mt-2 flex flex-col gap-3">
-									{networkInterfaces && networkInterfaces.length > 1 && (
-										<>
-											<InterfacePicker
-												networkInterfaces={networkInterfaces}
-												activeDevice={activeDevice}
-												setActiveDevice={setActiveDevice}
-											/>
-										</>
-									)}
+							<DropdownMenuContent
+								className="pointer-events-none sm:max-w-[320px]"
+								align="end"
+							>
+								<div className="flex flex-col">
+									<DropdownMenuLabel className="border-b-2 pb-2 text-base">
+										Menu
+									</DropdownMenuLabel>
+									<InterfacePicker
+										networkInterfaces={networkInterfaces || []}
+										activeDevice={activeDevice}
+										setActiveDevice={setActiveDevice}
+									/>
 									{process.env.NEXT_PUBLIC_PBR_ENABLED === 'true' && (
-										<>
-											<PBRInfo />
-										</>
+										<PBRInfo />
 									)}
 									<RouterLogs />
 									<ManageRouters />

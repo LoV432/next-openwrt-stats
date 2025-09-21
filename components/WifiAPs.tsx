@@ -73,7 +73,7 @@ export function WifiAPs() {
 				{wifiAPsQuery.data &&
 					Object.entries(wifiAPsQuery.data.wifiAPsOverview).map(
 						([ssid, data]) => (
-							<Card key={ssid} className="w-full">
+							<Card key={ssid} className="w-full gap-4">
 								<CardHeader>
 									<h3 className="flex text-lg font-semibold">
 										<WifiIcon className="mb-1 mr-2 inline-block" /> {ssid}

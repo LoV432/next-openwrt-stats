@@ -105,7 +105,7 @@ function ClientCard({
 	} | null;
 }) {
 	return (
-		<Card className="w-full">
+		<Card className="w-full gap-2">
 			<CardHeader className="pb-2">
 				<div className="flex items-center justify-between overflow-hidden">
 					<h3 className="mr-2 overflow-hidden text-ellipsis whitespace-nowrap text-lg font-semibold">
@@ -123,7 +123,7 @@ function ClientCard({
 										</span>
 									</div>
 								</PopoverTrigger>
-								<PopoverContent className="w-80">
+								<PopoverContent className="w-80" align="end">
 									<div className="space-y-2">
 										<h4 className="mb-2 font-medium">
 											WiFi Connection Details
