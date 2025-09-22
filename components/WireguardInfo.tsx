@@ -52,11 +52,15 @@ export function WireguardInfo({ interfaceName }: WireguardInfoProps) {
 							<div className="bg-card space-y-2 rounded-lg border p-3">
 								<div className="flex flex-wrap gap-2 text-sm">
 									<span className="text-muted-foreground">Public Key:</span>
-									<span>{wireguardQuery.data.public_key}</span>
+									<span className="ml-auto">
+										{wireguardQuery.data.public_key}
+									</span>
 								</div>
 								<div className="flex flex-wrap gap-2 text-sm">
 									<span className="text-muted-foreground">Listen Port:</span>
-									<span>{wireguardQuery.data.listen_port}</span>
+									<span className="ml-auto">
+										{wireguardQuery.data.listen_port}
+									</span>
 								</div>
 							</div>
 						</div>
@@ -71,23 +75,25 @@ export function WireguardInfo({ interfaceName }: WireguardInfoProps) {
 										>
 											<div className="flex flex-wrap gap-2 text-sm">
 												<span className="text-muted-foreground">Name:</span>
-												<span>{peer.name}</span>
+												<span className="ml-auto">{peer.name}</span>
 											</div>
 											<div className="flex flex-wrap gap-2 text-sm">
 												<span className="text-muted-foreground">
 													Public Key:
 												</span>
-												<span>{peer.public_key}</span>
+												<span className="ml-auto">{peer.public_key}</span>
 											</div>
 											<div className="flex flex-wrap gap-2 text-sm">
 												<span className="text-muted-foreground">Endpoint:</span>
-												<span>{peer.endpoint || 'Not connected'}</span>
+												<span className="ml-auto">
+													{peer.endpoint || 'Not connected'}
+												</span>
 											</div>
 											<div className="flex flex-wrap gap-2 text-sm">
 												<span className="text-muted-foreground">
 													Latest Handshake:
 												</span>
-												<span>
+												<span className="ml-auto">
 													{parseInt(peer.latest_handshake)
 														? new Date(
 																parseInt(peer.latest_handshake) * 1000
@@ -97,7 +103,7 @@ export function WireguardInfo({ interfaceName }: WireguardInfoProps) {
 											</div>
 											<div className="flex flex-wrap gap-2 text-sm">
 												<span className="text-muted-foreground">Transfer:</span>
-												<span>
+												<span className="ml-auto">
 													↑ {formatBytes(Number(peer.transfer_tx))} /{' '}
 													{formatBytes(Number(peer.transfer_rx))} ↓
 												</span>
@@ -106,7 +112,9 @@ export function WireguardInfo({ interfaceName }: WireguardInfoProps) {
 												<span className="text-muted-foreground">
 													Allowed IPs:
 												</span>
-												<span>{peer.allowed_ips.join(', ')}</span>
+												<span className="ml-auto">
+													{peer.allowed_ips.join(', ')}
+												</span>
 											</div>
 										</div>
 									))}
