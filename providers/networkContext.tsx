@@ -27,7 +27,8 @@ export function NetworkProvider({ children }: { children: ReactNode }) {
 	const {
 		data: networkInterfaces,
 		isLoading,
-		error
+		error,
+		dataUpdatedAt
 	} = useQuery({
 		queryKey: ['networkInterfaces'],
 		queryFn: async () => {
@@ -71,7 +72,7 @@ export function NetworkProvider({ children }: { children: ReactNode }) {
 				setActiveDevice(networkInterfaces[0]);
 			}
 		}
-	}, [networkInterfaces, activeDevice]);
+	}, [dataUpdatedAt, activeDevice]);
 
 	useEffect(() => {
 		if (activeDevice) {
