@@ -15,13 +15,13 @@ export default async function Home() {
 	if (routers.length === 0) {
 		redirect('/register');
 	}
-
+	const MAX_TRAFFIC = Number(process.env.MAX_TRAFFIC) || 100;
 	return (
 		<div className="bg-background mx-auto flex w-full flex-col items-center justify-center gap-4">
 			<Header />
 			<div className="flex w-full flex-col p-4 sm:w-[80%]">
 				<div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-					<RealtimeTraffic />
+					<RealtimeTraffic MAX_TRAFFIC={MAX_TRAFFIC} />
 					<NetworkInterfaceInfo />
 					<RouterInfo />
 				</div>

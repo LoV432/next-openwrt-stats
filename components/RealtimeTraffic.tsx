@@ -37,8 +37,7 @@ const chartConfig = {
 	}
 } satisfies ChartConfig;
 
-export function RealtimeTraffic() {
-	const MAX_TRAFFIC = Number(process.env.NEXT_PUBLIC_MAX_TRAFFIC) || 100;
+export function RealtimeTraffic({ MAX_TRAFFIC }: { MAX_TRAFFIC: number }) {
 	const [trafficHistory, setTrafficHistory] = useState<
 		Array<{ time: string; rx: number; tx: number }>
 	>([]);

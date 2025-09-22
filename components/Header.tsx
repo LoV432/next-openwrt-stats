@@ -1,15 +1,10 @@
-'use client';
-
 import { ManageRouters } from '@/components/ManageRouters';
 import { InterfacePicker } from './InterfacePicker';
-import { useNetwork } from '@/providers/networkContext';
 import { PBRInfo } from './PBRInfo';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuTrigger,
-	DropdownMenuSeparator,
-	DropdownMenuItem,
 	DropdownMenuLabel
 } from '@/components/ui/dropdown-menu';
 import { Menu, RouterIcon } from 'lucide-react';
@@ -17,8 +12,6 @@ import { Button } from './ui/button';
 import { RouterLogs } from './RouterLogs';
 
 export function Header() {
-	const { networkInterfaces, activeDevice, setActiveDevice } = useNetwork();
-
 	return (
 		<header className="bg-card sticky top-0 z-10 w-full border-b border-neutral-800">
 			<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -31,14 +24,8 @@ export function Header() {
 					</div>
 
 					<div className="hidden items-center gap-4 md:flex">
-						{networkInterfaces && networkInterfaces.length > 1 && (
-							<InterfacePicker
-								networkInterfaces={networkInterfaces}
-								activeDevice={activeDevice}
-								setActiveDevice={setActiveDevice}
-							/>
-						)}
-						{process.env.NEXT_PUBLIC_PBR_ENABLED === 'true' && <PBRInfo />}
+						<InterfacePicker />
+						{process.env.PBR_ENABLED === 'true' && <PBRInfo />}
 						<RouterLogs />
 						<ManageRouters />
 					</div>
@@ -58,14 +45,8 @@ export function Header() {
 									<DropdownMenuLabel className="border-b-2 pb-2 text-base">
 										Menu
 									</DropdownMenuLabel>
-									<InterfacePicker
-										networkInterfaces={networkInterfaces || []}
-										activeDevice={activeDevice}
-										setActiveDevice={setActiveDevice}
-									/>
-									{process.env.NEXT_PUBLIC_PBR_ENABLED === 'true' && (
-										<PBRInfo />
-									)}
+									<InterfacePicker />
+									{process.env.PBR_ENABLED === 'true' && <PBRInfo />}
 									<RouterLogs />
 									<ManageRouters />
 								</div>

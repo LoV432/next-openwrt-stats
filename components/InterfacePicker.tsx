@@ -4,33 +4,32 @@ import {
 	PopoverContent,
 	PopoverTrigger
 } from '@/components/ui/popover';
-import { NetworkInterface } from '@/types/ubusCalls';
 import { GlobeIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from './ui/button';
+import { useNetwork } from '@/providers/networkContext';
 
-export function InterfacePicker({
-	networkInterfaces,
-	activeDevice,
-	setActiveDevice
-}: {
-	networkInterfaces: Array<NetworkInterface>;
-	activeDevice: NetworkInterface | undefined;
-	setActiveDevice: (device: NetworkInterface) => void;
-}) {
+export function InterfacePicker() {
 	const [isOpen, setIsOpen] = useState(false);
+	const { networkInterfaces, activeDevice, setActiveDevice } = useNetwork();
 	return (
 		<Popover open={isOpen} onOpenChange={setIsOpen}>
 			<PopoverTrigger asChild>
 				<div>
-					<Button variant="outline" className="hidden md:flex">
-						<GlobeIcon className="h-4 w-4" />
-						{activeDevice?.interface || 'Network Interfaces'}
-					</Button>
-					<button className="flex w-full items-center justify-start gap-2 rounded-none border-b-2 p-2 md:hidden">
-						<GlobeIcon className="h-4 w-4" />
-						{activeDevice?.interface || 'Network Interfaces'}
-					</button>
+					{activeDevice ? (
+						<>
+							<Button variant="outline" className="hidden md:flex">
+								<GlobeIcon className="h-4 w-4" />
+								{activeDevice?.interface || 'Network Interfaces'}
+							</Button>
+							<button className="flex w-full items-center justify-start gap-2 rounded-none border-b-2 p-2 md:hidden">
+								<GlobeIcon className="h-4 w-4" />
+								{activeDevice?.interface || 'Network Interfaces'}
+							</button>
+						</>
+					) : (
+						<></>
+					)}
 				</div>
 			</PopoverTrigger>
 			<PopoverContent className="w-80 p-0" align="end">
@@ -39,7 +38,7 @@ export function InterfacePicker({
 						Network Interfaces
 					</h4>
 					<div className="p-2">
-						{networkInterfaces.map((networkInterface) => (
+						{networkInterfaces?.map((networkInterface) => (
 							<button
 								onClick={() => {
 									setActiveDevice(networkInterface);
