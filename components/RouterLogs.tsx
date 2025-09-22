@@ -15,7 +15,7 @@ import {
 	SelectValue
 } from '@/components/ui/select';
 // import { ScrollArea } from '@/components/ui/scroll-area';
-import { FileText } from 'lucide-react';
+import { FileText, LoaderCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Routers } from '@/lib/server/router';
 import { useEffect, useState } from 'react';
@@ -209,7 +209,13 @@ export function RouterLogs() {
 						</div>
 					</ScrollArea> */}
 					<div className="h-[calc(95dvh-160px)] overflow-x-scroll rounded-md border border-neutral-800 bg-black">
-						<pre className="overflow-y-scroll p-4">{routerLogs.data}</pre>
+						{routerLogs.data ? (
+							<pre className="overflow-y-scroll p-4">{routerLogs.data}</pre>
+						) : (
+							<div className="flex h-full w-full items-center justify-center">
+								<LoaderCircle className="h-12 w-12 animate-spin" />
+							</div>
+						)}
 					</div>
 				</div>
 			</DialogContent>
