@@ -160,6 +160,9 @@ export async function getWifiAPs() {
 							Number(wifiConfigParent.txpower) ||
 							0
 					);
+					wifiAPsOverview[wifiConfig.ssid].bitrate.add(
+						wifiLiveData?.iwinfo?.bitrate || 0
+					);
 					if (!allIfname[router.displayName]) {
 						allIfname[router.displayName] = [];
 					}
@@ -190,11 +193,11 @@ export async function getWifiAPs() {
 		const entry = wifiAPsOverview[ssid];
 		wifiAPsOverviewFinal[ssid] = {
 			displayName: Array.from(entry.displayName).sort(),
-			channel: Array.from(entry.channel).sort(),
+			channel: Array.from(entry.channel).sort((a, b) => a - b),
 			band: Array.from(entry.band).sort(),
 			htmode: Array.from(entry.htmode).sort(),
-			txpower: Array.from(entry.txpower).sort(),
-			bitrate: Array.from(entry.bitrate).sort()
+			txpower: Array.from(entry.txpower).sort((a, b) => a - b),
+			bitrate: Array.from(entry.bitrate).sort((a, b) => a - b).filter((value) => value !== 0)
 		};
 	}
 

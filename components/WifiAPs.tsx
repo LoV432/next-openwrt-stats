@@ -122,6 +122,17 @@ export function WifiAPs() {
 												dBm
 											</span>
 										</p>
+										<p className="flex justify-between">
+											<span className="text-muted-foreground">Bitrate</span>
+											<span>
+												{data.bitrate.length > 0 ? (
+													data.bitrate.map((value) => value / 1000).join(' / ')
+												) : (
+													<>- - -</>
+												)}{' '}
+												Mbit/s
+											</span>
+										</p>
 									</div>
 								</CardContent>
 							</Card>
