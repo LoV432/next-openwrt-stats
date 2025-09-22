@@ -11,7 +11,7 @@ import { WireguardInterfaces } from '@/lib/server/routerInterfaces';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Button } from './ui/button';
-import { NetworkIcon } from 'lucide-react';
+import { LoaderCircle, NetworkIcon } from 'lucide-react';
 import { formatBytes } from '@/lib/utils';
 
 interface WireguardInfoProps {
@@ -41,77 +41,83 @@ export function WireguardInfo({ interfaceName }: WireguardInfoProps) {
 					<NetworkIcon className="h-3 w-3" />
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="w-fit sm:max-w-[unset]">
+			<DialogContent className="flex h-full max-h-[80vh] w-[90vw] max-w-3xl flex-col overflow-hidden">
 				<DialogHeader>
 					<DialogTitle>Wireguard Info - {interfaceName}</DialogTitle>
 				</DialogHeader>
-				<div className="space-y-4">
-					{wireguardQuery.isLoading && <div>Loading...</div>}
-					{wireguardQuery.isError && (
-						<div>Error: {wireguardQuery.error?.message}</div>
-					)}
-					{wireguardQuery.data && (
-						<div className="space-y-4 break-words">
-							<div className="space-y-2">
-								<h4 className="font-semibold">Interface</h4>
-								<div className="bg-card space-y-2 rounded-lg border p-3">
-									<div className="grid grid-cols-[0.5fr_1fr] gap-2 text-sm">
-										<span className="text-muted-foreground">Public Key:</span>
-										<span>{wireguardQuery.data.public_key}</span>
-										<span className="text-muted-foreground">Listen Port:</span>
-										<span>{wireguardQuery.data.listen_port}</span>
-									</div>
+				{wireguardQuery.data ? (
+					<div className="space-y-4 overflow-y-auto break-all">
+						<div className="space-y-4">
+							<h4 className="font-semibold">Interface</h4>
+							<div className="bg-card space-y-2 rounded-lg border p-3">
+								<div className="flex flex-wrap gap-2 text-sm">
+									<span className="text-muted-foreground">Public Key:</span>
+									<span>{wireguardQuery.data.public_key}</span>
+								</div>
+								<div className="flex flex-wrap gap-2 text-sm">
+									<span className="text-muted-foreground">Listen Port:</span>
+									<span>{wireguardQuery.data.listen_port}</span>
 								</div>
 							</div>
-							{wireguardQuery.data.peers &&
-								wireguardQuery.data.peers.length > 0 && (
-									<div className="space-y-2">
-										<h4 className="font-semibold">Peers</h4>
-										{wireguardQuery.data.peers.map((peer) => (
-											<div
-												key={peer.public_key}
-												className="bg-card space-y-2 rounded-lg border p-3"
-											>
-												<div className="grid grid-cols-[0.5fr_1fr] gap-2 text-sm">
-													<span className="text-muted-foreground">Name:</span>
-													<span>{peer.name}</span>
-													<span className="text-muted-foreground">
-														Public Key:
-													</span>
-													<span>{peer.public_key}</span>
-													<span className="text-muted-foreground">
-														Endpoint:
-													</span>
-													<span>{peer.endpoint || 'Not connected'}</span>
-													<span className="text-muted-foreground">
-														Latest Handshake:
-													</span>
-													<span>
-														{parseInt(peer.latest_handshake)
-															? new Date(
-																	parseInt(peer.latest_handshake) * 1000
-																).toLocaleString()
-															: 'Never'}
-													</span>
-													<span className="text-muted-foreground">
-														Transfer:
-													</span>
-													<span>
-														↑ {formatBytes(Number(peer.transfer_tx))} /{' '}
-														{formatBytes(Number(peer.transfer_rx))} ↓
-													</span>
-													<span className="text-muted-foreground">
-														Allowed IPs:
-													</span>
-													<span>{peer.allowed_ips.join(', ')}</span>
-												</div>
-											</div>
-										))}
-									</div>
-								)}
 						</div>
-					)}
-				</div>
+						{wireguardQuery.data.peers &&
+							wireguardQuery.data.peers.length > 0 && (
+								<div className="space-y-2">
+									<h4 className="font-semibold">Peers</h4>
+									{wireguardQuery.data.peers.map((peer) => (
+										<div
+											key={peer.public_key}
+											className="bg-card space-y-2 rounded-lg border p-3"
+										>
+											<div className="flex flex-wrap gap-2 text-sm">
+												<span className="text-muted-foreground">Name:</span>
+												<span>{peer.name}</span>
+											</div>
+											<div className="flex flex-wrap gap-2 text-sm">
+												<span className="text-muted-foreground">
+													Public Key:
+												</span>
+												<span>{peer.public_key}</span>
+											</div>
+											<div className="flex flex-wrap gap-2 text-sm">
+												<span className="text-muted-foreground">Endpoint:</span>
+												<span>{peer.endpoint || 'Not connected'}</span>
+											</div>
+											<div className="flex flex-wrap gap-2 text-sm">
+												<span className="text-muted-foreground">
+													Latest Handshake:
+												</span>
+												<span>
+													{parseInt(peer.latest_handshake)
+														? new Date(
+																parseInt(peer.latest_handshake) * 1000
+															).toLocaleString()
+														: 'Never'}
+												</span>
+											</div>
+											<div className="flex flex-wrap gap-2 text-sm">
+												<span className="text-muted-foreground">Transfer:</span>
+												<span>
+													↑ {formatBytes(Number(peer.transfer_tx))} /{' '}
+													{formatBytes(Number(peer.transfer_rx))} ↓
+												</span>
+											</div>
+											<div className="flex flex-wrap gap-2 text-sm">
+												<span className="text-muted-foreground">
+													Allowed IPs:
+												</span>
+												<span>{peer.allowed_ips.join(', ')}</span>
+											</div>
+										</div>
+									))}
+								</div>
+							)}
+					</div>
+				) : (
+					<div className="grid h-full w-full place-items-center">
+						<LoaderCircle className="h-12 w-12 animate-spin" />
+					</div>
+				)}
 			</DialogContent>
 		</Dialog>
 	);
