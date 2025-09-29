@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { EditWifiAPModel } from './EditWifiAP';
 
 export function WifiAPs() {
 	const wifiAPsQuery = useQuery({
@@ -268,7 +269,6 @@ function DetailedWifiAPs({
 											<Button
 												disabled={isLoading}
 												variant="outline"
-												size="sm"
 												onClick={() => {
 													disableEnabledWifiAP({
 														disabled: wifiInterface.disabled ? true : false,
@@ -281,6 +281,10 @@ function DetailedWifiAPs({
 											>
 												{wifiInterface.disabled ? 'Enable' : 'Disable'}
 											</Button>
+											<EditWifiAPModel
+												{...wifiInterface}
+												refreshWifiAPs={refetchWifiAPs}
+											/>
 											{/* <Button variant="destructive" size="sm">
 													Remove
 												</Button> */}

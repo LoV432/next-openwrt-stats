@@ -138,7 +138,7 @@ const wifiAPLiveData = z.object({
 				ifname: z.string().optional(),
 				iwinfo: z
 					.object({
-						channel: z.number(),
+						channel: z.number().optional(),
 						txpower: z.number(),
 						ssid: z.string(),
 						bitrate: z.number().optional()
@@ -155,22 +155,25 @@ export const wifiAPsLiveDataSchema = z.object({
 	result: z.tuple([z.literal(0), z.record(z.string(), wifiAPLiveData)])
 });
 
-const wifiConfig = z.object({
+export const wifiConfig = z.object({
 	'.type': z.literal('wifi-iface'),
 	'.name': z.string(),
 	ssid: z.string(),
 	device: z.string(),
-	disabled: z.string().optional()
+	disabled: z.string().optional(),
+	key: z.string().optional(),
+	hidden: z.string().optional()
 });
 
-const wifiConfigParent = z.object({
+export const wifiConfigParent = z.object({
 	'.type': z.literal('wifi-device'),
 	'.name': z.string(),
 	channel: z.string(),
 	band: z.string(),
 	htmode: z.string(),
 	txpower: z.string().optional(),
-	disabled: z.string().optional()
+	disabled: z.string().optional(),
+	country: z.string().optional()
 });
 
 export const wifiConfigSchema = z.object({
@@ -374,4 +377,70 @@ export const addPolicyForm = z.object({
 export const addPolicyFormClient = z.object({
 	...addPolicyForm.shape,
 	predefinedDstAddr: z.array(z.string())
+});
+
+export const wifiAPUpdateForm = z.object({
+	ssid: z.string().min(1, 'SSID is required'),
+	password: z.string().optional(),
+	channel: z.string().min(1, 'Channel is required'),
+	hidden: z.string().default('0'),
+	txpower: z.string().min(1, 'Txpower is required'),
+	country: z.string().min(1, 'Country is required')
+});
+
+export const wifiAPUpdateFormServer = z.object({
+	values: wifiAPUpdateForm,
+	displayName: z.string().min(1, 'Display name is required'),
+	configSection: z.string().min(1, 'Config section is required'),
+	parentConfigSection: z.string().min(1, 'Config parent section is required')
+});
+
+export const wifiAPFrequencyListSchema = z.object({
+	jsonrpc: z.string(),
+	id: z.number(),
+	result: z.tuple([
+		z.literal(0),
+		z.object({
+			results: z.array(
+				z.object({
+					channel: z.number(),
+					band: z.number(),
+					active: z.boolean().optional()
+				})
+			)
+		})
+	])
+});
+
+export const wifiAPTxPowerListSchema = z.object({
+	jsonrpc: z.string(),
+	id: z.number(),
+	result: z.tuple([
+		z.literal(0),
+		z.object({
+			results: z.array(
+				z.object({
+					dbm: z.number(),
+					active: z.boolean().optional()
+				})
+			)
+		})
+	])
+});
+
+export const wifiAPCountryListSchema = z.object({
+	jsonrpc: z.string(),
+	id: z.number(),
+	result: z.tuple([
+		z.literal(0),
+		z.object({
+			results: z.array(
+				z.object({
+					country: z.string(),
+					code: z.string(),
+					active: z.boolean().optional()
+				})
+			)
+		})
+	])
 });
