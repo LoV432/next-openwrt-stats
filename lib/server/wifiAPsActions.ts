@@ -11,57 +11,56 @@ export async function disableWifiAPAction({
 	displayName: string;
 	configSection: string;
 }) {
-	const router = await getRouter(displayName);
-	if (!router.success) {
-		return router;
-	}
+	try {
+		const router = await getRouter(displayName);
+		if (!router.success) {
+			return router;
+		}
 
-	const ubusResponse = await ubusCall({
-		displayName: router.data.displayName,
-		params: [
-			'uci',
-			'set',
-			{
-				config: 'wireless',
-				section: configSection,
-				values: {
-					disabled: '1'
+		const ubusResponse = await ubusCall({
+			displayName: router.data.displayName,
+			params: [
+				'uci',
+				'set',
+				{
+					config: 'wireless',
+					section: configSection,
+					values: {
+						disabled: '1'
+					}
 				}
-			}
-		]
-	});
+			]
+		});
 
-	if (!ubusResponse.success) {
+		if (!ubusResponse.success) {
+			throw new Error('Something went wrong while disabling wifi AP');
+		}
+
+		const commitChangesResponse = await commitWifiChanges(
+			router.data.displayName
+		);
+
+		if (!commitChangesResponse.success) {
+			throw new Error('Something went wrong while committing changes', {
+				cause: commitChangesResponse.error
+			});
+		}
+
+		return {
+			success: true,
+			data: true
+		} as const;
+	} catch (error) {
+		console.error(error);
+		if (displayName) {
+			await revertWifiChanges(displayName);
+		}
 		return {
 			success: false,
 			error:
-				'Something went wrong while disabling the wifi AP. Please see logs for more details'
-		} as const;
+				'Something went wrong while disabling wifi AP. Please see logs for more details' as string
+		};
 	}
-
-	const confirmResponse = await ubusCall({
-		displayName: router.data.displayName,
-		params: [
-			'uci',
-			'commit',
-			{
-				config: 'wireless'
-			}
-		],
-		attemptRetry: false
-	});
-
-	if (!confirmResponse.success) {
-		return {
-			success: false,
-			error: confirmResponse.error
-		} as const;
-	}
-
-	return {
-		success: true,
-		data: true
-	} as const;
 }
 
 export async function enabledWifiAPAction({
@@ -71,70 +70,71 @@ export async function enabledWifiAPAction({
 	displayName: string;
 	configSection: string[];
 }) {
-	const router = await getRouter(displayName);
-	if (!router.success) {
-		return router;
-	}
+	try {
+		const router = await getRouter(displayName);
+		if (!router.success) {
+			return {
+				success: false,
+				error: 'Router not found'
+			} as const;
+		}
 
-	const [delte1, delete2] = await Promise.all([
-		ubusCall({
-			displayName: router.data.displayName,
-			params: [
-				'uci',
-				'delete',
-				{
-					config: 'wireless',
-					section: configSection[0],
-					options: ['disabled']
-				}
-			]
-		}),
-		ubusCall({
-			displayName: router.data.displayName,
-			params: [
-				'uci',
-				'delete',
-				{
-					config: 'wireless',
-					section: configSection[1],
-					options: ['disabled']
-				}
-			]
-		})
-	]);
+		const [delte1, delete2] = await Promise.all([
+			ubusCall({
+				displayName: router.data.displayName,
+				params: [
+					'uci',
+					'delete',
+					{
+						config: 'wireless',
+						section: configSection[0],
+						options: ['disabled']
+					}
+				]
+			}),
+			ubusCall({
+				displayName: router.data.displayName,
+				params: [
+					'uci',
+					'delete',
+					{
+						config: 'wireless',
+						section: configSection[1],
+						options: ['disabled']
+					}
+				]
+			})
+		]);
 
-	if (!delte1.success || !delete2.success) {
+		if (!delte1.success || !delete2.success) {
+			throw new Error('Something went wrong while disabling wifi AP');
+		}
+
+		const commitChangesResponse = await commitWifiChanges(
+			router.data.displayName
+		);
+
+		if (!commitChangesResponse.success) {
+			throw new Error('Something went wrong while committing changes', {
+				cause: commitChangesResponse.error
+			});
+		}
+
+		return {
+			success: true,
+			data: true
+		} as const;
+	} catch (error) {
+		console.error(error);
+		if (displayName) {
+			await revertWifiChanges(displayName);
+		}
 		return {
 			success: false,
 			error:
-				'Something went wrong while enabling the wifi AP. Please see logs for more details'
-		} as const;
+				'Something went wrong while enabling wifi AP. Please see logs for more details' as string
+		};
 	}
-
-	const confirmResponse = await ubusCall({
-		displayName: router.data.displayName,
-		params: [
-			'uci',
-			'commit',
-			{
-				config: 'wireless'
-			}
-		],
-		attemptRetry: false
-	});
-
-	if (!confirmResponse.success) {
-		return {
-			success: false,
-			error:
-				'Something went wrong while committing the changes. Please see logs for more details'
-		} as const;
-	}
-
-	return {
-		success: true,
-		data: true
-	} as const;
 }
 
 export async function updateWifiAPAction({ params }: { params: any }) {
@@ -287,24 +287,13 @@ export async function updateWifiAPAction({ params }: { params: any }) {
 			}
 		}
 
-		const confirmResponse = await ubusCall({
-			displayName: router.data.displayName,
-			params: [
-				'uci',
-				'commit',
-				{
-					config: 'wireless'
-				}
-			],
-			attemptRetry: false
-		});
-
-		if (!confirmResponse.success) {
+		const commitChangesResponse = await commitWifiChanges(
+			router.data.displayName
+		);
+		if (!commitChangesResponse.success) {
 			throw new Error(
 				'Something went wrong while committing the changes. Please see logs for more details',
-				{
-					cause: confirmResponse.error
-				}
+				{ cause: commitChangesResponse.error }
 			);
 		}
 
@@ -315,7 +304,7 @@ export async function updateWifiAPAction({ params }: { params: any }) {
 	} catch (error) {
 		console.log('Update AP Error: ', error);
 		if (params?.displayName && params.displayName !== '') {
-			await revertChanges(params.displayName);
+			await revertWifiChanges(params.displayName);
 		}
 		return {
 			success: false,
@@ -325,7 +314,41 @@ export async function updateWifiAPAction({ params }: { params: any }) {
 	}
 }
 
-async function revertChanges(router: string) {
+async function commitWifiChanges(router: string) {
+	const primaryRouter = await getRouter(router);
+	if (!primaryRouter.success) {
+		return {
+			success: false,
+			error: 'Failed to find router'
+		};
+	}
+
+	const commitChangesResponse = await ubusCall({
+		displayName: primaryRouter.data.displayName,
+		params: [
+			'uci',
+			'commit',
+			{
+				config: 'wireless'
+			}
+		],
+		attemptRetry: false
+	});
+
+	if (!commitChangesResponse.success) {
+		return {
+			success: false,
+			error: commitChangesResponse.error
+		} as const;
+	}
+
+	return {
+		success: true,
+		data: commitChangesResponse.data
+	} as const;
+}
+
+async function revertWifiChanges(router: string) {
 	const primaryRouter = await getRouter(router);
 	if (!primaryRouter.success) {
 		return {
@@ -349,8 +372,7 @@ async function revertChanges(router: string) {
 	if (!revertResponse.success) {
 		return {
 			success: false,
-			error:
-				'Something went wrong while reverting the changes. Please see logs for more details'
+			error: revertResponse.error
 		} as const;
 	}
 
