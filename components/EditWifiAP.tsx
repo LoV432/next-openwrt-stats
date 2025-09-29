@@ -65,7 +65,7 @@ export function EditWifiAPModel({
 					Edit
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="flex h-full max-h-[80vh] w-[90vw] max-w-3xl flex-col overflow-hidden">
+			<DialogContent className="flex h-fit max-h-[80vh] w-[90vw] max-w-3xl flex-col overflow-hidden">
 				<DialogHeader>
 					<DialogTitle>WiFi Access Point Settings</DialogTitle>
 				</DialogHeader>
@@ -150,14 +150,14 @@ function EditWifiAP({
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
-				<div className="flex w-full gap-4">
+				<div className="flex w-full flex-wrap gap-4">
 					<FormField
 						control={form.control}
 						name="ssid"
 						render={({ field }) => (
 							<FormItem className="flex-1">
 								<FormLabel className="font-medium text-white">
-									Network Name (SSID)
+									WiFi SSID
 								</FormLabel>
 								<FormControl>
 									<Input
