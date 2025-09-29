@@ -6,6 +6,7 @@ import { LoaderCircle, UserIcon, Wifi } from 'lucide-react';
 import { WifiClients } from '@/lib/server/wifiAPs';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { formatBytes, secondsToHumanReadable } from '@/lib/utils';
+import { Button } from './ui/button';
 
 export default function ClientCards() {
 	const dhcpDevicesQuery = useQuery({
@@ -117,13 +118,13 @@ function ClientCard({
 					{wifiData && (
 						<div className="flex items-center gap-2">
 							<Popover>
-								<PopoverTrigger>
-									<div className="border-1 flex items-center gap-1.5 rounded-md border-neutral-700 bg-neutral-800 p-1 px-2 hover:bg-neutral-700">
+								<PopoverTrigger asChild>
+									<Button className="gap-1.5" variant="outline" size="sm">
 										<Wifi className="h-4 w-4" />
 										<span className="text-muted-foreground text-sm">
 											{wifiData.displayName}
 										</span>
-									</div>
+									</Button>
 								</PopoverTrigger>
 								<PopoverContent className="w-80" align="end">
 									<div className="space-y-2">

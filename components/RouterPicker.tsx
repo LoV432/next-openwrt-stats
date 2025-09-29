@@ -6,6 +6,7 @@ import {
 } from '@/components/ui/popover';
 import { RouterIcon } from 'lucide-react';
 import { useState } from 'react';
+import { Button } from './ui/button';
 
 export function RouterPicker({
 	allRouters,
@@ -20,12 +21,12 @@ export function RouterPicker({
 	return (
 		<Popover open={isOpen} onOpenChange={setIsOpen}>
 			<PopoverTrigger asChild>
-				<button className="border-1 flex w-fit items-center justify-center gap-1.5 rounded-md border-neutral-700 bg-neutral-800 px-2 py-1.5 text-sm text-white hover:bg-neutral-700">
+				<Button variant="outline" size={'sm'}>
 					<RouterIcon className="inline-block h-4 w-4" />
 					<span className="text-muted-foreground text-sm">
 						{activeDevice || 'Select Router'}
 					</span>
-				</button>
+				</Button>
 				{/* <button className="border-1 flex h-9 w-fit items-center gap-1 rounded-md border-neutral-700 bg-neutral-800 px-2 text-white hover:bg-neutral-700">
 					<RouterIcon className="inline-block h-5 w-5" />
 					<span className="text-sm">{activeDevice || 'Select Router'}</span>

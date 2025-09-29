@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from './ui/card';
 import { secondsToHumanReadable } from '@/lib/utils';
 import { RouterPicker } from './RouterPicker';
 import { RouterIcon, ServerIcon } from 'lucide-react';
+import { Button } from './ui/button';
 
 export function RouterInfo() {
 	const [activeRouter, setActiveRouter] = useState<string | undefined>(
@@ -154,12 +155,12 @@ function LoadingError({
 						<ServerIcon className="mb-1 mr-2 inline-block" />
 						Router Info
 					</h3>
-					<button className="border-1 flex w-fit items-center justify-center gap-1.5 rounded-md border-neutral-700 bg-neutral-800 px-2 py-1.5 text-sm text-white hover:bg-neutral-700">
+					<Button variant={'outline'} size={'sm'}>
 						<RouterIcon className="inline-block h-4 w-4" />
 						<span className="text-muted-foreground text-sm">
 							{activeRouter || 'Select Router'}
 						</span>
-					</button>
+					</Button>
 				</div>
 			</CardHeader>
 			<CardContent>

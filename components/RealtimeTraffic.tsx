@@ -25,6 +25,7 @@ import {
 	DownloadIcon,
 	UploadIcon
 } from 'lucide-react';
+import { Button } from './ui/button';
 
 const chartConfig = {
 	rx: {
@@ -109,9 +110,9 @@ export function RealtimeTraffic({ MAX_TRAFFIC }: { MAX_TRAFFIC: number }) {
 					</h3>
 					<Dialog>
 						<DialogTrigger asChild>
-							<button className="border-1 grid h-9 w-9 place-items-center rounded-md border-neutral-700 bg-neutral-800 text-white hover:bg-neutral-700">
+							<Button variant={'outline'} size={'sm'}>
 								<ChartAreaIcon className="h-5 w-5" />
-							</button>
+							</Button>
 						</DialogTrigger>
 						<DialogContent className="w-full max-w-[95vw] sm:max-w-2xl md:max-w-3xl">
 							<DialogHeader>

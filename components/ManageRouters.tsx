@@ -519,7 +519,7 @@ function AddRouter() {
 								</Select>
 								<p className="text-neutral-300">://</p>
 								<Input
-									className="h-11 border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus:border-slate-600 focus:ring-slate-600"
+									className="h-11"
 									placeholder="192.168.1.1"
 									required
 									value={routerIP}

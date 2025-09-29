@@ -210,9 +210,9 @@ function DetailedWifiAPs({
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<button className="border-1 grid h-9 w-9 place-items-center rounded-md border-neutral-700 bg-neutral-800 text-white hover:bg-neutral-700">
+				<Button variant="outline" size={'sm'}>
 					<Settings2 className="h-5 w-5" />
-				</button>
+				</Button>
 			</DialogTrigger>
 			<DialogContent className="h-[80vh] sm:max-w-[700px]">
 				<DialogHeader>
