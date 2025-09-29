@@ -19,6 +19,17 @@ import {
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { EditWifiAPModel } from './EditWifiAP';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger
+} from '@/components/ui/alert-dialog';
 
 export function WifiAPs() {
 	const wifiAPsQuery = useQuery({
@@ -163,50 +174,6 @@ function DetailedWifiAPs({
 	ssid: string;
 	refetchWifiAPs: () => Promise<any>;
 }) {
-	const [isLoading, setIsLoading] = useState(false);
-
-	async function disableEnabledWifiAP({
-		disabled,
-		displayName,
-		configSection,
-		parentConfigSection
-	}: {
-		disabled: boolean;
-		displayName: string;
-		configSection: string;
-		parentConfigSection: string;
-	}) {
-		setIsLoading(true);
-		try {
-			let response;
-			if (disabled) {
-				response = await enabledWifiAPAction({
-					displayName,
-					configSection: [configSection, parentConfigSection]
-				});
-			} else {
-				response = await disableWifiAPAction({
-					displayName,
-					configSection: configSection
-				});
-			}
-			await refetchWifiAPs();
-			if (response.success) {
-				toast.success('Wifi AP updated', {
-					richColors: true
-				});
-			} else {
-				toast.error(`Failed to update wifi AP: ${response.error}`, {
-					richColors: true
-				});
-			}
-		} catch (err) {
-			toast.error('Something went wrong', {
-				richColors: true
-			});
-		}
-		setIsLoading(false);
-	}
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
@@ -266,21 +233,13 @@ function DetailedWifiAPs({
 											</div>
 										</div>
 										<div className="ml-auto mt-3 flex flex-wrap items-center gap-2 md:ml-4 md:mt-0">
-											<Button
-												disabled={isLoading}
-												variant="outline"
-												onClick={() => {
-													disableEnabledWifiAP({
-														disabled: wifiInterface.disabled ? true : false,
-														displayName: wifiInterface.displayName,
-														configSection: wifiInterface.configSection,
-														parentConfigSection:
-															wifiInterface.parentConfigSection
-													});
-												}}
-											>
-												{wifiInterface.disabled ? 'Enable' : 'Disable'}
-											</Button>
+											<EnableDisableWifiAP
+												displayName={wifiInterface.displayName}
+												configSection={wifiInterface.configSection}
+												parentConfigSection={wifiInterface.parentConfigSection}
+												disabled={wifiInterface.disabled ? true : false}
+												refetchWifiAPs={refetchWifiAPs}
+											/>
 											<EditWifiAPModel
 												{...wifiInterface}
 												refreshWifiAPs={refetchWifiAPs}
@@ -296,5 +255,101 @@ function DetailedWifiAPs({
 				</div>
 			</DialogContent>
 		</Dialog>
+	);
+}
+
+function EnableDisableWifiAP({
+	displayName,
+	configSection,
+	parentConfigSection,
+	disabled,
+	refetchWifiAPs
+}: {
+	displayName: string;
+	configSection: string;
+	parentConfigSection: string;
+	disabled: boolean;
+	refetchWifiAPs: () => Promise<any>;
+}) {
+	const [isLoading, setIsLoading] = useState(false);
+	const [isOpen, setIsOpen] = useState(false);
+
+	async function disableEnabledWifiAP() {
+		setIsLoading(true);
+		try {
+			let response;
+			if (disabled) {
+				response = await enabledWifiAPAction({
+					displayName,
+					configSection: [configSection, parentConfigSection]
+				});
+			} else {
+				response = await disableWifiAPAction({
+					displayName,
+					configSection: configSection
+				});
+			}
+			await refetchWifiAPs();
+			if (response.success) {
+				toast.success('Wifi AP updated', {
+					richColors: true
+				});
+			} else {
+				toast.error(`Failed to update wifi AP: ${response.error}`, {
+					richColors: true
+				});
+			}
+		} catch (err) {
+			toast.error('Something went wrong', {
+				richColors: true
+			});
+		}
+		setIsLoading(false);
+	}
+
+	function handleOpenClose(newSate: boolean) {
+		if (newSate) {
+			setIsOpen(true);
+		} else if (!newSate && !isLoading) {
+			setIsOpen(false);
+		}
+	}
+
+	return (
+		<AlertDialog open={isOpen} onOpenChange={handleOpenClose}>
+			<AlertDialogTrigger asChild>
+				<Button onClick={() => setIsOpen(true)} variant="outline">
+					{disabled ? 'Enable' : 'Disable'}
+				</Button>
+			</AlertDialogTrigger>
+			<AlertDialogContent>
+				<AlertDialogHeader>
+					<AlertDialogTitle>
+						{disabled ? 'Enable' : 'Disable'} - WiFi AP
+					</AlertDialogTitle>
+					<AlertDialogDescription>
+						Are you sure you want to {disabled ? 'enable' : 'disable'} this WiFi
+						AP?
+					</AlertDialogDescription>
+				</AlertDialogHeader>
+				<AlertDialogFooter>
+					<AlertDialogCancel>Cancel</AlertDialogCancel>
+					<AlertDialogAction asChild>
+						<Button
+							disabled={isLoading}
+							onClick={(event) => {
+								event.preventDefault();
+								disableEnabledWifiAP();
+							}}
+							variant="destructive"
+							className="text-white"
+						>
+							{disabled ? (isLoading ? 'Enabling...' : 'Enable') : ''}
+							{!disabled ? (isLoading ? 'Disabling...' : 'Disable') : ''}
+						</Button>
+					</AlertDialogAction>
+				</AlertDialogFooter>
+			</AlertDialogContent>
+		</AlertDialog>
 	);
 }
