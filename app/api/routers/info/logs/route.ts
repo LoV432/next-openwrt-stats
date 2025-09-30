@@ -8,7 +8,7 @@ import { NextRequest } from 'next/server';
 export type RouterLogs = Awaited<
 	| {
 			success: true;
-			data: string;
+			data: string[];
 	  }
 	| {
 			success: false;
@@ -86,9 +86,7 @@ export async function GET(request: NextRequest) {
 
 		const logs = (logsCall.data.result[1].stdout as string)
 			.trimEnd()
-			.split('\n')
-			.toReversed()
-			.join('\n');
+			.split('\n');
 		return new Response(
 			JSON.stringify({
 				success: true,

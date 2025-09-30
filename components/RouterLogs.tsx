@@ -14,11 +14,11 @@ import {
 	SelectTrigger,
 	SelectValue
 } from '@/components/ui/select';
-// import { ScrollArea } from '@/components/ui/scroll-area';
+import { List, RowComponentProps } from 'react-window';
 import { FileText, LoaderCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Routers } from '@/lib/server/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { RouterLogs } from '@/app/api/routers/info/logs/route';
 
 export function RouterLogs() {
@@ -26,20 +26,20 @@ export function RouterLogs() {
 	const [selectedRouter, setSelectedRouter] = useState<string | undefined>(
 		undefined
 	);
-	// const logsByRouter = useRef<{
-	// 	[key: string]: {
-	// 		logs: {
-	// 			id: string;
-	// 			timestamp: string;
-	// 			level: string;
-	// 			message: string;
-	// 			source: string;
-	// 			facility: string;
-	// 		}[];
-	// 		lastLog: string;
-	// 	};
-	// }>({});
-	// const [rerender, setRerender] = useState(false);
+	const logsByRouter = useRef<{
+		[key: string]: {
+			logs: {
+				id: string;
+				timestamp: string;
+				level: string;
+				message: string;
+				source: string;
+				facility: string;
+			}[];
+			lastLog: string;
+		};
+	}>({});
+	const [rerender, setRerender] = useState(false);
 	const routers = useQuery({
 		queryKey: ['getRouters'],
 		queryFn: async () => {
@@ -85,54 +85,47 @@ export function RouterLogs() {
 		refetchInterval: 10000
 	});
 
-	// useEffect(() => {
-	// 	if (routerLogs.data && selectedRouter) {
-	// 		parseAndPushLogs(routerLogs.data, selectedRouter);
-	// 	}
-	// }, [routerLogs.dataUpdatedAt]);
+	useEffect(() => {
+		if (routerLogs.data && selectedRouter) {
+			parseAndPushLogs(routerLogs.data, selectedRouter);
+		}
+	}, [routerLogs.dataUpdatedAt]);
 
-	// function parseAndPushLogs(logs: string[], router: string) {
-	// 	if (!logsByRouter.current[router]) {
-	// 		logsByRouter.current[router] = {
-	// 			logs: [],
-	// 			lastLog: ''
-	// 		};
-	// 	}
-	// 	const lastLogIndex = logs.findIndex(
-	// 		(log) => log.trim() === logsByRouter.current[router].lastLog.trim()
-	// 	);
-	// 	// console.log(lastLogIndex, 'lastLogIndex');
-	// 	let newLogs: string[] = logs;
-	// 	if (lastLogIndex !== -1) {
-	// 		newLogs = logs.slice(lastLogIndex + 1);
-	// 	}
-	// 	// console.log(newLogs, 'newLogs');
-	// 	for (const logLine of newLogs) {
-	// 		const parts = logLine.split(' ');
-	// 		const timestamp = parts.slice(0, 5).join(' ');
-	// 		const facilityLevel = parts[5];
-	// 		const message = parts.slice(6).join(' ');
+	function parseAndPushLogs(logs: string[], router: string) {
+		if (!logsByRouter.current[router]) {
+			logsByRouter.current[router] = {
+				logs: [],
+				lastLog: ''
+			};
+		}
+		const lastLogIndex = logs.findIndex(
+			(log) => log.trim() === logsByRouter.current[router].lastLog.trim()
+		);
+		let newLogs: string[] = logs;
+		if (lastLogIndex !== -1) {
+			newLogs = logs.slice(lastLogIndex + 1);
+		}
+		for (const logLine of newLogs) {
+			const parts = logLine.split(' ');
+			const timestamp = parts.slice(0, 5).join(' ');
+			const facilityLevel = parts[5];
+			const daemon = parts.slice(6).join(' ').split(':')[0] || 'system';
+			const message = parts.slice(7).join(' ');
 
-	// 		const level = facilityLevel.split('.')[1]?.toUpperCase() || 'INFO';
-	// 		const daemon = message.split(':')[0] || 'system';
-	// 		logsByRouter.current[router].logs.push({
-	// 			id: logLine.replace(/\n/g, '') + Math.random(),
-	// 			timestamp,
-	// 			level,
-	// 			message,
-	// 			source: daemon,
-	// 			facility: facilityLevel
-	// 		});
-	// 	}
-	// 	logsByRouter.current[router].lastLog = logs[logs.length - 1].trim();
-	// 	logsByRouter.current[router].logs =
-	// 		logsByRouter.current[router].logs.slice(-500);
-	// 	// console.log(logsByRouter.current[router].logs.length);
-	// 	setRerender(!rerender);
-	// 	return true;
-	// }
-
-	// console.log('rerender', rerender);
+			const level = facilityLevel.split('.')[1]?.toUpperCase() || 'INFO';
+			logsByRouter.current[router].logs.push({
+				id: logLine.replace(/\n/g, '') + Math.random(),
+				timestamp,
+				level,
+				message,
+				source: daemon,
+				facility: facilityLevel
+			});
+		}
+		logsByRouter.current[router].lastLog = logs[logs.length - 1].trim();
+		setRerender(!rerender);
+		return true;
+	}
 
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -178,39 +171,18 @@ export function RouterLogs() {
 						</Select>
 					</div>
 
-					{/* <ScrollArea className="h-[calc(95vh-160px)] w-full rounded-md border border-neutral-800 bg-black p-4">
-						<div className="space-y-2">
-							{logsByRouter.current?.[selectedRouter || '']?.logs
-								.toReversed()
-								.map((log) => (
-									<div
-										key={log.id}
-										className="flex items-start gap-3 rounded-md p-2 transition-colors hover:bg-neutral-900"
-										style={{ contentVisibility: 'auto' }}
-									>
-										<Badge
-											variant="outline"
-											className={`font-mono text-xs ${getLogLevelStyle(log.level)} my-auto w-20`}
-										>
-											{log.level}
-										</Badge>
-										<div className="min-w-0 flex-1">
-											<div className="flex items-center gap-2 text-xs text-neutral-500">
-												<span className="font-mono">{log.timestamp}</span>
-												<span>•</span>
-												<span>{log.source}</span>
-											</div>
-											<p className="mt-1 font-mono text-sm text-white">
-												{log.message}
-											</p>
-										</div>
-									</div>
-								))}
-						</div>
-					</ScrollArea> */}
-					<div className="h-[calc(95dvh-160px)] overflow-x-scroll rounded-md border border-neutral-800 bg-black">
-						{routerLogs.data ? (
-							<pre className="overflow-y-scroll p-4">{routerLogs.data}</pre>
+					<div className="h-[calc(95dvh-160px)] w-full overflow-scroll rounded-md border border-neutral-800 bg-black">
+						{selectedRouter &&
+						logsByRouter.current[selectedRouter]?.logs.length ? (
+							<List
+								rowCount={logsByRouter.current[selectedRouter]?.logs.length}
+								overscanCount={20}
+								rowHeight={55}
+								rowProps={{
+									logs: logsByRouter.current[selectedRouter].logs
+								}}
+								rowComponent={Log}
+							/>
 						) : (
 							<div className="flex h-full w-full items-center justify-center">
 								<LoaderCircle className="h-12 w-12 animate-spin" />
@@ -223,21 +195,59 @@ export function RouterLogs() {
 	);
 }
 
-// function getLogLevelStyle(level: string) {
-// 	switch (level.toUpperCase()) {
-// 		case 'ERR':
-// 		case 'ERROR':
-// 			return 'text-red-400 bg-red-950 border-red-800';
-// 		case 'WARN':
-// 		case 'WARNING':
-// 			return 'text-yellow-400 bg-yellow-950 border-yellow-800';
-// 		case 'INFO':
-// 			return 'text-blue-400 bg-blue-950 border-blue-800';
-// 		case 'NOTICE':
-// 			return 'text-green-400 bg-green-950 border-green-800';
-// 		case 'DEBUG':
-// 			return 'text-gray-400 bg-gray-950 border-gray-800';
-// 		default:
-// 			return 'text-neutral-400 bg-neutral-950 border-neutral-800';
-// 	}
-// }
+function Log({
+	index,
+	logs,
+	style
+}: RowComponentProps<{
+	logs: {
+		id: string;
+		timestamp: string;
+		level: string;
+		message: string;
+		source: string;
+		facility: string;
+	}[];
+}>) {
+	const log = logs[logs.length - index - 1];
+	return (
+		<div
+			key={log.id}
+			className="flex items-start gap-3 p-2 transition-colors hover:bg-neutral-900"
+			style={style}
+		>
+			<div
+				className={`font-mono text-xs ${getLogLevelStyle(log.level)} my-auto h-4 w-4 rounded-full`}
+			></div>
+			<div className="min-w-0 flex-1">
+				<div className="flex items-center gap-2 text-xs text-neutral-500">
+					<span className="font-mono">{log.timestamp}</span>
+					<span>•</span>
+					<span>{log.source}</span>
+				</div>
+				<p className="mt-1 whitespace-nowrap font-mono text-sm text-white">
+					{log.message}
+				</p>
+			</div>
+		</div>
+	);
+}
+
+function getLogLevelStyle(level: string) {
+	switch (level.toUpperCase()) {
+		case 'ERR':
+		case 'ERROR':
+			return 'text-red-400 bg-red-950 border-red-800';
+		case 'WARN':
+		case 'WARNING':
+			return 'text-yellow-400 bg-yellow-950 border-yellow-800';
+		case 'INFO':
+			return 'text-blue-400 bg-blue-950 border-blue-800';
+		case 'NOTICE':
+			return 'text-green-400 bg-green-950 border-green-800';
+		case 'DEBUG':
+			return 'text-gray-400 bg-gray-950 border-gray-800';
+		default:
+			return 'text-neutral-400 bg-neutral-950 border-neutral-800';
+	}
+}
