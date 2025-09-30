@@ -109,8 +109,9 @@ export function RouterLogs() {
 			const parts = logLine.split(' ');
 			const timestamp = parts.slice(0, 5).join(' ');
 			const facilityLevel = parts[5];
-			const daemon = parts.slice(6).join(' ').split(':')[0] || 'system';
-			const message = parts.slice(7).join(' ');
+			const messageWithDaemon = parts.slice(6).join(' ').split(':');
+			const message = messageWithDaemon.slice(1).join(':');
+			const daemon = messageWithDaemon[0] || 'system';
 
 			const level = facilityLevel.split('.')[1]?.toUpperCase() || 'INFO';
 			logsByRouter.current[router].logs.push({
