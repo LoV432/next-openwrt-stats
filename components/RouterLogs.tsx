@@ -107,7 +107,9 @@ export function RouterLogs() {
 		}
 		for (const logLine of newLogs) {
 			const parts = logLine.split(' ');
-			const timestamp = parts.slice(0, 5).join(' ');
+			const timestamp = new Date(
+				parts.slice(0, 5).join(' ') + 'Z'
+			).toLocaleString();
 			const facilityLevel = parts[5];
 			const messageWithDaemon = parts.slice(6).join(' ').split(':');
 			const message = messageWithDaemon.slice(1).join(':');
