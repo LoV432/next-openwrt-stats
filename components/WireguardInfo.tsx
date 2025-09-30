@@ -46,7 +46,13 @@ export function WireguardInfo({ interfaceName }: WireguardInfoProps) {
 					<DialogTitle>Wireguard Info - {interfaceName}</DialogTitle>
 				</DialogHeader>
 				{wireguardQuery.data ? (
-					<div className="space-y-4 overflow-y-auto break-all">
+					<div
+						className="space-y-4 overflow-y-auto break-all"
+						style={{
+							scrollbarColor: 'transparent transparent',
+							scrollbarWidth: 'thin'
+						}}
+					>
 						<div className="space-y-4">
 							<h4 className="font-semibold">Interface</h4>
 							<div className="bg-card space-y-2 rounded-lg border p-3">
