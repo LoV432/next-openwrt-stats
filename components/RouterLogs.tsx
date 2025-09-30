@@ -157,12 +157,11 @@ export function RouterLogs() {
 							<SelectTrigger className="ml-auto w-40 border-neutral-700 bg-neutral-800 text-white">
 								<SelectValue />
 							</SelectTrigger>
-							<SelectContent className="border-neutral-700 bg-neutral-800">
+							<SelectContent>
 								{routers?.data?.map((router) => (
 									<SelectItem
 										key={router.displayName}
 										value={router.displayName}
-										className="text-white hover:bg-neutral-700"
 									>
 										{router.displayName}
 									</SelectItem>
