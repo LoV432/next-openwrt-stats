@@ -16,7 +16,7 @@ import { PBRIcon } from './PBRIcons';
 import { AddEditRule } from './AddPBRPolicy';
 import { toast } from 'sonner';
 import { useState } from 'react';
-import { ShieldIcon, Trash2Icon } from 'lucide-react';
+import { LoaderCircle, ShieldIcon, Trash2Icon } from 'lucide-react';
 
 function Field({ label, value }: { label: string; value: string }) {
 	const values = value.split(' ').map((v) => {
@@ -50,7 +50,12 @@ function Field({ label, value }: { label: string; value: string }) {
 }
 
 export function PBRInfo() {
-	const { data, refetch: refetchPolicies } = useQuery({
+	const [isOpen, setIsOpen] = useState(false);
+	const {
+		data,
+		refetch: refetchPolicies,
+		isLoading
+	} = useQuery({
 		queryKey: ['pbrPolicy'],
 		queryFn: async () => {
 			const pbrData = await fetch('/api/pbr/pbr-policy').then(
@@ -60,7 +65,8 @@ export function PBRInfo() {
 				throw new Error(pbrData.error);
 			}
 			return pbrData.data;
-		}
+		},
+		enabled: isOpen
 	});
 
 	const { data: interfaces } = useQuery({
@@ -71,7 +77,8 @@ export function PBRInfo() {
 			);
 			if (!pbrData.success) throw new Error(pbrData.error);
 			return pbrData.data;
-		}
+		},
+		enabled: isOpen
 	});
 
 	const policies = Object.values(data || {})
@@ -90,13 +97,8 @@ export function PBRInfo() {
 			return null;
 		})
 		.filter((policy) => policy !== null);
-
-	if (config.length === 0) {
-		// TODO: I assume this would mean PBR is not installed or enabled.
-		return null;
-	}
 	return (
-		<Dialog>
+		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogTrigger asChild>
 				<div>
 					<Button variant="outline" className="hidden md:flex">
@@ -120,18 +122,22 @@ export function PBRInfo() {
 						scrollbarWidth: 'thin'
 					}}
 				>
-					{config &&
+					<div className="w-full">
+						{config &&
 						config.length > 0 &&
 						interfaces &&
-						interfaces.length > 0 && (
-							<div className="w-full">
-								<AddEditRule
-									supportedProtocols={config[0].webui_supported_protocol}
-									interfaces={interfaces}
-									refetchPolicies={refetchPolicies}
-								/>
-							</div>
+						interfaces.length > 0 ? (
+							<AddEditRule
+								supportedProtocols={config[0].webui_supported_protocol}
+								interfaces={interfaces}
+								refetchPolicies={refetchPolicies}
+							/>
+						) : (
+							<Button variant="outline" className="w-full">
+								Loading....
+							</Button>
 						)}
+					</div>
 					{policies.map((policy) => (
 						<Card
 							key={policy['.name']}
@@ -209,8 +215,10 @@ export function PBRInfo() {
 							</div>
 						</Card>
 					))}
-					{policies.length === 0 && (
-						<div className="text-center">No policies found</div>
+					{isLoading && (
+						<div className="grid h-full w-full place-items-center">
+							<LoaderCircle className="h-12 w-12 animate-spin" />
+						</div>
 					)}
 				</div>
 			</DialogContent>
