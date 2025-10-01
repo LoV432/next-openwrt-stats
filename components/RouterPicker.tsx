@@ -34,9 +34,7 @@ export function RouterPicker({
 			</PopoverTrigger>
 			<PopoverContent className="w-80 p-0" align="end">
 				<div className="grid">
-					<h4 className="mb-2 border-b px-4 py-3 font-medium">
-						Network Interfaces
-					</h4>
+					<h4 className="mb-2 border-b px-4 py-3 font-medium">Routers</h4>
 					<div className="p-2">
 						{allRouters.map((router) => (
 							<button
