@@ -106,7 +106,7 @@ export function RouterLogs() {
 			newLogs = logs.slice(lastLogIndex + 1);
 		}
 		for (const logLine of newLogs) {
-			const parts = logLine.split(' ');
+			const parts = logLine.split(' ').filter((part) => part !== '');
 			const timestamp = new Date(
 				parts.slice(0, 5).join(' ') + 'Z'
 			).toLocaleString();
