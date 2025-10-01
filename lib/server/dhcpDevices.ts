@@ -1,11 +1,10 @@
-'use server';
 import 'server-only';
 import { ubusCall } from './ubusCalls';
 import { dhcpDevicesSchema } from '@/types/ubusCalls';
 import { getRouters } from './router';
 
-export type DhcpDevices = Awaited<ReturnType<typeof getDhcpDevicesAction>>;
-export async function getDhcpDevicesAction() {
+export type DhcpDevices = Awaited<ReturnType<typeof getDhcpDevices>>;
+export async function getDhcpDevices() {
 	const allRouters = await getRouters();
 	if (!allRouters.success) {
 		return {
@@ -14,13 +13,11 @@ export async function getDhcpDevicesAction() {
 		} as const;
 	}
 	const dhcpDevices: {
-		[key: string]: {
-			deviceName: string;
-			macAddress: string;
-			ipAddress: string;
-			leaseTime: number | boolean;
-		};
-	} = {};
+		deviceName: string;
+		macAddress: string;
+		ipAddress: string;
+		leaseTime: number | boolean;
+	}[] = [];
 	await Promise.all(
 		allRouters.data.map(async (router) => {
 			const dhcpDevicesResponse = await ubusCall({
@@ -43,18 +40,18 @@ export async function getDhcpDevicesAction() {
 			if (parsedDhcpDevicesResponse.data.result) {
 				for (const device of parsedDhcpDevicesResponse.data.result[1]
 					.dhcp_leases) {
-					dhcpDevices[device.macaddr] = {
+					dhcpDevices.push({
 						deviceName: device.hostname || 'Unknown Device',
 						macAddress: device.macaddr,
 						ipAddress: device.ipaddr,
 						leaseTime: device.expires
-					};
+					});
 				}
 			}
 		})
 	);
 	return {
 		success: true,
-		data: dhcpDevices
+		data: dhcpDevices.sort((a, b) => a.ipAddress.localeCompare(b.ipAddress))
 	} as const;
 }

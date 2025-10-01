@@ -1,5 +1,5 @@
 'use client';
-import { DhcpDevices } from '@/lib/server/dhcpActions';
+import { DhcpDevices } from '@/lib/server/dhcpDevices';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { LoaderCircle, UserIcon, Wifi } from 'lucide-react';
@@ -69,7 +69,7 @@ export default function ClientCards() {
 	return (
 		<div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 			{dhcpDevicesQuery.data &&
-				Object.values(dhcpDevicesQuery.data).map((device) => (
+				dhcpDevicesQuery.data.map((device) => (
 					<ClientCard
 						device={device}
 						key={device.macAddress}
