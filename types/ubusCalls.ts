@@ -444,3 +444,18 @@ export const wifiAPCountryListSchema = z.object({
 		})
 	])
 });
+
+export const routerTimezoneSchema = z.object({
+	jsonrpc: z.string(),
+	id: z.number(),
+	result: z.tuple([
+		z.literal(0),
+		z.record(
+			z.string(),
+			z.object({
+				tzstring: z.string(),
+				active: z.boolean().optional()
+			})
+		)
+	])
+});

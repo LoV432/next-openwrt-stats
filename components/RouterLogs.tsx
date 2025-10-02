@@ -20,6 +20,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Routers } from '@/lib/server/router';
 import { useEffect, useRef, useState } from 'react';
 import type { RouterLogs } from '@/app/api/routers/info/logs/route';
+import { getRouterTimezone } from '@/app/api/routers/info/timezone/route';
 
 export function RouterLogs() {
 	const [isOpen, setIsOpen] = useState(false);
@@ -64,6 +65,40 @@ export function RouterLogs() {
 		}
 	}, [routers.dataUpdatedAt]);
 
+	const routerTimezone = useQuery({
+		// TODO: I feel like we are making 1 extra request for no real reason here
+		// We could just use ENV vars to findout what timezone the routers are in
+		// Most people should have their router in UTC anyways
+		// We could also fetch the timezone is the same reuqest as the router logs
+		queryKey: ['routerTimezone', selectedRouter],
+		queryFn: async () => {
+			const response = await fetch(
+				'/api/routers/info/timezone?displayName=' + selectedRouter,
+				{
+					method: 'GET'
+				}
+			);
+			const data = (await response.json()) as getRouterTimezone;
+			if (!data.success) {
+				throw new Error(data.error);
+			}
+			const timeZoneOffset =
+				data.data === 'UTC'
+					? 'Z'
+					: new Intl.DateTimeFormat('en-US', {
+							timeZone: data.data,
+							timeZoneName: 'longOffset'
+						})
+							.format(new Date())
+							.split('GMT')[1];
+			return timeZoneOffset;
+		},
+		enabled: selectedRouter !== undefined,
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		staleTime: Infinity
+	});
+
 	const routerLogs = useQuery({
 		queryKey: ['getRouterLogs', selectedRouter],
 		queryFn: async () => {
@@ -79,7 +114,10 @@ export function RouterLogs() {
 			}
 			return data.data;
 		},
-		enabled: isOpen && selectedRouter !== undefined,
+		enabled:
+			isOpen &&
+			selectedRouter !== undefined &&
+			routerTimezone.data !== undefined,
 		refetchOnWindowFocus: false,
 		refetchOnMount: false,
 		refetchInterval: 10000
@@ -108,7 +146,7 @@ export function RouterLogs() {
 		for (const logLine of newLogs) {
 			const parts = logLine.split(' ').filter((part) => part !== '');
 			const timestamp = new Date(
-				parts.slice(0, 5).join(' ') + 'Z'
+				parts.slice(0, 5).join(' ') + routerTimezone.data
 			).toLocaleString();
 			const facilityLevel = parts[5];
 			const messageWithDaemon = parts.slice(6).join(' ').split(':');
