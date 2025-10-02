@@ -211,7 +211,7 @@ export function RouterLogs() {
 						</Select>
 					</div>
 
-					<div className="h-[calc(95dvh-160px)] w-full overflow-scroll rounded-md border border-neutral-800 bg-black">
+					<div className="h-[calc(95dvh-160px)] w-full rounded-md border border-neutral-800 bg-black">
 						{selectedRouter &&
 						logsByRouter.current[selectedRouter]?.logs.length ? (
 							<List
