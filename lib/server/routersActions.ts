@@ -20,6 +20,14 @@ export async function registerRouterAction(
 	});
 
 	if (!checkCredentials.success) {
+		console.log(
+			checkCredentials.error,
+			displayName,
+			routerIP,
+			username,
+			password,
+			isPrimary
+		);
 		return {
 			success: false,
 			error: checkCredentials.errorMessage

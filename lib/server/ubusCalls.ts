@@ -275,8 +275,7 @@ export async function login({
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify(ubusObject),
-			signal: AbortSignal.timeout(2000)
+			body: JSON.stringify(ubusObject)
 		});
 
 		const ubusResponse = await response.json();
