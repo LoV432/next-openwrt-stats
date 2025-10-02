@@ -65,11 +65,18 @@ export function NetworkProvider({ children }: { children: ReactNode }) {
 					(device) => device.device === localStorageActiveDeviceParsed.device
 				);
 				if (!activeDevice) {
-					setActiveDevice(networkInterfaces[0]);
+					const wanDevice = networkInterfaces?.find(
+						(device) => device.interface === 'wan'
+					);
+					setActiveDevice(wanDevice || networkInterfaces[0]);
+					return;
 				}
 				setActiveDevice(activeDevice);
 			} else {
-				setActiveDevice(networkInterfaces[0]);
+				const wanDevice = networkInterfaces?.find(
+					(device) => device.interface === 'wan'
+				);
+				setActiveDevice(wanDevice || networkInterfaces[0]);
 			}
 		}
 	}, [dataUpdatedAt, activeDevice]);
