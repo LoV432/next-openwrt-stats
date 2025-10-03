@@ -92,8 +92,8 @@ function ClientCard({
 	};
 	wifiData: {
 		signal: number;
-		noise: number;
-		connected_time: number;
+		noise?: number;
+		connected_time?: number;
 		rx: {
 			packets: number;
 			bytes: number;
@@ -154,14 +154,16 @@ function ClientCard({
 												<span className="text-muted-foreground">
 													Noise Level:
 												</span>
-												<span>{wifiData.noise} dBm</span>
+												<span>{wifiData.noise || 0} dBm</span>
 											</p>
 											<p className="flex justify-between text-sm">
 												<span className="text-muted-foreground">
 													Connected Time:
 												</span>
 												<span>
-													{secondsToHumanReadable(wifiData.connected_time)}
+													{wifiData.connected_time
+														? secondsToHumanReadable(wifiData.connected_time)
+														: '- - - -'}
 												</span>
 											</p>
 											<div className="my-2 border-t" />

@@ -208,7 +208,6 @@ export const wifiClientsSchema = z.object({
 				z.object({
 					mac: z.string(),
 					signal: z.number(),
-					signal_avg: z.number(),
 					noise: z.number(),
 					connected_time: z.number(),
 					rx: z.object({
@@ -218,6 +217,30 @@ export const wifiClientsSchema = z.object({
 					tx: z.object({
 						packets: z.number(),
 						bytes: z.number()
+					})
+				})
+			)
+		})
+	])
+});
+
+export const wifiHostapdClientsSchema = z.object({
+	jsonrpc: z.string(),
+	id: z.number(),
+	result: z.tuple([
+		z.literal(0),
+		z.object({
+			clients: z.record(
+				z.string(),
+				z.object({
+					signal: z.number(),
+					bytes: z.object({
+						rx: z.number(),
+						tx: z.number()
+					}),
+					packets: z.object({
+						rx: z.number(),
+						tx: z.number()
 					})
 				})
 			)
