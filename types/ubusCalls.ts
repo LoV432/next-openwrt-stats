@@ -233,15 +233,19 @@ export const wifiHostapdClientsSchema = z.object({
 			clients: z.record(
 				z.string(),
 				z.object({
-					signal: z.number(),
-					bytes: z.object({
-						rx: z.number(),
-						tx: z.number()
-					}),
-					packets: z.object({
-						rx: z.number(),
-						tx: z.number()
-					})
+					signal: z.number().optional(),
+					bytes: z
+						.object({
+							rx: z.number(),
+							tx: z.number()
+						})
+						.optional(),
+					packets: z
+						.object({
+							rx: z.number(),
+							tx: z.number()
+						})
+						.optional()
 				})
 			)
 		})

@@ -337,20 +337,25 @@ export async function getWifiClients() {
 						return null;
 					}
 					return {
-						...parsedHostapdResponse.data.result[1].clients[key],
+						signal:
+							parsedHostapdResponse.data.result[1].clients[key].signal || 0,
 						displayName: router,
 						ssid: ifname.ssid,
 						band: ifname.band,
 						mac: key.toUpperCase(),
 						rx: {
 							packets:
-								parsedHostapdResponse.data.result[1].clients[key].packets.rx,
-							bytes: parsedHostapdResponse.data.result[1].clients[key].bytes.rx
+								parsedHostapdResponse.data.result[1].clients[key].packets?.rx ||
+								0,
+							bytes:
+								parsedHostapdResponse.data.result[1].clients[key].bytes?.rx || 0
 						},
 						tx: {
 							packets:
-								parsedHostapdResponse.data.result[1].clients[key].packets.tx,
-							bytes: parsedHostapdResponse.data.result[1].clients[key].bytes.tx
+								parsedHostapdResponse.data.result[1].clients[key].packets?.tx ||
+								0,
+							bytes:
+								parsedHostapdResponse.data.result[1].clients[key].bytes?.tx || 0
 						}
 					};
 				});
