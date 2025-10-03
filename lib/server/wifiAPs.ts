@@ -50,14 +50,6 @@ export async function getWifiAPs() {
 		};
 	} = {};
 
-	const allIfname: {
-		[key: string]: {
-			ifname: string;
-			ssid: string;
-			band: string;
-		}[];
-	} = {};
-
 	await Promise.all(
 		allRouters.data.map(async (router) => {
 			const [getWifiConfigs, getWifiAPsLiveData] = await Promise.all([
@@ -164,15 +156,6 @@ export async function getWifiAPs() {
 				wifiAPsOverview[wifiConfig.ssid].bitrate.add(
 					wifiAPLiveData?.iwinfo?.bitrate || 0
 				);
-				if (!allIfname[router.displayName]) {
-					allIfname[router.displayName] = [];
-				}
-				if (wifiAPLiveData?.ifname)
-					allIfname[router.displayName].push({
-						ifname: wifiAPLiveData.ifname,
-						ssid: wifiConfig.ssid,
-						band: wifiConfigParent.band
-					});
 			}
 		})
 	);
@@ -217,9 +200,60 @@ export async function getWifiAPs() {
 		success: true,
 		data: {
 			wifiAPsOverview: wifiAPsOverviewFinal,
-			allIfname,
 			wifiAPsPerSSID
 		}
+	} as const;
+}
+
+async function getWifiAPsIfname() {
+	const allRouters = await getRouters();
+	if (!allRouters.success) {
+		return {
+			success: false,
+			error: allRouters.error
+		} as const;
+	}
+	const wifiAPsIfname: {
+		[key: string]: {
+			ifname: string;
+			ssid: string;
+			band: string;
+		}[];
+	} = {};
+	await Promise.all(
+		allRouters.data.map(async (router) => {
+			const wifiData = await ubusCall({
+				displayName: router.displayName,
+				params: ['luci-rpc', 'getWirelessDevices', {}]
+			});
+			if (!wifiData.success) {
+				return;
+			}
+			const wifiDevices = wifiAPsLiveDataSchema.safeParse(wifiData.data);
+			if (!wifiDevices.success) {
+				console.log('[ERROR] Failed to parse ubus response from wifiDevices', {
+					displayName: router.displayName,
+					error: wifiDevices.error
+				});
+				return;
+			}
+			for (const wifiDevice of Object.values(wifiDevices.data.result[1])) {
+				wifiDevice.interfaces?.forEach((iface) => {
+					if (!wifiAPsIfname[router.displayName]) {
+						wifiAPsIfname[router.displayName] = [];
+					}
+					wifiAPsIfname[router.displayName].push({
+						ifname: iface.ifname || '',
+						ssid: iface.iwinfo?.ssid || '',
+						band: wifiDevice.config.band || ''
+					});
+				});
+			}
+		})
+	);
+	return {
+		success: true,
+		data: wifiAPsIfname
 	} as const;
 }
 
@@ -245,8 +279,8 @@ export async function getWifiClients() {
 		};
 	} = {};
 
-	const wifiAPs = await getWifiAPs();
-	if (!wifiAPs.success) {
+	const wifiAPsIfname = await getWifiAPsIfname();
+	if (!wifiAPsIfname.success) {
 		return {
 			success: false,
 			error:
@@ -254,8 +288,8 @@ export async function getWifiClients() {
 		} as const;
 	}
 	await Promise.all(
-		Object.keys(wifiAPs.data.allIfname).map(async (router) => {
-			const allifname = wifiAPs.data.allIfname[router];
+		Object.keys(wifiAPsIfname.data).map(async (router) => {
+			const allifname = wifiAPsIfname.data[router];
 			for (const ifname of allifname) {
 				const ubusResponse = await ubusBatchCall({
 					displayName: router,
