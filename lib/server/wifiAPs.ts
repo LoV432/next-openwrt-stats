@@ -89,90 +89,90 @@ export async function getWifiAPs() {
 			if (!getWifiAPsLiveData.success) {
 				return;
 			}
-			const wifiAPsData = wifiAPsLiveDataSchema.safeParse(
+			const wifiAPsLiveData = wifiAPsLiveDataSchema.safeParse(
 				getWifiAPsLiveData.data
 			);
-			if (!wifiAPsData.success) {
+			if (!wifiAPsLiveData.success) {
 				console.log('[ERROR] Failed to parse ubus response from wifiAPs', {
 					displayName: router.displayName,
-					error: wifiAPsData.error
+					error: wifiAPsLiveData.error
 				});
 				return;
 			}
-			for (const radio of Object.values(wirelessConfig.data.result[1])) {
-				for (const wifiConfig of Object.values(radio)) {
-					if (wifiConfig['.type'] !== 'wifi-iface') {
-						continue;
-					}
-					const wifiConfigParent = radio[wifiConfig.device];
-					if (
-						!wifiConfigParent ||
-						wifiConfigParent['.type'] !== 'wifi-device'
-					) {
-						continue;
-					}
-					if (!wifiAPsPerSSID[wifiConfig.ssid]) {
-						wifiAPsPerSSID[wifiConfig.ssid] = [];
-					}
-					const wifiLiveData = wifiAPsData.data.result[1][
-						wifiConfig.device
-					].interfaces?.find((iface) => iface.section === wifiConfig['.name']);
-					wifiAPsPerSSID[wifiConfig.ssid].push({
-						configSection: wifiConfig['.name'],
-						parentConfigSection: wifiConfig.device,
-						displayName: router.displayName,
-						channel:
-							wifiLiveData?.iwinfo?.channel ||
-							Number(wifiConfigParent.channel) ||
-							0,
-						band: wifiConfigParent.band,
-						htmode: wifiConfigParent.htmode,
-						txpower:
-							wifiLiveData?.iwinfo?.txpower ||
-							Number(wifiConfigParent.txpower) ||
-							0,
-						bitrate: wifiLiveData?.iwinfo?.bitrate || 0,
-						disabled:
-							wifiConfigParent.disabled === '1' || wifiConfig.disabled === '1'
-								? true
-								: false
-					});
-					if (!wifiAPsOverview[wifiConfig.ssid]) {
-						wifiAPsOverview[wifiConfig.ssid] = {
-							displayName: new Set(),
-							channel: new Set(),
-							band: new Set(),
-							htmode: new Set(),
-							txpower: new Set(),
-							bitrate: new Set()
-						};
-					}
-					wifiAPsOverview[wifiConfig.ssid].displayName.add(router.displayName);
-					wifiAPsOverview[wifiConfig.ssid].channel.add(
-						wifiLiveData?.iwinfo?.channel ||
-							Number(wifiConfigParent.channel) ||
-							0
-					);
-					wifiAPsOverview[wifiConfig.ssid].band.add(wifiConfigParent.band);
-					wifiAPsOverview[wifiConfig.ssid].htmode.add(wifiConfigParent.htmode);
-					wifiAPsOverview[wifiConfig.ssid].txpower.add(
-						wifiLiveData?.iwinfo?.txpower ||
-							Number(wifiConfigParent.txpower) ||
-							0
-					);
-					wifiAPsOverview[wifiConfig.ssid].bitrate.add(
-						wifiLiveData?.iwinfo?.bitrate || 0
-					);
-					if (!allIfname[router.displayName]) {
-						allIfname[router.displayName] = [];
-					}
-					if (wifiLiveData?.ifname)
-						allIfname[router.displayName].push({
-							ifname: wifiLiveData.ifname,
-							ssid: wifiConfig.ssid,
-							band: wifiConfigParent.band
-						});
+			const allWifiConfigs = Object.values(
+				wirelessConfig.data.result[1].values
+			);
+			for (const wifiConfig of allWifiConfigs) {
+				if (wifiConfig['.type'] !== 'wifi-iface') {
+					continue;
 				}
+				const wifiConfigParent = allWifiConfigs.find(
+					(config) => wifiConfig.device === config['.name']
+				);
+				if (!wifiConfigParent || wifiConfigParent['.type'] !== 'wifi-device') {
+					continue;
+				}
+				if (!wifiAPsPerSSID[wifiConfig.ssid]) {
+					wifiAPsPerSSID[wifiConfig.ssid] = [];
+				}
+				const wifiAPLiveData = wifiAPsLiveData.data.result[1][
+					wifiConfig.device
+				].interfaces?.find((iface) => iface.section === wifiConfig['.name']);
+				wifiAPsPerSSID[wifiConfig.ssid].push({
+					configSection: wifiConfig['.name'],
+					parentConfigSection: wifiConfig.device,
+					displayName: router.displayName,
+					channel:
+						wifiAPLiveData?.iwinfo?.channel ||
+						Number(wifiConfigParent.channel) ||
+						0,
+					band: wifiConfigParent.band,
+					htmode: wifiConfigParent.htmode,
+					txpower:
+						wifiAPLiveData?.iwinfo?.txpower ||
+						Number(wifiConfigParent.txpower) ||
+						0,
+					bitrate: wifiAPLiveData?.iwinfo?.bitrate || 0,
+					disabled:
+						wifiConfigParent.disabled === '1' || wifiConfig.disabled === '1'
+							? true
+							: false
+				});
+				if (!wifiAPsOverview[wifiConfig.ssid]) {
+					wifiAPsOverview[wifiConfig.ssid] = {
+						displayName: new Set(),
+						channel: new Set(),
+						band: new Set(),
+						htmode: new Set(),
+						txpower: new Set(),
+						bitrate: new Set()
+					};
+				}
+				wifiAPsOverview[wifiConfig.ssid].displayName.add(router.displayName);
+				wifiAPsOverview[wifiConfig.ssid].channel.add(
+					wifiAPLiveData?.iwinfo?.channel ||
+						Number(wifiConfigParent.channel) ||
+						0
+				);
+				wifiAPsOverview[wifiConfig.ssid].band.add(wifiConfigParent.band);
+				wifiAPsOverview[wifiConfig.ssid].htmode.add(wifiConfigParent.htmode);
+				wifiAPsOverview[wifiConfig.ssid].txpower.add(
+					wifiAPLiveData?.iwinfo?.txpower ||
+						Number(wifiConfigParent.txpower) ||
+						0
+				);
+				wifiAPsOverview[wifiConfig.ssid].bitrate.add(
+					wifiAPLiveData?.iwinfo?.bitrate || 0
+				);
+				if (!allIfname[router.displayName]) {
+					allIfname[router.displayName] = [];
+				}
+				if (wifiAPLiveData?.ifname)
+					allIfname[router.displayName].push({
+						ifname: wifiAPLiveData.ifname,
+						ssid: wifiConfig.ssid,
+						band: wifiConfigParent.band
+					});
 			}
 		})
 	);
