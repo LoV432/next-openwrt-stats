@@ -21,6 +21,14 @@ export const validResponseSchema = z.object({
 	id: z.number(),
 	result: z.tuple([z.number(), z.any()])
 });
+export const accessDeniedSchema = z.object({
+	jsonrpc: z.string(),
+	id: z.number(),
+	error: z.object({
+		code: z.number(),
+		message: z.literal('Access denied')
+	})
+});
 
 export const validBatchResponseSchema = z.array(validResponseSchema);
 

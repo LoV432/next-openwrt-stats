@@ -2,7 +2,8 @@ import 'server-only';
 import {
 	validBatchResponseSchema,
 	validResponseSchema,
-	loginSchema
+	loginSchema,
+	accessDeniedSchema
 } from '@/types/ubusCalls';
 import { db } from './dbDriver';
 import { routersTable } from '@/drizzle/schema/schema';
@@ -64,7 +65,19 @@ export async function ubusCall({
 				params: [newLogin.data.ubus_rpc_session, ...params]
 			};
 			parsedResponse = await sendUbus(session.data.routerIP, newUbusObject);
-			if (!parsedResponse.success) {
+			if (
+				!parsedResponse.success &&
+				parsedResponse.errorMessage === 'Access denied'
+			) {
+				console.log('[ERROR] Access denied for command', {
+					displayName,
+					params
+				});
+				return {
+					success: false,
+					error: parsedResponse.errorMessage
+				} as const;
+			} else if (!parsedResponse.success) {
 				console.log(
 					'[ERROR] Relogin was successful but the command still failed',
 					{
@@ -392,11 +405,15 @@ async function sendUbus(routerIP: string, ubusObject: object, timeout = 2000) {
 		const jsonResponse = await response.json();
 		const parsedResponse = validResponseSchema.safeParse(jsonResponse);
 		if (!parsedResponse.success) {
-			return {
-				success: false,
-				error: parsedResponse.error,
-				errorMessage: 'Failed to parse ubus response'
-			} as const;
+			const failedResponse = accessDeniedSchema.safeParse(jsonResponse);
+			if (failedResponse.success) {
+				return {
+					success: false,
+					error: failedResponse.data.error.message,
+					errorMessage: 'Access denied'
+				} as const;
+			}
+			return { success: false, error: parsedResponse.error } as const;
 		}
 		return {
 			success: true,
