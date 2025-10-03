@@ -42,7 +42,7 @@ export async function getDhcpDevices() {
 					.dhcp_leases) {
 					dhcpDevices.push({
 						deviceName: device.hostname || 'Unknown Device',
-						macAddress: device.macaddr,
+						macAddress: device.macaddr.toUpperCase(),
 						ipAddress: device.ipaddr,
 						leaseTime: device.expires
 					});

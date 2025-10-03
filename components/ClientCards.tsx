@@ -73,7 +73,9 @@ export default function ClientCards() {
 					<ClientCard
 						device={device}
 						key={device.macAddress}
-						wifiData={wifiClientsQuery.data?.[device.macAddress] ?? null}
+						wifiData={
+							wifiClientsQuery.data?.[device.macAddress.toUpperCase()] ?? null
+						}
 					/>
 				))}
 		</div>
