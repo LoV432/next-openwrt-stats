@@ -337,26 +337,24 @@ export async function getWifiClients() {
 					if (wifiUsers[key.toUpperCase()]) {
 						return null;
 					}
+					const client = parsedHostapdResponse.data.result[1].clients[key];
+					if (!client.bytes) {
+						// TODO: this is temp, remove this later
+						console.log('undefined hostapd client found', client);
+					}
 					return {
-						signal:
-							parsedHostapdResponse.data.result[1].clients[key].signal || 0,
+						signal: client.signal || 0,
 						displayName: router,
 						ssid: ifname.ssid,
 						band: ifname.band,
 						mac: key.toUpperCase(),
 						rx: {
-							packets:
-								parsedHostapdResponse.data.result[1].clients[key].packets?.rx ||
-								0,
-							bytes:
-								parsedHostapdResponse.data.result[1].clients[key].bytes?.rx || 0
+							packets: client.packets?.rx || 0,
+							bytes: client.bytes?.rx || 0
 						},
 						tx: {
-							packets:
-								parsedHostapdResponse.data.result[1].clients[key].packets?.tx ||
-								0,
-							bytes:
-								parsedHostapdResponse.data.result[1].clients[key].bytes?.tx || 0
+							packets: client.packets?.tx || 0,
+							bytes: client.bytes?.tx || 0
 						}
 					};
 				});
@@ -453,6 +451,8 @@ export async function getWifiClientsTraffic(ifnames: {
 						}
 						const client = parsedHostapdResponse.data.result[1].clients[key];
 						if (!client.bytes) {
+							// TODO: this is temp, remove this later
+							console.log('undefined hostapd client found', client);
 							return null;
 						}
 						return {
