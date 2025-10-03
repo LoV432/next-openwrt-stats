@@ -1,4 +1,3 @@
-import { getRouter } from '@/lib/server/router';
 import { ubusCall } from '@/lib/server/ubusCalls';
 import { routerTimezoneSchema } from '@/types/ubusCalls';
 import { NextRequest } from 'next/server';
@@ -29,18 +28,9 @@ export async function GET(request: NextRequest) {
 				}
 			);
 		}
-		const router = await getRouter(displayName);
-		if (!router.success) {
-			return new Response(JSON.stringify(router), {
-				status: 400,
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			});
-		}
 
 		const response = await ubusCall({
-			displayName: router.data.displayName,
+			displayName,
 			params: ['luci', 'getTimezones', {}]
 		});
 
@@ -56,7 +46,7 @@ export async function GET(request: NextRequest) {
 		const parsedResponse = routerTimezoneSchema.safeParse(response.data);
 		if (!parsedResponse.success) {
 			console.log('[ERROR] Failed to parse router timezone', {
-				displayName: router.data.displayName,
+				displayName,
 				error: parsedResponse.error
 			});
 			return new Response(
