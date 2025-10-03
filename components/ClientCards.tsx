@@ -5,8 +5,10 @@ import { Card, CardContent, CardHeader } from './ui/card';
 import { LoaderCircle, UserIcon, Wifi } from 'lucide-react';
 import { WifiClients } from '@/lib/server/wifiAPs';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { formatBytes, secondsToHumanReadable } from '@/lib/utils';
+import { calcMbps, formatBytes, secondsToHumanReadable } from '@/lib/utils';
 import { Button } from './ui/button';
+import useWifiClientsTraffic from '@/hooks/wifiClientsTraffic';
+import { useEffect, useState } from 'react';
 
 export default function ClientCards() {
 	const dhcpDevicesQuery = useQuery({
@@ -40,6 +42,7 @@ export default function ClientCards() {
 		refetchInterval: false,
 		retry: 1
 	});
+	const wifiClientsTrafficQuery = useWifiClientsTraffic();
 
 	if (dhcpDevicesQuery.isError || wifiClientsQuery.isError) {
 		return (
@@ -73,8 +76,9 @@ export default function ClientCards() {
 					<ClientCard
 						device={device}
 						key={device.macAddress}
-						wifiData={
-							wifiClientsQuery.data?.[device.macAddress.toUpperCase()] ?? null
+						wifiData={wifiClientsQuery.data?.[device.macAddress.toUpperCase()]}
+						wifiClientTraffic={
+							wifiClientsTrafficQuery.data?.[device.macAddress.toUpperCase()]
 						}
 					/>
 				))}
@@ -84,7 +88,8 @@ export default function ClientCards() {
 
 function ClientCard({
 	device,
-	wifiData
+	wifiData,
+	wifiClientTraffic
 }: {
 	device: {
 		deviceName: string;
@@ -92,23 +97,64 @@ function ClientCard({
 		ipAddress: string;
 		leaseTime: number | boolean;
 	};
-	wifiData: {
-		signal: number;
-		noise?: number;
-		connected_time?: number;
-		rx: {
-			packets: number;
-			bytes: number;
-		};
-		tx: {
-			packets: number;
-			bytes: number;
-		};
-		displayName: string;
-		ssid: string;
-		band: string;
-	} | null;
+	wifiClientTraffic:
+		| {
+				txBytes: number;
+				rxBytes: number;
+				time: number;
+		  }
+		| undefined;
+	wifiData:
+		| {
+				signal: number;
+				noise?: number;
+				connected_time?: number;
+				rx: {
+					packets: number;
+					bytes: number;
+				};
+				tx: {
+					packets: number;
+					bytes: number;
+				};
+				displayName: string;
+				ssid: string;
+				band: string;
+		  }
+		| undefined;
 }) {
+	const [bytesHistory, setBytesHistory] = useState<
+		[number, number, number, number][]
+	>([]);
+
+	const [realTimeTraffic, setRealTimeTraffic] = useState<{
+		rxBytes: number;
+		txBytes: number;
+	} | null>(null);
+
+	useEffect(() => {
+		if (wifiClientTraffic) {
+			setBytesHistory((prev) => [
+				[
+					wifiClientTraffic.time,
+					wifiClientTraffic.rxBytes,
+					0,
+					wifiClientTraffic.txBytes
+				],
+				...prev.slice(0, 10)
+			]);
+		}
+	}, [wifiClientTraffic]);
+
+	useEffect(() => {
+		if (bytesHistory.length > 1) {
+			const traffic = calcMbps(bytesHistory[1], bytesHistory[0]);
+			setRealTimeTraffic({
+				rxBytes: traffic.rxMbps,
+				txBytes: traffic.txMbps
+			});
+		}
+	}, [bytesHistory[0]]);
 	return (
 		<Card className="w-full gap-2">
 			<CardHeader className="pb-2">
@@ -208,6 +254,19 @@ function ClientCard({
 						<span className="text-muted-foreground">Lease Time:</span>
 						<span>
 							{secondsToHumanReadable(Number(device.leaseTime)) || 'Infinite'}
+						</span>
+					</p>
+					<p className="flex justify-between">
+						<span className="text-muted-foreground">Traffic Stats:</span>
+						<span>
+							{wifiData ? (
+								<>
+									↓ {realTimeTraffic?.txBytes || 0} / ↑{' '}
+									{realTimeTraffic?.rxBytes || 0} Mbps
+								</>
+							) : (
+								<>- - - -</>
+							)}
 						</span>
 					</p>
 				</div>

@@ -205,7 +205,8 @@ export async function getWifiAPs() {
 	} as const;
 }
 
-async function getWifiAPsIfname() {
+export type WifiAPsIfname = Awaited<ReturnType<typeof getWifiAPsIfname>>;
+export async function getWifiAPsIfname() {
 	const allRouters = await getRouters();
 	if (!allRouters.success) {
 		return {
@@ -375,4 +376,114 @@ export async function getWifiClients() {
 		success: true,
 		data: wifiUsers
 	};
+}
+
+export type WifiClientsTraffic = Awaited<
+	ReturnType<typeof getWifiClientsTraffic>
+>;
+export async function getWifiClientsTraffic(ifnames: {
+	[key: string]: {
+		ifname: string;
+		ssid: string;
+		band: string;
+	}[];
+}) {
+	try {
+		const trafficStats: {
+			[key: string]: {
+				rxBytes: number;
+				txBytes: number;
+				time: number;
+			};
+		} = {};
+
+		await Promise.all(
+			Object.keys(ifnames).map(async (router) => {
+				const allifname = ifnames[router];
+				for (const ifname of allifname) {
+					const ubusResponse = await ubusBatchCall({
+						displayName: router,
+						calls: [
+							{
+								id: 1,
+								params: ['iwinfo', 'assoclist', { device: ifname.ifname }]
+							},
+							{ id: 2, params: [`hostapd.${ifname.ifname}`, 'get_clients', {}] }
+						]
+					});
+					if (!ubusResponse.success) {
+						continue;
+					}
+					const parsedClientsResponse = wifiClientsSchema.safeParse(
+						ubusResponse.data.find((response) => response.id === 1)
+					);
+					const parsedHostapdResponse = wifiHostapdClientsSchema.safeParse(
+						ubusResponse.data.find((response) => response.id === 2)
+					);
+					if (
+						!parsedClientsResponse.success ||
+						!parsedHostapdResponse.success
+					) {
+						console.log(
+							'[ERROR] Failed to parse ubus response from wifiClients',
+							{
+								displayName: router,
+								error: [
+									parsedClientsResponse.error,
+									parsedHostapdResponse.error
+								]
+							}
+						);
+						continue;
+					}
+					const wifiClients = parsedClientsResponse.data.result[1].results;
+					for (const client of wifiClients) {
+						trafficStats[client.mac.toUpperCase()] = {
+							rxBytes: client.rx.bytes,
+							txBytes: client.tx.bytes,
+							time: Date.now() / 1000
+						};
+					}
+
+					const hostapdClients = Object.keys(
+						parsedHostapdResponse.data.result[1].clients
+					).map((key) => {
+						if (trafficStats[key.toUpperCase()]) {
+							return null;
+						}
+						const client = parsedHostapdResponse.data.result[1].clients[key];
+						if (!client.bytes) {
+							return null;
+						}
+						return {
+							rxBytes: client.bytes.rx,
+							txBytes: client.bytes.tx,
+							time: Date.now() / 1000,
+							mac: key.toUpperCase()
+						};
+					});
+					for (const client of hostapdClients) {
+						if (!client) {
+							continue;
+						}
+						trafficStats[client.mac.toUpperCase()] = {
+							...client
+						};
+					}
+				}
+			})
+		);
+
+		return {
+			success: true,
+			data: trafficStats
+		} as const;
+	} catch (error) {
+		console.error(error);
+		return {
+			success: false,
+			error:
+				'Something went wrong while getting the wifi clients traffic. Please see logs for more details'
+		} as const;
+	}
 }

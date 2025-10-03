@@ -13,7 +13,7 @@ export function calcMbps(prev: number[], curr: number[]) {
 	const drx = rx2 - rx1;
 	const dtx = tx2 - tx1;
 
-	if (dt <= 0) throw new Error('Invalid timestamp difference');
+	if (dt <= 0) return { rxMbps: 0, txMbps: 0 };
 
 	const rxMbps = (drx * 8) / dt / 1_000_000;
 	const txMbps = (dtx * 8) / dt / 1_000_000;
