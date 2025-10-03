@@ -257,12 +257,12 @@ function ClientCard({
 						</span>
 					</p>
 					<p className="flex justify-between">
-						<span className="text-muted-foreground">Traffic Stats:</span>
+						<span className="text-muted-foreground">Realtime Traffic:</span>
 						<span>
 							{wifiData ? (
 								<>
-									↓ {realTimeTraffic?.txBytes || 0} / ↑{' '}
-									{realTimeTraffic?.rxBytes || 0} Mbps
+									↓ {realTimeTraffic?.txBytes || '0.00'} / ↑{' '}
+									{realTimeTraffic?.rxBytes || '0.00'} Mbps
 								</>
 							) : (
 								<>- - - -</>
