@@ -288,17 +288,18 @@ export async function getWifiClients() {
 				}
 				const wifiClients = parsedClientsResponse.data.result[1].results;
 				for (const client of wifiClients) {
-					wifiUsers[client.mac] = {
+					wifiUsers[client.mac.toUpperCase()] = {
 						...client,
 						displayName: router,
 						ssid: ifname.ssid,
-						band: ifname.band
+						band: ifname.band,
+						mac: client.mac.toUpperCase()
 					};
 				}
 				const hostapdClients = Object.keys(
 					parsedHostapdResponse.data.result[1].clients
 				).map((key) => {
-					if (wifiUsers[key]) {
+					if (wifiUsers[key.toUpperCase()]) {
 						return null;
 					}
 					return {
@@ -306,7 +307,7 @@ export async function getWifiClients() {
 						displayName: router,
 						ssid: ifname.ssid,
 						band: ifname.band,
-						mac: key,
+						mac: key.toUpperCase(),
 						rx: {
 							packets:
 								parsedHostapdResponse.data.result[1].clients[key].packets.rx,
@@ -323,7 +324,7 @@ export async function getWifiClients() {
 					if (!client) {
 						continue;
 					}
-					wifiUsers[client.mac] = {
+					wifiUsers[client.mac.toUpperCase()] = {
 						...client
 					};
 				}
