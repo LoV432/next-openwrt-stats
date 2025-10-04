@@ -266,9 +266,13 @@ function EnableDisableWifiAP({
 			}
 			await refetchWifiAPs();
 			if (response.success) {
-				toast.success('Wifi AP updated', {
-					richColors: true
-				});
+				toast.success(
+					`Successfully ${disabled ? 'enabled' : 'disabled'} WiFi AP`,
+					{
+						richColors: true
+					}
+				);
+				setIsOpen(false);
 			} else {
 				toast.error(`Failed to update wifi AP: ${response.error}`, {
 					richColors: true
