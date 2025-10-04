@@ -190,6 +190,9 @@ function LoadingErrorCard({ error }: { error?: string }) {
 						<ActivityIcon className="mb-1 mr-2 inline-block" />
 						Realtime Traffic
 					</h3>
+					<Button variant={'outline'} size={'sm'}>
+						<ChartAreaIcon className="h-5 w-5" />
+					</Button>
 				</div>
 			</CardHeader>
 			<CardContent>
@@ -203,13 +206,19 @@ function LoadingErrorCard({ error }: { error?: string }) {
 				) : (
 					<div className="space-y-4 text-sm">
 						<div className="flex w-full items-center gap-2">
-							<span className="text-muted-foreground w-1/4">Download:</span>
-							<span className="ml-auto ">{0} Mbps</span>
+							<span className="text-muted-foreground flex w-2/4 items-center gap-1.5">
+								<DownloadIcon className="inline-block h-4 w-4" />
+								Download:
+							</span>
+							<span className="ml-auto ">0.00 Mbps</span>
 						</div>
 						<Progress className="w-full" value={0} />
 						<div className="flex w-full items-center gap-2">
-							<span className="text-muted-foreground w-1/4">Upload:</span>
-							<span className="ml-auto ">{0} Mbps</span>
+							<span className="text-muted-foreground flex w-2/4 items-center gap-1.5">
+								<UploadIcon className="inline-block h-4 w-4" />
+								Upload:
+							</span>
+							<span className="ml-auto ">0.00 Mbps</span>
 						</div>
 						<Progress className="w-full" value={0} />
 					</div>
