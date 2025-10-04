@@ -1,7 +1,7 @@
 'use client';
 import { getRouterInfo } from '@/app/api/routers/info/route';
 import { Routers } from '@/lib/server/router';
-import { useQuery } from '@tanstack/react-query';
+import { isServer, useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { secondsToHumanReadable } from '@/lib/utils';
@@ -11,7 +11,7 @@ import { Button } from './ui/button';
 
 export function RouterInfo() {
 	const [activeRouter, setActiveRouter] = useState<string | undefined>(
-		undefined
+		isServer ? undefined : localStorage.getItem('activeRouter') || undefined
 	);
 	const allRouters = useQuery({
 		queryKey: ['getRouters'],
@@ -40,6 +40,7 @@ export function RouterInfo() {
 				setActiveRouter(savedRouter);
 			} else {
 				setActiveRouter(allRouters.data[0].displayName);
+				localStorage.setItem('activeRouter', allRouters.data[0].displayName);
 			}
 		}
 	}, [allRouters.dataUpdatedAt]);

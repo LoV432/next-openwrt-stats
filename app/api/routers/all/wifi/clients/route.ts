@@ -1,8 +1,25 @@
 import { getWifiClients } from '@/lib/server/wifiAPs';
+import { NextRequest } from 'next/server';
 
-export async function GET() {
+export async function POST(request: NextRequest) {
 	try {
-		const response = await getWifiClients();
+		const { ifnames } = await request.json();
+		if (!ifnames) {
+			return new Response(
+				JSON.stringify({
+					success: false,
+					error: 'No ifnames provided'
+				}),
+				{
+					status: 400,
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				}
+			);
+		}
+		// TODO: validate ifnames
+		const response = await getWifiClients(ifnames);
 		if (!response.success) {
 			return new Response(JSON.stringify(response), {
 				status: 400,

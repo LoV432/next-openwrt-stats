@@ -3,12 +3,12 @@ import { DhcpDevices } from '@/lib/server/dhcpDevices';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { LoaderCircle, UserIcon, Wifi } from 'lucide-react';
-import { WifiClients } from '@/lib/server/wifiAPs';
+import { WifiClients, WifiClientsTraffic } from '@/lib/server/wifiAPs';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { calcMbps, formatBytes, secondsToHumanReadable } from '@/lib/utils';
 import { Button } from './ui/button';
-import useWifiClientsTraffic from '@/hooks/wifiClientsTraffic';
 import { useEffect, useState } from 'react';
+import { useWifiAPsQuery } from '@/providers/wifiAPsContext';
 
 export default function ClientCards() {
 	const dhcpDevicesQuery = useQuery({
@@ -27,37 +27,66 @@ export default function ClientCards() {
 		retry: 1
 	});
 
+	const wifiAPs = useWifiAPsQuery();
 	const wifiClientsQuery = useQuery({
 		queryKey: ['wifiClients'],
 		queryFn: async () => {
-			const wifiClients = await fetch('/api/routers/all/wifi/clients').then(
-				(res) => res.json() as Promise<WifiClients>
-			);
+			if (!wifiAPs.data?.wifiAPsIfname) {
+				throw new Error('No wifiAPsIfname found');
+			}
+			const wifiClients = await fetch('/api/routers/all/wifi/clients', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ ifnames: wifiAPs.data.wifiAPsIfname })
+			}).then((res) => res.json() as Promise<WifiClients>);
 			if (!wifiClients.success) {
 				throw new Error(wifiClients.error);
 			}
 
 			return wifiClients.data;
 		},
-		refetchInterval: false,
-		retry: 1
+		enabled: !!wifiAPs.data?.wifiAPsIfname
 	});
-	const wifiClientsTrafficQuery = useWifiClientsTraffic();
+	const wifiClientsTrafficQuery = useQuery({
+		queryKey: ['wifiClientsTraffic'],
+		queryFn: async () => {
+			if (!wifiAPs?.data?.wifiAPsIfname) {
+				throw new Error('No ifnames found');
+			}
+			const wifiClientsTraffic = await fetch(
+				'/api/routers/all/wifi/clients/traffic',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({ ifnames: wifiAPs.data.wifiAPsIfname })
+				}
+			).then((res) => res.json() as Promise<WifiClientsTraffic>);
+			if (!wifiClientsTraffic.success) {
+				throw new Error(wifiClientsTraffic.error);
+			}
+			return wifiClientsTraffic.data;
+		},
+		refetchInterval: 3000,
+		enabled: !!wifiAPs.data?.wifiAPsIfname
+	});
 
-	if (dhcpDevicesQuery.isError || wifiClientsQuery.isError) {
+	if (dhcpDevicesQuery.isError) {
 		return (
 			<div className="w-full py-4">
 				<div className="grid h-44 w-full place-items-center text-xl">
 					<div className="flex h-full w-full flex-col items-center justify-center">
 						<div>Error: {dhcpDevicesQuery.error?.message}</div>
-						<div>Error: {wifiClientsQuery.error?.message}</div>
 					</div>
 				</div>
 			</div>
 		);
 	}
 
-	if (dhcpDevicesQuery.isLoading || wifiClientsQuery.isLoading) {
+	if (dhcpDevicesQuery.isLoading) {
 		return (
 			<div className="w-full py-4">
 				<div className="grid h-44 w-full place-items-center text-xl">

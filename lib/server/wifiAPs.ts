@@ -50,6 +50,14 @@ export async function getWifiAPs() {
 		};
 	} = {};
 
+	const wifiAPsIfname: {
+		[displayName: string]: {
+			ifname: string;
+			ssid: string;
+			band: string;
+		}[];
+	} = {};
+
 	await Promise.all(
 		allRouters.data.map(async (router) => {
 			const [getWifiConfigs, getWifiAPsLiveData] = await Promise.all([
@@ -156,6 +164,16 @@ export async function getWifiAPs() {
 				wifiAPsOverview[wifiConfig.ssid].bitrate.add(
 					wifiAPLiveData?.iwinfo?.bitrate || 0
 				);
+				if (!wifiAPsIfname[router.displayName]) {
+					wifiAPsIfname[router.displayName] = [];
+				}
+				if (wifiAPLiveData?.ifname) {
+					wifiAPsIfname[router.displayName].push({
+						ssid: wifiConfig.ssid,
+						band: wifiConfigParent.band,
+						ifname: wifiAPLiveData.ifname
+					});
+				}
 			}
 		})
 	);
@@ -200,66 +218,26 @@ export async function getWifiAPs() {
 		success: true,
 		data: {
 			wifiAPsOverview: wifiAPsOverviewFinal,
-			wifiAPsPerSSID
+			wifiAPsPerSSID,
+			wifiAPsIfname
 		}
 	} as const;
 }
 
-export type WifiAPsIfname = Awaited<ReturnType<typeof getWifiAPsIfname>>;
-export async function getWifiAPsIfname() {
-	const allRouters = await getRouters();
-	if (!allRouters.success) {
+export type WifiClients = Awaited<ReturnType<typeof getWifiClients>>;
+export async function getWifiClients(ifnames: {
+	[key: string]: {
+		ifname: string;
+		ssid: string;
+		band: string;
+	}[];
+}) {
+	if (!ifnames) {
 		return {
 			success: false,
-			error: allRouters.error
+			error: 'No ifnames provided'
 		} as const;
 	}
-	const wifiAPsIfname: {
-		[key: string]: {
-			ifname: string;
-			ssid: string;
-			band: string;
-		}[];
-	} = {};
-	await Promise.all(
-		allRouters.data.map(async (router) => {
-			const wifiData = await ubusCall({
-				displayName: router.displayName,
-				params: ['luci-rpc', 'getWirelessDevices', {}]
-			});
-			if (!wifiData.success) {
-				return;
-			}
-			const wifiDevices = wifiAPsLiveDataSchema.safeParse(wifiData.data);
-			if (!wifiDevices.success) {
-				console.log('[ERROR] Failed to parse ubus response from wifiDevices', {
-					displayName: router.displayName,
-					error: wifiDevices.error
-				});
-				return;
-			}
-			for (const wifiDevice of Object.values(wifiDevices.data.result[1])) {
-				wifiDevice.interfaces?.forEach((iface) => {
-					if (!wifiAPsIfname[router.displayName]) {
-						wifiAPsIfname[router.displayName] = [];
-					}
-					wifiAPsIfname[router.displayName].push({
-						ifname: iface.ifname || '',
-						ssid: iface.iwinfo?.ssid || '',
-						band: wifiDevice.config.band || ''
-					});
-				});
-			}
-		})
-	);
-	return {
-		success: true,
-		data: wifiAPsIfname
-	} as const;
-}
-
-export type WifiClients = Awaited<ReturnType<typeof getWifiClients>>;
-export async function getWifiClients() {
 	const wifiUsers: {
 		[key: string]: {
 			displayName: string;
@@ -279,18 +257,9 @@ export async function getWifiClients() {
 			connected_time?: number;
 		};
 	} = {};
-
-	const wifiAPsIfname = await getWifiAPsIfname();
-	if (!wifiAPsIfname.success) {
-		return {
-			success: false,
-			error:
-				'Something went wrong while getting the wifi clients. Please see logs for more details'
-		} as const;
-	}
 	await Promise.all(
-		Object.keys(wifiAPsIfname.data).map(async (router) => {
-			const allifname = wifiAPsIfname.data[router];
+		Object.keys(ifnames).map(async (router) => {
+			const allifname = ifnames[router];
 			for (const ifname of allifname) {
 				const ubusResponse = await ubusBatchCall({
 					displayName: router,
@@ -340,7 +309,7 @@ export async function getWifiClients() {
 					const client = parsedHostapdResponse.data.result[1].clients[key];
 					if (!client.bytes) {
 						// TODO: this is temp, remove this later
-						console.log('undefined hostapd client found', client);
+						console.log('undefined hostapd client found', client, key);
 					}
 					return {
 						signal: client.signal || 0,
@@ -452,7 +421,7 @@ export async function getWifiClientsTraffic(ifnames: {
 						const client = parsedHostapdResponse.data.result[1].clients[key];
 						if (!client.bytes) {
 							// TODO: this is temp, remove this later
-							console.log('undefined hostapd client found', client);
+							console.log('undefined hostapd client found', client, key);
 							return null;
 						}
 						return {

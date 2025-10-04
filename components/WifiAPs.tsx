@@ -5,7 +5,6 @@ import {
 	enabledWifiAPAction
 } from '@/lib/server/wifiAPsActions';
 import { type WifiAPs } from '@/lib/server/wifiAPs';
-import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { LoaderCircle, Settings2, WifiIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -30,37 +29,24 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
+import { useWifiAPsQuery } from '@/providers/wifiAPsContext';
 
 export function WifiAPs() {
-	const wifiAPsQuery = useQuery({
-		queryKey: ['wifiAPs'],
-		queryFn: async () => {
-			const wifiAPs = await fetch('/api/routers/all/wifi/aps').then(
-				(res) => res.json() as Promise<WifiAPs>
-			);
-			if (!wifiAPs.success) {
-				throw new Error(wifiAPs.error);
-			}
+	const wifiAPs = useWifiAPsQuery();
 
-			return wifiAPs.data;
-		},
-		refetchInterval: false,
-		retry: 1
-	});
-
-	if (wifiAPsQuery.isError) {
+	if (wifiAPs.isError) {
 		return (
 			<div className="w-fullpy-4">
 				<div className="grid h-44 w-full place-items-center text-xl">
 					<div className="flex h-full w-full flex-col items-center justify-center">
-						Error: {wifiAPsQuery.error?.message}
+						Error: {wifiAPs.error?.message}
 					</div>
 				</div>
 			</div>
 		);
 	}
 
-	if (wifiAPsQuery.isLoading) {
+	if (wifiAPs.isLoading) {
 		return (
 			<div className="w-full py-4">
 				<div className="grid h-44 w-full place-items-center text-xl">
@@ -72,84 +58,73 @@ export function WifiAPs() {
 		);
 	}
 
-	if (
-		wifiAPsQuery.data &&
-		Object.keys(wifiAPsQuery.data.wifiAPsPerSSID).length === 0
-	) {
+	if (wifiAPs.data && Object.keys(wifiAPs.data.wifiAPsPerSSID).length === 0) {
 		return <></>;
 	}
 
 	return (
 		<div className="w-full border-zinc-800">
 			<div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-				{wifiAPsQuery.data &&
-					Object.entries(wifiAPsQuery.data.wifiAPsOverview).map(
-						([ssid, data]) => (
-							<Card key={ssid} className="w-full gap-4">
-								<CardHeader>
-									<h3 className="flex text-lg font-semibold">
-										<WifiIcon className="mb-1 mr-2 inline-block" /> {ssid}
-										<div className="ml-auto">
-											<DetailedWifiAPs
-												allAPsWithSameSSID={
-													wifiAPsQuery.data.wifiAPsPerSSID[ssid]
-												}
-												ssid={ssid}
-												refetchWifiAPs={wifiAPsQuery.refetch}
-											/>
-										</div>
-									</h3>
-									<p>{data.displayName.join(' / ')}</p>
-								</CardHeader>
-								<CardContent>
-									<div className="space-y-2 text-sm">
-										<p className="flex justify-between">
-											<span className="text-muted-foreground">Channel:</span>
-											<span>
-												{data.channel
-													.filter((value) => value !== 0)
-													.join(' / ')}
-											</span>
-										</p>
-										<p className="flex justify-between">
-											<span className="text-muted-foreground">Band:</span>
-											<span>
-												{data.band
-													.join(' / ')
-													.replace('2g', '2.4')
-													.replace('5g', '5')}{' '}
-												GHz
-											</span>
-										</p>
-										<p className="flex justify-between">
-											<span className="text-muted-foreground">Width:</span>
-											<span>{data.htmode.join(' / ')}</span>
-										</p>
-										<p className="flex justify-between">
-											<span className="text-muted-foreground">Power:</span>
-											<span>
-												{data.txpower
-													.filter((value) => value !== 0)
-													.join(' / ')}{' '}
-												dBm
-											</span>
-										</p>
-										<p className="flex justify-between">
-											<span className="text-muted-foreground">Bitrate</span>
-											<span>
-												{data.bitrate.length > 0 ? (
-													data.bitrate.map((value) => value / 1000).join(' / ')
-												) : (
-													<>- - -</>
-												)}{' '}
-												Mbit/s
-											</span>
-										</p>
+				{wifiAPs.data &&
+					Object.entries(wifiAPs.data.wifiAPsOverview).map(([ssid, data]) => (
+						<Card key={ssid} className="w-full gap-4">
+							<CardHeader>
+								<h3 className="flex text-lg font-semibold">
+									<WifiIcon className="mb-1 mr-2 inline-block" /> {ssid}
+									<div className="ml-auto">
+										<DetailedWifiAPs
+											allAPsWithSameSSID={wifiAPs.data.wifiAPsPerSSID[ssid]}
+											ssid={ssid}
+											refetchWifiAPs={wifiAPs.refetch}
+										/>
 									</div>
-								</CardContent>
-							</Card>
-						)
-					)}
+								</h3>
+								<p>{data.displayName.join(' / ')}</p>
+							</CardHeader>
+							<CardContent>
+								<div className="space-y-2 text-sm">
+									<p className="flex justify-between">
+										<span className="text-muted-foreground">Channel:</span>
+										<span>
+											{data.channel.filter((value) => value !== 0).join(' / ')}
+										</span>
+									</p>
+									<p className="flex justify-between">
+										<span className="text-muted-foreground">Band:</span>
+										<span>
+											{data.band
+												.join(' / ')
+												.replace('2g', '2.4')
+												.replace('5g', '5')}{' '}
+											GHz
+										</span>
+									</p>
+									<p className="flex justify-between">
+										<span className="text-muted-foreground">Width:</span>
+										<span>{data.htmode.join(' / ')}</span>
+									</p>
+									<p className="flex justify-between">
+										<span className="text-muted-foreground">Power:</span>
+										<span>
+											{data.txpower.filter((value) => value !== 0).join(' / ')}{' '}
+											dBm
+										</span>
+									</p>
+									<p className="flex justify-between">
+										<span className="text-muted-foreground">Bitrate</span>
+										<span>
+											{data.bitrate.length > 0 ? (
+												data.bitrate.map((value) => value / 1000).join(' / ')
+											) : (
+												<>- - -</>
+											)}{' '}
+											Mbit/s
+										</span>
+									</p>
+								</div>
+							</CardContent>
+						</Card>
+					))}
 			</div>
 		</div>
 	);

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getWifiAPsIfname, getWifiClientsTraffic } from '@/lib/server/wifiAPs';
+import { getWifiClientsTraffic } from '@/lib/server/wifiAPs';
 
 export async function POST(request: Request) {
 	try {
