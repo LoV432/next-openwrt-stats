@@ -11,7 +11,7 @@ import { Button } from './ui/button';
 
 export function RouterInfo() {
 	const [activeRouter, setActiveRouter] = useState<string | undefined>(
-		isServer ? undefined : localStorage.getItem('activeRouter') || undefined
+		undefined
 	);
 	const allRouters = useQuery({
 		queryKey: ['getRouters'],
@@ -29,6 +29,13 @@ export function RouterInfo() {
 		refetchOnWindowFocus: false,
 		refetchOnMount: false
 	});
+
+	useEffect(() => {
+		const savedRouter = localStorage.getItem('activeRouter');
+		if (savedRouter) {
+			setActiveRouter(savedRouter);
+		}
+	}, []);
 
 	useEffect(() => {
 		if (allRouters.data) {
