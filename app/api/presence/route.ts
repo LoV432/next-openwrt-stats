@@ -8,6 +8,7 @@ import {
 import { getWifiAPs, getWifiClients, WifiClients } from '@/lib/server/wifiAPs';
 import { and, eq } from 'drizzle-orm';
 import { DhcpDevices, getDhcpDevices } from '@/lib/server/dhcpDevices';
+export const dynamic = 'force-dynamic';
 
 type PresenceEvent = {
 	timestamp: number;

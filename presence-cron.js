@@ -4,7 +4,7 @@ import { loadEnvConfig } from '@next/env';
 loadEnvConfig(process.cwd());
 
 const PRESENCE_ENABLED = process.env.PRESENCE_ENABLED === 'true';
-const PRESENCE_CRON = process.env.PRESENCE_CRON || '0 * * * *';
+const PRESENCE_CRON = process.env.PRESENCE_CRON || '* * * * *';
 
 if (PRESENCE_ENABLED) {
 	cron.schedule(PRESENCE_CRON, async () => {
