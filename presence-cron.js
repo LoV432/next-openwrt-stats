@@ -1,13 +1,32 @@
-import cron from 'node-cron';
-import { loadEnvConfig } from '@next/env';
+const PORT = process.env.PORT || '3000';
+const HOST = process.env.HOSTNAME || '127.0.0.1';
+const PRESENCE_URL =
+	process.env.PRESENCE_URL || `http://${HOST}:${PORT}/api/presence`;
 
-loadEnvConfig(process.cwd());
-
-const PRESENCE_ENABLED = process.env.PRESENCE_ENABLED === 'true';
-const PRESENCE_CRON = process.env.PRESENCE_CRON || '* * * * *';
-
-if (PRESENCE_ENABLED) {
-	cron.schedule(PRESENCE_CRON, async () => {
-		await fetch('http://localhost:3000/api/presence/');
-	});
+async function pingPresence() {
+	try {
+		const res = await fetch(PRESENCE_URL, { method: 'GET' });
+		if (!res.ok) {
+			console.error(
+				`[presence-cron] ${new Date().toISOString()} - fetch failed:`,
+				res.status,
+				res.statusText
+			);
+		}
+	} catch (err) {
+		console.error(
+			'[presence-cron] fetch error:',
+			err && err.message ? err.message : err
+		);
+	}
 }
+
+const ONE_MINUTE_MS = 60 * 1000;
+
+setInterval(() => {
+	pingPresence();
+}, ONE_MINUTE_MS);
+
+// Graceful shutdown
+process.on('SIGINT', () => process.exit(0));
+process.on('SIGTERM', () => process.exit(0));
