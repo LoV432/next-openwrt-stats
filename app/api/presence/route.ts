@@ -21,10 +21,17 @@ type PresenceEvent = {
 let dhcpClientsCache: Exclude<DhcpDevices['data'], undefined> = [];
 
 let prevClients: Exclude<WifiClients['data'], undefined> = {};
-const dbPrevClients = await db
-	.select()
-	.from(prevClientsTable)
-	.where(eq(prevClientsTable.id, 1));
+let dbPrevClients: {
+	id: number;
+	data: string;
+}[] = [];
+
+try {
+	dbPrevClients = await db
+		.select()
+		.from(prevClientsTable)
+		.where(eq(prevClientsTable.id, 1));
+} catch (error) {}
 if (dbPrevClients.length > 0) {
 	prevClients = JSON.parse(dbPrevClients[0].data);
 } else {
