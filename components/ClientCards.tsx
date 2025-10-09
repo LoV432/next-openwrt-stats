@@ -5,12 +5,22 @@ import { Card, CardContent, CardHeader } from './ui/card';
 import { LoaderCircle, UserIcon, Wifi } from 'lucide-react';
 import { WifiClients, WifiClientsTraffic } from '@/lib/server/wifiAPs';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { calcMbps, formatBytes, secondsToHumanReadable } from '@/lib/utils';
+import {
+	calcMbps,
+	formatBand,
+	formatBytes,
+	secondsToHumanReadable
+} from '@/lib/utils';
 import { Button } from './ui/button';
 import { useEffect, useState } from 'react';
 import { useWifiAPsQuery } from '@/providers/wifiAPsContext';
+import { PresenceHistoryDialog } from './ClientPresence';
 
-export default function ClientCards() {
+export default function ClientCards({
+	presenceEnabled
+}: {
+	presenceEnabled: boolean;
+}) {
 	const dhcpDevicesQuery = useQuery({
 		queryKey: ['dhcpDevices'],
 		queryFn: async () => {
@@ -109,6 +119,7 @@ export default function ClientCards() {
 						wifiClientTraffic={
 							wifiClientsTrafficQuery.data?.[device.macAddress.toUpperCase()]
 						}
+						presenceEnabled={presenceEnabled}
 					/>
 				))}
 		</div>
@@ -118,7 +129,8 @@ export default function ClientCards() {
 function ClientCard({
 	device,
 	wifiData,
-	wifiClientTraffic
+	wifiClientTraffic,
+	presenceEnabled
 }: {
 	device: {
 		deviceName: string;
@@ -151,6 +163,7 @@ function ClientCard({
 				band: string;
 		  }
 		| undefined;
+	presenceEnabled: boolean;
 }) {
 	const [bytesHistory, setBytesHistory] = useState<
 		[number, number, number, number][]
@@ -192,8 +205,14 @@ function ClientCard({
 						<UserIcon className="mb-1 mr-2 inline-block" />
 						{device.deviceName || 'Unknown Device'}
 					</h3>
-					{wifiData && (
-						<div className="flex items-center gap-2">
+					<div className="flex items-center gap-2">
+						{presenceEnabled && (
+							<PresenceHistoryDialog
+								clientMac={device.macAddress}
+								clientName={device.deviceName}
+							/>
+						)}
+						{wifiData && (
 							<Popover>
 								<PopoverTrigger asChild>
 									<Button className="gap-1.5" variant="outline" size="sm">
@@ -219,7 +238,7 @@ function ClientCard({
 											</p>
 											<p className="flex justify-between text-sm">
 												<span className="text-muted-foreground">Band:</span>
-												<span>{wifiData.band === '2g' ? '2.4' : '5'} GHz</span>
+												<span>{formatBand(wifiData.band)}</span>
 											</p>
 											<p className="flex justify-between text-sm">
 												<span className="text-muted-foreground">
@@ -265,8 +284,8 @@ function ClientCard({
 									</div>
 								</PopoverContent>
 							</Popover>
-						</div>
-					)}
+						)}
+					</div>
 				</div>
 			</CardHeader>
 			<CardContent>

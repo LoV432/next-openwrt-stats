@@ -22,6 +22,13 @@
       "when": 1758285708558,
       "tag": "0002_dear_thor",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1760030001808,
+      "tag": "0003_mute_micromacro",
+      "breakpoints": true
     }
   ]
 }

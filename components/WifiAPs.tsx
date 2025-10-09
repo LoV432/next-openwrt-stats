@@ -30,6 +30,7 @@ import {
 	AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
 import { useWifiAPsQuery } from '@/providers/wifiAPsContext';
+import { formatBand } from '@/lib/utils';
 
 export function WifiAPs() {
 	const wifiAPs = useWifiAPsQuery();
@@ -91,13 +92,7 @@ export function WifiAPs() {
 									</p>
 									<p className="flex justify-between">
 										<span className="text-muted-foreground">Band:</span>
-										<span>
-											{data.band
-												.join(' / ')
-												.replace('2g', '2.4')
-												.replace('5g', '5')}{' '}
-											GHz
-										</span>
+										<span>{formatBand(data.band)}</span>
 									</p>
 									<p className="flex justify-between">
 										<span className="text-muted-foreground">Width:</span>
