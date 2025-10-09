@@ -31,15 +31,15 @@ try {
 		.select()
 		.from(prevClientsTable)
 		.where(eq(prevClientsTable.id, 1));
+	if (dbPrevClients.length > 0) {
+		prevClients = JSON.parse(dbPrevClients[0].data);
+	} else {
+		await db.insert(prevClientsTable).values({
+			id: 1,
+			data: JSON.stringify({})
+		});
+	}
 } catch (error) {}
-if (dbPrevClients.length > 0) {
-	prevClients = JSON.parse(dbPrevClients[0].data);
-} else {
-	await db.insert(prevClientsTable).values({
-		id: 1,
-		data: JSON.stringify({})
-	});
-}
 
 export async function GET() {
 	if (process.env.PRESENCE_ENABLED !== 'true') {
