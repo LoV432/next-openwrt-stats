@@ -5,9 +5,12 @@ import {
 	prevClientsTable,
 	wifisTable
 } from '@/drizzle/schema/schema';
-import { getWifiAPs, getWifiClients, WifiClients } from '@/lib/server/wifiAPs';
+import { getWifiClients, WifiClients } from '@/lib/server/wifiAPs';
 import { and, eq } from 'drizzle-orm';
 import { DhcpDevices, getDhcpDevices } from '@/lib/server/dhcpDevices';
+import { getRouters } from '@/lib/server/router';
+import { ubusCall } from '@/lib/server/ubusCalls';
+import { wifiAPsLiveDataSchema } from '@/types/ubusCalls';
 export const dynamic = 'force-dynamic';
 
 type PresenceEvent = {
@@ -45,12 +48,12 @@ export async function GET() {
 	if (process.env.PRESENCE_ENABLED !== 'true') {
 		return new Response('Not enabled', { status: 500 });
 	}
-	const wifiaps = await getWifiAPs();
-	if (!wifiaps.success) {
+	const wifiIfnames = await getIfnames();
+	if (!wifiIfnames.success) {
 		return new Response(
 			JSON.stringify({
 				success: false,
-				error: wifiaps.error
+				error: wifiIfnames.error
 			}),
 			{
 				status: 500,
@@ -60,7 +63,7 @@ export async function GET() {
 			}
 		);
 	}
-	const allClients = await getWifiClients(wifiaps.data.wifiAPsIfname);
+	const allClients = await getWifiClients(wifiIfnames.data);
 	if (!allClients.success) {
 		return new Response(
 			JSON.stringify({
@@ -79,8 +82,8 @@ export async function GET() {
 		Object.values(allClients.data).map(async (client) => {
 			const prevClient = prevClients[client.mac];
 			if (!prevClient) {
-				const clientId = await getClient({ clientMacAddress: client.mac });
-				const wifiId = await getWifi({
+				const clientId = await getClientDB({ clientMacAddress: client.mac });
+				const wifiId = await getWifiDB({
 					displayName: client.displayName,
 					ssid: client.ssid,
 					band: client.band
@@ -97,13 +100,13 @@ export async function GET() {
 				return;
 			}
 			if (clientUpdated(client, prevClient)) {
-				const clientId = await getClient({ clientMacAddress: client.mac });
-				const fromWifiId = await getWifi({
+				const clientId = await getClientDB({ clientMacAddress: client.mac });
+				const fromWifiId = await getWifiDB({
 					displayName: prevClient.displayName,
 					ssid: prevClient.ssid,
 					band: prevClient.band
 				});
-				const toWifiId = await getWifi({
+				const toWifiId = await getWifiDB({
 					displayName: client.displayName,
 					ssid: client.ssid,
 					band: client.band
@@ -124,10 +127,10 @@ export async function GET() {
 	await Promise.all(
 		allPrevClientsMac.map(async (prevClientMac) => {
 			if (!allClientsMac.includes(prevClientMac)) {
-				const clientId = await getClient({
+				const clientId = await getClientDB({
 					clientMacAddress: prevClientMac
 				});
-				const fromWifiId = await getWifi({
+				const fromWifiId = await getWifiDB({
 					displayName: prevClients[prevClientMac].displayName,
 					ssid: prevClients[prevClientMac].ssid,
 					band: prevClients[prevClientMac].band
@@ -160,6 +163,77 @@ export async function GET() {
 	);
 }
 
+async function getIfnames() {
+	try {
+		const allRouters = await getRouters();
+		if (!allRouters.success) {
+			return allRouters;
+		}
+		let wifiIfnames: {
+			[displayName: string]: {
+				ifname: string;
+				ssid: string;
+				band: string;
+			}[];
+		} = {};
+
+		await Promise.all(
+			allRouters.data.map(async (router) => {
+				const wifiAPsLiveData = await ubusCall({
+					displayName: router.displayName,
+					params: ['luci-rpc', 'getWirelessDevices', {}]
+				});
+				if (!wifiAPsLiveData.success) {
+					return;
+				}
+				const wifiAPsLiveDataParsed = wifiAPsLiveDataSchema.safeParse(
+					wifiAPsLiveData.data
+				);
+				if (!wifiAPsLiveDataParsed.success) {
+					console.log('[ERROR] Failed to parse ubus response from wifiAPs', {
+						displayName: router.displayName,
+						error: wifiAPsLiveDataParsed.error
+					});
+					return;
+				}
+
+				const allWifisData = Object.values(
+					wifiAPsLiveDataParsed.data.result[1]
+				);
+				for (const wifiData of allWifisData) {
+					if (!wifiData.interfaces) {
+						continue;
+					}
+					for (const wifiInterface of wifiData.interfaces) {
+						if (!wifiInterface.ifname || !wifiInterface.iwinfo) {
+							continue;
+						}
+						if (!wifiIfnames[router.displayName]) {
+							wifiIfnames[router.displayName] = [];
+						}
+						wifiIfnames[router.displayName].push({
+							ssid: wifiInterface.iwinfo.ssid,
+							band: wifiData.config.band,
+							ifname: wifiInterface.ifname
+						});
+					}
+				}
+			})
+		);
+		return {
+			success: true,
+			data: wifiIfnames
+		} as const;
+	} catch (error) {
+		console.error(error);
+		return {
+			success: false,
+			error:
+				'Something went wrong while getting the wifi ifnames for presence detection. Please see logs for more details'
+		} as const;
+	}
+}
+
 type WifiClient = NonNullable<WifiClients['data']>[keyof NonNullable<
 	WifiClients['data']
 >];
@@ -186,7 +260,7 @@ async function addEventToDB(event: PresenceEvent) {
 	return await db.insert(presencesEventTable).values(event);
 }
 
-async function getClient({ clientMacAddress }: { clientMacAddress: string }) {
+async function getClientDB({ clientMacAddress }: { clientMacAddress: string }) {
 	const getClientId = await db
 		.select({ id: clientsTable.id })
 		.from(clientsTable)
@@ -248,7 +322,7 @@ async function getClient({ clientMacAddress }: { clientMacAddress: string }) {
 	return getClientId;
 }
 
-async function getWifi({
+async function getWifiDB({
 	displayName,
 	ssid,
 	band
