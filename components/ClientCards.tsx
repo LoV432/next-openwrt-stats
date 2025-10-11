@@ -213,7 +213,9 @@ function ClientCard({
 							<Popover>
 								<PopoverTrigger asChild>
 									<Button className="gap-1" variant="outline" size="sm">
-										<span className="text-sm">{wifiData.displayName}</span>
+										<span className="text-muted-foreground text-sm">
+											{wifiData.displayName}
+										</span>
 										<ChevronDownIcon className="h-4 w-4" />
 									</Button>
 								</PopoverTrigger>
