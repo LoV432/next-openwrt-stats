@@ -69,8 +69,18 @@ export function WifiAPs() {
 					Object.entries(wifiAPs.data.wifiAPsOverview).map(([ssid, data]) => (
 						<Card key={ssid} className="w-full gap-4">
 							<CardHeader>
-								<h3 className="flex text-lg font-semibold">
-									<WifiIcon className="mb-1 mr-2 inline-block" /> {ssid}
+								<h3 className="flex justify-center text-lg font-semibold">
+									<WifiIcon className="mb-1 mr-2 inline-block" />
+									<div className="flex gap-2">
+										<p>{ssid}</p>
+										<p className="text-muted-foreground self-center text-xs">
+											{data.band
+												.join(' / ')
+												.replace('2g', '2.4')
+												.replace('5g', '5')}{' '}
+											GHz
+										</p>
+									</div>
 									<div className="ml-auto">
 										<DetailedWifiAPs
 											allAPsWithSameSSID={wifiAPs.data.wifiAPsPerSSID[ssid]}
@@ -87,16 +97,6 @@ export function WifiAPs() {
 										<span className="text-muted-foreground">Channel:</span>
 										<span>
 											{data.channel.filter((value) => value !== 0).join(' / ')}
-										</span>
-									</p>
-									<p className="flex justify-between">
-										<span className="text-muted-foreground">Band:</span>
-										<span>
-											{data.band
-												.join(' / ')
-												.replace('2g', '2.4')
-												.replace('5g', '5')}{' '}
-											GHz
 										</span>
 									</p>
 									<p className="flex justify-between">
