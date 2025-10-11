@@ -39,7 +39,7 @@ import {
 	AccordionItem,
 	AccordionTrigger
 } from '@/components/ui/accordion';
-import { PBRIcon } from './PBRIcons';
+import { SVGIcon } from './SVGIcons';
 import { toast } from 'sonner';
 import {
 	addPolicyForm,
@@ -459,7 +459,7 @@ function PredefinedDstAddr({
 									}
 								}}
 							>
-								<PBRIcon iconName={iconName} />
+								<SVGIcon iconName={iconName} />
 							</div>
 						))}
 					</div>

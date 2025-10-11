@@ -2,13 +2,21 @@
 import { DhcpDevices } from '@/lib/server/dhcpDevices';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
-import { LoaderCircle, UserIcon, Wifi } from 'lucide-react';
+import {
+	ChevronDownIcon,
+	LoaderCircle,
+	MoveDownIcon,
+	UserIcon,
+	Wifi,
+	WifiIcon
+} from 'lucide-react';
 import { WifiClients, WifiClientsTraffic } from '@/lib/server/wifiAPs';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { calcMbps, formatBytes, secondsToHumanReadable } from '@/lib/utils';
 import { Button } from './ui/button';
 import { useEffect, useState } from 'react';
 import { useWifiAPsQuery } from '@/providers/wifiAPsContext';
+import { SVGIcon } from './SVGIcons';
 
 export default function ClientCards() {
 	const dhcpDevicesQuery = useQuery({
@@ -188,19 +196,25 @@ function ClientCard({
 		<Card className="w-full gap-2">
 			<CardHeader className="pb-2">
 				<div className="flex items-center justify-between overflow-hidden">
-					<h3 className="mr-2 overflow-hidden text-ellipsis whitespace-nowrap text-lg font-semibold">
-						<UserIcon className="mb-1 mr-2 inline-block" />
+					<h3 className="mr-2 flex gap-2 overflow-hidden text-ellipsis whitespace-nowrap text-lg font-semibold">
+						{!wifiData ? (
+							<UserIcon />
+						) : wifiData.band === '2g' ? (
+							<SVGIcon iconName="wifi4" className="h-7 w-7 pb-1" />
+						) : wifiData.band === '5g' ? (
+							<SVGIcon iconName="wifi5" className="h-7 w-7 pb-1" />
+						) : (
+							<WifiIcon className="h-8 w-8" />
+						)}
 						{device.deviceName || 'Unknown Device'}
 					</h3>
 					{wifiData && (
 						<div className="flex items-center gap-2">
 							<Popover>
 								<PopoverTrigger asChild>
-									<Button className="gap-1.5" variant="outline" size="sm">
-										<Wifi className="h-4 w-4" />
-										<span className="text-muted-foreground text-sm">
-											{wifiData.displayName}
-										</span>
+									<Button className="gap-1" variant="outline" size="sm">
+										<span className="text-sm">{wifiData.displayName}</span>
+										<ChevronDownIcon className="h-4 w-4" />
 									</Button>
 								</PopoverTrigger>
 								<PopoverContent className="w-80" align="end">

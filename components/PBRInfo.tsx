@@ -12,7 +12,7 @@ import { Card } from './ui/card';
 import { useQuery } from '@tanstack/react-query';
 import { PbrInterfaces, PbrPolicy } from '@/lib/server/pbr';
 import { deletePBRPolicyAction } from '@/lib/server/pbrActions';
-import { PBRIcon } from './PBRIcons';
+import { SVGIcon } from './SVGIcons';
 import { AddEditRule } from './AddPBRPolicy';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -27,7 +27,7 @@ function Field({ label, value }: { label: string; value: string }) {
 		) {
 			return (
 				<div className="h-6 w-6 fill-white" key={v}>
-					<PBRIcon iconName={v.split('/')[v.split('/').length - 1]} />
+					<SVGIcon iconName={v.split('/')[v.split('/').length - 1]} />
 				</div>
 			);
 		}
