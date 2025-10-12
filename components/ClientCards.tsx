@@ -2,14 +2,7 @@
 import { DhcpDevices } from '@/lib/server/dhcpDevices';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from './ui/card';
-import {
-	ChevronDownIcon,
-	LoaderCircle,
-	MoveDownIcon,
-	UserIcon,
-	Wifi,
-	WifiIcon
-} from 'lucide-react';
+import { LoaderCircle, RouterIcon, UserIcon, WifiIcon } from 'lucide-react';
 import { WifiClients, WifiClientsTraffic } from '@/lib/server/wifiAPs';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { calcMbps, formatBytes, secondsToHumanReadable } from '@/lib/utils';
@@ -212,11 +205,11 @@ function ClientCard({
 						<div className="flex items-center gap-2">
 							<Popover>
 								<PopoverTrigger asChild>
-									<Button className="gap-1" variant="outline" size="sm">
+									<Button className="gap-1.5" variant="outline" size="sm">
+										<RouterIcon className="h-4 w-4" />
 										<span className="text-muted-foreground text-sm">
 											{wifiData.displayName}
 										</span>
-										<ChevronDownIcon className="h-4 w-4" />
 									</Button>
 								</PopoverTrigger>
 								<PopoverContent className="w-80" align="end">
@@ -259,24 +252,6 @@ function ClientCard({
 														: '- - - -'}
 												</span>
 											</p>
-											<div className="my-2 border-t" />
-											<div className="space-y-1">
-												<p className="text-sm font-medium">Traffic Stats:</p>
-												<div className="w-full gap-2 space-y-1">
-													<p className="flex justify-between text-sm">
-														<span className="text-muted-foreground">
-															RX Bytes:
-														</span>
-														<span>{formatBytes(wifiData.rx.bytes)}</span>
-													</p>
-													<p className="flex justify-between text-sm">
-														<span className="text-muted-foreground">
-															TX Bytes:
-														</span>
-														<span>{formatBytes(wifiData.tx.bytes)}</span>
-													</p>
-												</div>
-											</div>
 										</div>
 									</div>
 								</PopoverContent>
@@ -296,12 +271,6 @@ function ClientCard({
 						<span>{device.macAddress}</span>
 					</p>
 					<p className="flex justify-between">
-						<span className="text-muted-foreground">Lease Time:</span>
-						<span>
-							{secondsToHumanReadable(Number(device.leaseTime)) || 'Infinite'}
-						</span>
-					</p>
-					<p className="flex justify-between">
 						<span className="text-muted-foreground">Realtime Traffic:</span>
 						<span>
 							{wifiData ? (
@@ -312,6 +281,25 @@ function ClientCard({
 							) : (
 								<>- - - -</>
 							)}
+						</span>
+					</p>
+					<p className="flex justify-between">
+						<span className="text-muted-foreground">Traffic Stats:</span>
+						<span>
+							{wifiData ? (
+								<>
+									{formatBytes(wifiData.tx.bytes)} /{' '}
+									{formatBytes(wifiData.rx.bytes)}
+								</>
+							) : (
+								<>- - - -</>
+							)}
+						</span>
+					</p>
+					<p className="flex justify-between">
+						<span className="text-muted-foreground">Lease Time:</span>
+						<span>
+							{secondsToHumanReadable(Number(device.leaseTime)) || 'Infinite'}
 						</span>
 					</p>
 				</div>
