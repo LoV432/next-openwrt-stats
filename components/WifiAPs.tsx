@@ -6,6 +6,7 @@ import {
 } from '@/lib/server/wifiAPsActions';
 import { type WifiAPs } from '@/lib/server/wifiAPs';
 import { Card, CardContent, CardHeader } from './ui/card';
+import { Badge } from '@/components/ui/badge';
 import { LoaderCircle, Settings2, WifiIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -73,13 +74,16 @@ export function WifiAPs() {
 									<WifiIcon className="mb-1 mr-2 inline-block" />
 									<div className="flex gap-2">
 										<p>{ssid}</p>
-										<p className="text-muted-foreground self-center text-xs">
+										<Badge
+											variant="secondary"
+											className="text-muted-foreground h-fit w-fit self-center text-xs"
+										>
 											{data.band
 												.join(' / ')
 												.replace('2g', '2.4')
 												.replace('5g', '5')}{' '}
 											GHz
-										</p>
+										</Badge>
 									</div>
 									<div className="ml-auto">
 										<DetailedWifiAPs
