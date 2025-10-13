@@ -14,12 +14,9 @@ import { Button } from './ui/button';
 import { LoaderCircle, NetworkIcon } from 'lucide-react';
 import { formatBytes } from '@/lib/utils';
 import { DeleteWireguardPeer } from './DeleteWireguardPeer';
+import { AddEditWireguardPeer } from './AddWireguardPeer';
 
-interface WireguardInfoProps {
-	interfaceName: string;
-}
-
-export function WireguardInfo({ interfaceName }: WireguardInfoProps) {
+export function WireguardInfo({ interfaceName }: { interfaceName: string }) {
 	const [open, setOpen] = useState(false);
 	const wireguardQuery = useQuery({
 		queryKey: ['wireguard', interfaceName],
@@ -46,6 +43,10 @@ export function WireguardInfo({ interfaceName }: WireguardInfoProps) {
 				<DialogHeader>
 					<DialogTitle>Wireguard Info - {interfaceName}</DialogTitle>
 				</DialogHeader>
+				<AddEditWireguardPeer
+					refetchWireguardInterfaces={wireguardQuery.refetch}
+					wireguardInterface={interfaceName}
+				/>
 				{wireguardQuery.data ? (
 					<div
 						className="space-y-4 overflow-y-auto break-all"

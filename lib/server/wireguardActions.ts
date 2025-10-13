@@ -1,7 +1,157 @@
 'use server';
 import 'server-only';
+import { wireguardPeerConfigClientSchema } from '@/types/ubusCalls';
 import { ubusCall } from './ubusCalls';
 import { getPrimaryRouter } from './router';
+
+export async function generateWireguardKeyPair() {
+	const primaryRouter = await getPrimaryRouter();
+	if (!primaryRouter.success) {
+		return primaryRouter;
+	}
+
+	const keyPairResponse = await ubusCall({
+		displayName: primaryRouter.data.displayName,
+		params: ['luci.wireguard', 'generateKeyPair', {}]
+	});
+
+	if (!keyPairResponse.success) {
+		return {
+			success: false,
+			error: 'Failed to generate WireGuard key pair'
+		} as const;
+	}
+
+	const private_key = keyPairResponse.data?.result[1]?.keys?.priv as
+		| string
+		| undefined;
+	const public_key = keyPairResponse.data?.result[1]?.keys?.pub as
+		| string
+		| undefined;
+	if (!private_key || !public_key) {
+		return {
+			success: false,
+			error: 'Failed to generate WireGuard key pair'
+		} as const;
+	}
+
+	return {
+		success: true,
+		data: {
+			private_key,
+			public_key
+		}
+	} as const;
+}
+
+export async function generateWireguardPsk() {
+	const primaryRouter = await getPrimaryRouter();
+	if (!primaryRouter.success) {
+		return primaryRouter;
+	}
+
+	const pskResponse = await ubusCall({
+		displayName: primaryRouter.data.displayName,
+		params: ['luci.wireguard', 'generatePsk', {}]
+	});
+
+	if (!pskResponse.success) {
+		return {
+			success: false,
+			error: 'Failed to generate WireGuard PSK'
+		} as const;
+	}
+	const psk = pskResponse.data?.result[1]?.psk as string | undefined;
+	if (!psk) {
+		return {
+			success: false,
+			error: 'Failed to generate WireGuard PSK'
+		} as const;
+	}
+
+	return {
+		success: true,
+		data: psk
+	} as const;
+}
+
+export async function addWireguardPeerAction({
+	values,
+	interfaceName
+}: {
+	values: {
+		public_key: string;
+		private_key?: string;
+		preshared_key?: string;
+		description?: string;
+		endpoint_host?: string;
+		endpoint_port?: string;
+		allowed_ips?: string[];
+		persistent_keepalive?: string;
+		route_allowed_ips?: string;
+		disabled?: string;
+	};
+	interfaceName: string;
+}) {
+	try {
+		const parsedForm = wireguardPeerConfigClientSchema.safeParse(values);
+		if (!parsedForm.success) {
+			return {
+				success: false,
+				error: 'Invalid form values'
+			} as const;
+		}
+		const primaryRouter = await getPrimaryRouter();
+		if (!primaryRouter.success) {
+			return primaryRouter;
+		}
+
+		const postData: Record<string, string | string[]> = {};
+		Object.entries(parsedForm.data).forEach(([key, value]) => {
+			if (value && value !== '') {
+				postData[key] = value;
+			}
+		});
+
+		const wireguardPeerResponse = await ubusCall({
+			displayName: primaryRouter.data.displayName,
+			params: [
+				'uci',
+				'add',
+				{
+					config: 'network',
+					type: `wireguard_${interfaceName}`,
+					values: postData
+				}
+			]
+		});
+		if (!wireguardPeerResponse.success) {
+			throw new Error(
+				'Something went wrong while adding the WireGuard peer. Please see logs for more details'
+			);
+		}
+
+		const commitChangesResponse = await commitWireguardChanges();
+		if (!commitChangesResponse.success) {
+			throw new Error(
+				'Something went wrong while committing the changes. Please see logs for more details'
+			);
+		}
+
+		return {
+			success: true,
+			data: commitChangesResponse.data
+		} as const;
+	} catch (error) {
+		console.error('[ERROR] Failed to add WireGuard peer:', error);
+		await revertWireguardChanges();
+		return {
+			success: false,
+			error:
+				'Something went wrong while adding the WireGuard peer. Please see logs for more details'
+		} as const;
+	}
+}
 
 export async function deleteWireguardPeerAction({
 	section_name

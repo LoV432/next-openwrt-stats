@@ -495,7 +495,7 @@ export const routerTimezoneSchema = z.object({
 	])
 });
 
-const wireguardPeerConfigSchema = z.object({
+export const wireguardPeerConfigSchema = z.object({
 	'.type': z.string(),
 	'.name': z.string(),
 	public_key: z.string(),
@@ -503,11 +503,22 @@ const wireguardPeerConfigSchema = z.object({
 	preshared_key: z.string().optional(),
 	description: z.string().optional(),
 	endpoint_host: z.string().optional(),
+	endpoint_port: z.string().optional(),
 	allowed_ips: z.array(z.string()).optional(),
 	persistent_keepalive: z.string().optional(),
-	disabled: z.string().default('0')
+	route_allowed_ips: z.string().optional(),
+	disabled: z.string().optional()
 });
 
 export const wireguardPeerConfigArraySchema = z.array(
 	wireguardPeerConfigSchema
 );
+
+export const wireguardPeerConfigClientSchema = z.object({
+	...wireguardPeerConfigSchema.shape,
+	'.type': z.string().optional(),
+	'.name': z.string().optional(),
+	public_key: z
+		.string('Public key is required')
+		.min(1, 'Public key is required')
+});

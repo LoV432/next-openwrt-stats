@@ -34,7 +34,7 @@ export async function setPBRPolicyAction({
 
 	const postData: Record<string, string> = {};
 	Object.entries(parsedForm.data).forEach(([key, value]) => {
-		if (value) {
+		if (value && value !== '') {
 			postData[key] = value;
 		}
 	});
