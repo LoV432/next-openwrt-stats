@@ -121,7 +121,7 @@ export type WireguardInterfaces = Awaited<
 	ReturnType<typeof getWireguardInterfaces>
 >;
 
-type WireguardPeer = {
+export type WireguardPeer = {
 	'.name': string;
 	'.type': string;
 	public_key: string;
@@ -130,6 +130,7 @@ type WireguardPeer = {
 	description?: string;
 	name?: string;
 	endpoint_host?: string;
+	endpoint_port?: string;
 	allowed_ips?: string[];
 	persistent_keepalive?: string;
 	disabled?: string;

@@ -7,7 +7,10 @@ import {
 	DialogTitle,
 	DialogTrigger
 } from './ui/dialog';
-import { WireguardInterfaces } from '@/lib/server/routerInterfaces';
+import {
+	WireguardInterfaces,
+	WireguardPeer
+} from '@/lib/server/routerInterfaces';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Button } from './ui/button';
@@ -15,13 +18,15 @@ import { LoaderCircle, NetworkIcon } from 'lucide-react';
 import { formatBytes } from '@/lib/utils';
 import { DeleteWireguardPeer } from './DeleteWireguardPeer';
 import { AddEditWireguardPeer } from './AddWireguardPeer';
+import WireguardQRCode from './WireguardQRCode';
 
 export function WireguardInfo({ interfaceName }: { interfaceName: string }) {
 	const [open, setOpen] = useState(false);
+
 	const wireguardQuery = useQuery({
 		queryKey: ['wireguard', interfaceName],
 		queryFn: async () => {
-			const response = await fetch('api/routers/primary/wireguard').then(
+			const response = await fetch('/api/routers/primary/wireguard').then(
 				(res) => res.json() as Promise<WireguardInterfaces>
 			);
 			if (!response.success) {
@@ -127,6 +132,10 @@ export function WireguardInfo({ interfaceName }: { interfaceName: string }) {
 												</span>
 											</div>
 											<div className="flex justify-end gap-2">
+												<WireguardQRCode
+													peer={peer}
+													interfaceData={wireguardQuery.data}
+												/>
 												<AddEditWireguardPeer
 													wireguardInterface={interfaceName}
 													initialValues={peer}
