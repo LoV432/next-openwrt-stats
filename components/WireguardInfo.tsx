@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { Button } from './ui/button';
 import { LoaderCircle, NetworkIcon } from 'lucide-react';
 import { formatBytes } from '@/lib/utils';
+import { DeleteWireguardPeer } from './DeleteWireguardPeer';
 
 interface WireguardInfoProps {
 	interfaceName: string;
@@ -81,7 +82,9 @@ export function WireguardInfo({ interfaceName }: WireguardInfoProps) {
 										>
 											<div className="flex flex-wrap gap-2 text-sm">
 												<span className="text-muted-foreground">Name:</span>
-												<span className="ml-auto">{peer.name}</span>
+												<span className="ml-auto">
+													{peer.description || peer.name || 'Untitled Peer'}
+												</span>
 											</div>
 											<div className="flex flex-wrap gap-2 text-sm">
 												<span className="text-muted-foreground">
@@ -92,7 +95,7 @@ export function WireguardInfo({ interfaceName }: WireguardInfoProps) {
 											<div className="flex flex-wrap gap-2 text-sm">
 												<span className="text-muted-foreground">Endpoint:</span>
 												<span className="ml-auto">
-													{peer.endpoint || 'Not connected'}
+													{peer.endpoint || '(none)'}
 												</span>
 											</div>
 											<div className="flex flex-wrap gap-2 text-sm">
@@ -100,9 +103,9 @@ export function WireguardInfo({ interfaceName }: WireguardInfoProps) {
 													Latest Handshake:
 												</span>
 												<span className="ml-auto">
-													{parseInt(peer.latest_handshake)
+													{parseInt(peer.latest_handshake || '0')
 														? new Date(
-																parseInt(peer.latest_handshake) * 1000
+																parseInt(peer.latest_handshake || '0') * 1000
 															).toLocaleString()
 														: 'Never'}
 												</span>
@@ -110,8 +113,8 @@ export function WireguardInfo({ interfaceName }: WireguardInfoProps) {
 											<div className="flex flex-wrap gap-2 text-sm">
 												<span className="text-muted-foreground">Transfer:</span>
 												<span className="ml-auto">
-													↑ {formatBytes(Number(peer.transfer_tx))} /{' '}
-													{formatBytes(Number(peer.transfer_rx))} ↓
+													↑ {formatBytes(Number(peer.transfer_tx || '0'))} /{' '}
+													{formatBytes(Number(peer.transfer_rx || '0'))} ↓
 												</span>
 											</div>
 											<div className="flex flex-wrap gap-2 text-sm">
@@ -119,8 +122,17 @@ export function WireguardInfo({ interfaceName }: WireguardInfoProps) {
 													Allowed IPs:
 												</span>
 												<span className="ml-auto">
-													{peer.allowed_ips.join(', ')}
+													{peer.allowed_ips?.join(', ') || '- - - -'}
 												</span>
+											</div>
+											<div className="flex justify-end">
+												<DeleteWireguardPeer
+													sectionName={peer['.name']}
+													peerName={
+														peer.description || peer.name || 'Untitled Peer'
+													}
+													refetchWireguardInterfaces={wireguardQuery.refetch}
+												/>
 											</div>
 										</div>
 									))}

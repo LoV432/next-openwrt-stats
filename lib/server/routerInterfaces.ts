@@ -2,9 +2,10 @@ import 'server-only';
 import {
 	getNetworkInterfacesSchema,
 	getRealTimeStatsSchema,
-	wireguardInterfacesSchema
+	wireguardInterfacesSchema,
+	wireguardPeerConfigArraySchema
 } from '@/types/ubusCalls';
-import { ubusCall } from './ubusCalls';
+import { ubusBatchCall, ubusCall } from './ubusCalls';
 import { calcMbps } from '../utils';
 import { getPrimaryRouter } from './router';
 
@@ -119,15 +120,46 @@ export async function getRealTimeTraffic(device: string) {
 export type WireguardInterfaces = Awaited<
 	ReturnType<typeof getWireguardInterfaces>
 >;
+
+type WireguardPeer = {
+	'.name': string;
+	public_key: string;
+	private_key?: string;
+	preshared_key?: string;
+	description?: string;
+	name?: string;
+	endpoint_host?: string;
+	allowed_ips?: string[];
+	persistent_keepalive?: string;
+	disabled: string;
+	endpoint?: string;
+	latest_handshake?: string;
+	transfer_rx?: string;
+	transfer_tx?: string;
+};
 export async function getWireguardInterfaces() {
 	const primaryRouter = await getPrimaryRouter();
 	if (!primaryRouter.success) {
 		return primaryRouter;
 	}
 
-	const ubusResponse = await ubusCall({
+	// const ubusResponse = await ubusCall({
+	// 	displayName: primaryRouter.data.displayName,
+	// 	params: ['luci.wireguard', 'getWgInstances', {}]
+	// });
+
+	const ubusResponse = await ubusBatchCall({
 		displayName: primaryRouter.data.displayName,
-		params: ['luci.wireguard', 'getWgInstances', {}]
+		calls: [
+			{
+				id: 1,
+				params: ['luci.wireguard', 'getWgInstances', {}]
+			},
+			{
+				id: 2,
+				params: ['uci', 'get', { config: 'network' }]
+			}
+		]
 	});
 
 	if (!ubusResponse.success) {
@@ -138,14 +170,27 @@ export async function getWireguardInterfaces() {
 		} as const;
 	}
 
-	const parsedUbusResponse = wireguardInterfacesSchema.safeParse(
-		ubusResponse.data
+	const luciWireguardInterfaces = ubusResponse.data
+		.filter((response) => response.id === 1)
+		.map((response) => response);
+	const networkInterfaces = ubusResponse.data
+		.filter((response) => response.id === 2)
+		.map((response) => response.result);
+
+	const peersFromNetworkInterfaces = Object.values(
+		networkInterfaces[0][1].values
+	).filter((interfaceConfig: any) =>
+		interfaceConfig?.['.type'].startsWith('wireguard')
 	);
 
-	if (!parsedUbusResponse.success) {
+	const parsedWireguardPeers = wireguardPeerConfigArraySchema.safeParse(
+		peersFromNetworkInterfaces
+	);
+
+	if (!parsedWireguardPeers.success) {
 		console.log('[ERROR] Failed to parse ubus response', {
 			displayName: primaryRouter.data.displayName,
-			error: parsedUbusResponse.error
+			error: parsedWireguardPeers.error
 		});
 		return {
 			success: false,
@@ -153,15 +198,59 @@ export async function getWireguardInterfaces() {
 		} as const;
 	}
 
-	if (parsedUbusResponse.data.result) {
+	const parsedLuciWireguardInterfaces = wireguardInterfacesSchema.safeParse(
+		luciWireguardInterfaces[0]
+	);
+	if (!parsedLuciWireguardInterfaces.success) {
+		console.log('[ERROR] Failed to parse ubus response', {
+			displayName: primaryRouter.data.displayName,
+			error: parsedLuciWireguardInterfaces.error
+		});
 		return {
-			success: true,
-			data: parsedUbusResponse.data.result[1]
+			success: false,
+			error: 'Failed to parse ubus response'
 		} as const;
 	}
 
+	let wireguardInterfaces: {
+		[key: string]: {
+			name: string;
+			public_key: string;
+			listen_port: string;
+			fwmark: string;
+			peers: WireguardPeer[];
+		};
+	} = {};
+
+	Object.values(parsedLuciWireguardInterfaces.data.result[1]).forEach(
+		(wgInterface) => {
+			const peers = parsedWireguardPeers.data.filter(
+				(peer) => peer['.type'] === `wireguard_${wgInterface.name}`
+			);
+
+			const peersWithLiveData = peers.map((peer) => {
+				const liveData = wgInterface.peers.find(
+					(livePeer) => livePeer.public_key === peer.public_key
+				);
+
+				return {
+					...peer,
+					...liveData
+				};
+			});
+
+			wireguardInterfaces[wgInterface.name] = {
+				name: wgInterface.name,
+				public_key: wgInterface.public_key,
+				listen_port: wgInterface.listen_port,
+				fwmark: wgInterface.fwmark,
+				peers: peersWithLiveData
+			};
+		}
+	);
+
 	return {
-		success: false,
-		error: 'Failed to parse ubus response'
+		success: true,
+		data: wireguardInterfaces
 	} as const;
 }

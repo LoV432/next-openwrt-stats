@@ -494,3 +494,20 @@ export const routerTimezoneSchema = z.object({
 		)
 	])
 });
+
+const wireguardPeerConfigSchema = z.object({
+	'.type': z.string(),
+	'.name': z.string(),
+	public_key: z.string(),
+	private_key: z.string().optional(),
+	preshared_key: z.string().optional(),
+	description: z.string().optional(),
+	endpoint_host: z.string().optional(),
+	allowed_ips: z.array(z.string()).optional(),
+	persistent_keepalive: z.string().optional(),
+	disabled: z.string().default('0')
+});
+
+export const wireguardPeerConfigArraySchema = z.array(
+	wireguardPeerConfigSchema
+);
