@@ -126,7 +126,13 @@ export function WireguardInfo({ interfaceName }: { interfaceName: string }) {
 													{peer.allowed_ips?.join(', ') || '- - - -'}
 												</span>
 											</div>
-											<div className="flex justify-end">
+											<div className="flex justify-end gap-2">
+												<AddEditWireguardPeer
+													wireguardInterface={interfaceName}
+													initialValues={peer}
+													peer={peer['.name']}
+													refetchWireguardInterfaces={wireguardQuery.refetch}
+												/>
 												<DeleteWireguardPeer
 													sectionName={peer['.name']}
 													peerName={

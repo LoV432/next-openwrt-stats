@@ -153,6 +153,169 @@ export async function addWireguardPeerAction({
 	}
 }
 
+export async function editWireguardPeerAction({
+	values,
+	sectionName
+}: {
+	values: {
+		public_key: string;
+		private_key?: string;
+		preshared_key?: string;
+		description?: string;
+		endpoint_host?: string;
+		endpoint_port?: string;
+		allowed_ips?: string[];
+		persistent_keepalive?: string;
+		route_allowed_ips?: string;
+		disabled?: string;
+	};
+	sectionName: string;
+}) {
+	try {
+		const parsedNewValues = wireguardPeerConfigClientSchema.safeParse(values);
+		if (!parsedNewValues.success) {
+			return {
+				success: false,
+				error: 'Invalid form values'
+			} as const;
+		}
+		const primaryRouter = await getPrimaryRouter();
+		if (!primaryRouter.success) {
+			return {
+				success: false,
+				error: 'Failed to get primary router'
+			} as const;
+		}
+
+		const currentConfigResponse = await ubusCall({
+			displayName: primaryRouter.data.displayName,
+			params: [
+				'uci',
+				'get',
+				{
+					config: 'network'
+				}
+			]
+		});
+
+		if (!currentConfigResponse.success) {
+			return {
+				success: false,
+				error: 'Failed to get current WireGuard configuration'
+			} as const;
+		}
+
+		const configs = currentConfigResponse.data.result[1].values;
+		let peerToEdit = configs[sectionName];
+		if (!peerToEdit) {
+			console.log(
+				'[ERROR] Attempted to edit WireGuard peer that does not exist',
+				{
+					displayName: primaryRouter.data.displayName,
+					sectionName
+				}
+			);
+			return {
+				success: false,
+				error: 'WireGuard peer not found'
+			} as const;
+		}
+
+		const oldValues = Object.entries(peerToEdit);
+		const newValues = Object.entries(parsedNewValues.data);
+		const allKeysToDelete = oldValues.filter(
+			([key]) =>
+				!newValues.some(([newKey]) => newKey === key) && !key.startsWith('.')
+		);
+		const deleteValues = allKeysToDelete.map(([key]) => key);
+		console.log(deleteValues);
+
+		if (deleteValues.length > 0) {
+			const deleteResponse = await ubusCall({
+				displayName: primaryRouter.data.displayName,
+				params: [
+					'uci',
+					'delete',
+					{
+						config: 'network',
+						options: deleteValues,
+						section: sectionName
+					}
+				]
+			});
+			if (!deleteResponse.success) {
+				throw new Error(
+					'Something went wrong while editing the WireGuard peer. Please see logs for more details',
+					{
+						cause: deleteResponse.error
+					}
+				);
+			}
+		}
+
+		let postData: Record<string, string | string[]> = {};
+		Object.entries(parsedNewValues.data).forEach(([key, value]) => {
+			if (value && value !== '' && !key.startsWith('.') && value.length !== 0) {
+				postData[key] = value;
+			}
+		});
+
+		deleteValues.forEach((key) => {
+			if (key in postData) {
+				delete postData[key];
+			}
+		});
+
+		console.log(postData);
+
+		if (Object.keys(postData).length > 0) {
+			const wireguardPeerResponse = await ubusCall({
+				displayName: primaryRouter.data.displayName,
+				params: [
+					'uci',
+					'set',
+					{
+						config: 'network',
+						section: sectionName,
+						values: postData
+					}
+				]
+			});
+			if (!wireguardPeerResponse.success) {
+				throw new Error(
+					'Something went wrong while editing the WireGuard peer. Please see logs for more details',
+					{
+						cause: wireguardPeerResponse.error
+					}
+				);
+			}
+		}
+
+		const commitChangesResponse = await commitWireguardChanges();
+		if (!commitChangesResponse.success) {
+			throw new Error(
+				'Something went wrong while committing the changes. Please see logs for more details',
+				{
+					cause: commitChangesResponse.error
+				}
+			);
+		}
+
+		return {
+			success: true,
+			data: commitChangesResponse.data
+		} as const;
+	} catch (error) {
+		console.error('[ERROR] Failed to edit WireGuard peer:', error);
+		await revertWireguardChanges();
+		return {
+			success: false,
+			error:
+				'Something went wrong while editing the WireGuard peer. Please see logs for more details'
+		} as const;
+	}
+}
+
 export async function deleteWireguardPeerAction({
 	section_name
 }: {

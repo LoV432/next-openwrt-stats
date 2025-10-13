@@ -36,6 +36,7 @@ import {
 } from '@/types/ubusCalls';
 import {
 	addWireguardPeerAction,
+	editWireguardPeerAction,
 	generateWireguardKeyPair,
 	generateWireguardPsk
 } from '@/lib/server/wireguardActions';
@@ -72,7 +73,8 @@ export function AddEditWireguardPeer({
 			description: '',
 			preshared_key: '',
 			private_key: '',
-			public_key: ''
+			public_key: '',
+			...initialValues
 		}
 	});
 
@@ -127,19 +129,42 @@ export function AddEditWireguardPeer({
 				return;
 			}
 
-			const wireguardData = await addWireguardPeerAction({
-				values,
-				interfaceName: wireguardInterface
-			});
-			if (!wireguardData.success) {
-				toast.error(wireguardData.error, { richColors: true });
-				return;
+			let wireguardData;
+			if (peer) {
+				wireguardData = await editWireguardPeerAction({
+					values,
+					sectionName: peer
+				});
+				if (!wireguardData.success) {
+					toast.error(wireguardData.error, { richColors: true });
+					return;
+				}
+				await refetchWireguardInterfaces();
+				toast.success('WireGuard peer updated successfully', {
+					richColors: true
+				});
+			} else {
+				wireguardData = await addWireguardPeerAction({
+					values,
+					interfaceName: wireguardInterface
+				});
+				if (!wireguardData.success) {
+					toast.error(wireguardData.error, { richColors: true });
+					return;
+				}
+				await refetchWireguardInterfaces();
+				toast.success('WireGuard peer added successfully', {
+					richColors: true
+				});
 			}
-			await refetchWireguardInterfaces();
-			toast.success('WireGuard peer added successfully', {
-				richColors: true
-			});
-			form.reset();
+
+			if (peer) {
+				form.reset({
+					...values
+				});
+			} else {
+				form.reset();
+			}
 			setIsOpen(false);
 		} catch (err) {
 			toast.error('Something went wrong', {
@@ -162,8 +187,8 @@ export function AddEditWireguardPeer({
 			}}
 		>
 			<DialogTrigger asChild>
-				<Button variant="outline" className="w-full">
-					{peer ? <PencilLine /> : 'Add Peer'}
+				<Button variant="outline" size={peer ? 'sm' : 'default'}>
+					{peer ? <PencilLine className="h-3 w-3" /> : 'Add Peer'}
 				</Button>
 			</DialogTrigger>
 			<DialogContent className="flex h-full max-h-[80vh] w-[90vw] max-w-3xl flex-col">

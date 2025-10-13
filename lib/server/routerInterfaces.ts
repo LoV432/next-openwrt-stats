@@ -123,6 +123,7 @@ export type WireguardInterfaces = Awaited<
 
 type WireguardPeer = {
 	'.name': string;
+	'.type': string;
 	public_key: string;
 	private_key?: string;
 	preshared_key?: string;
@@ -131,7 +132,7 @@ type WireguardPeer = {
 	endpoint_host?: string;
 	allowed_ips?: string[];
 	persistent_keepalive?: string;
-	disabled: string;
+	disabled?: string;
 	endpoint?: string;
 	latest_handshake?: string;
 	transfer_rx?: string;
