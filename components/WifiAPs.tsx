@@ -31,6 +31,7 @@ import {
 	AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
 import { useWifiAPsQuery } from '@/providers/wifiAPsContext';
+import { formatBand } from '@/lib/utils';
 
 export function WifiAPs() {
 	const wifiAPs = useWifiAPsQuery();
@@ -78,11 +79,7 @@ export function WifiAPs() {
 											variant="secondary"
 											className="text-muted-foreground h-fit w-fit self-center text-xs"
 										>
-											{data.band
-												.join(' / ')
-												.replace('2g', '2.4')
-												.replace('5g', '5')}{' '}
-											GHz
+											{formatBand(data.band)}
 										</Badge>
 									</div>
 									<div className="ml-auto">

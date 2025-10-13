@@ -51,3 +51,17 @@ export function formatBytes(bytes: number, decimals = 2) {
 
 	return `${parseFloat((bytes / k ** i).toFixed(dm))} ${sizes[i]}`;
 }
+
+export const formatBand = (band: string | string[]) => {
+	if (Array.isArray(band)) {
+		return `${band.map((b) => b.replaceAll('2g', '2.4').replaceAll('5g', '5')).join(' / ')} GHz`;
+	}
+	switch (band) {
+		case '2g':
+			return '2.4 GHz';
+		case '5g':
+			return '5 GHz';
+		default:
+			return band;
+	}
+};
