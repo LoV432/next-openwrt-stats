@@ -1,6 +1,6 @@
 # Next.js OpenWrt Stats
 
-A web dashboard for monitoring and managing all your OpenWrt routers from a single place.
+A web dashboard for monitoring and managing all your OpenWrt APs from a single place.
 
 ## Features
 
@@ -11,13 +11,12 @@ A web dashboard for monitoring and managing all your OpenWrt routers from a sing
 - **DHCP Client Management**: View all connected devices with IP/MAC addresses and lease times
 
 ### 📡 WiFi Management
-- **Access Point Control**: View and manage all WiFi APs across all your OpenWrt routers
+- **Access Point Control**: View and manage all WiFi APs across your network
 - **WiFi Client Monitoring**: Real-time traffic stats for connected wireless clients
 - **Signal Strength Monitoring**: View signal quality, noise levels, and connection details
-- **AP Configuration**: Enable/disable WiFi access points and edit settings
 - **Client Presence Tracking**: Monitor WiFi client connection/disconnection history with detailed event logs including:
   - **Event Detection**: Automatically detects when clients connect, disconnect, or move between APs/routers
-  - **Historical Timeline**: View detailed connection history for each client (last 20 events)
+  - **Historical Timeline**: View detailed connection history for each client
   - **Change Tracking**: Monitors when clients switch between WiFi networks, routers, or frequency bands
 
 ### 🔒 VPN & Security
@@ -55,15 +54,16 @@ A web dashboard for monitoring and managing all your OpenWrt routers from a sing
 4. **Access the dashboard**
    Open your browser and navigate to `http://localhost:3000`
 
-5. **Register your router**
-   - On first launch, you'll be redirected to the registration page
-   - Enter your OpenWrt router's IP address, username, and password
+5. **Register your network devices**
+    - On first launch, you'll be redirected to the registration page
+    - Register your primary OpenWrt router first (main router that manages the network)
+    - Add additional access points as needed - these are APs running OpenWrt, not separate networks
 
 ## Configuration
 
 ### OpenWrt RPC Configuration
 
-**Required Setup Step**: On each OpenWrt router you want to monitor, create the following ACL file:
+**Required Setup Step**: On your primary OpenWrt router and all access points, create the following ACL file:
 
 ```bash
 # Create the ACL file
