@@ -201,8 +201,8 @@ function ClientCard({
 	return (
 		<Card className="w-full gap-2">
 			<CardHeader className="pb-2">
-				<div className="flex items-center justify-between overflow-hidden">
-					<h3 className="mr-2 flex gap-2 overflow-hidden text-ellipsis whitespace-nowrap text-lg font-semibold">
+				<div className="flex items-center overflow-hidden">
+					<div>
 						{!wifiData ? (
 							<UserIcon />
 						) : wifiData.band === '2g' ? (
@@ -212,9 +212,11 @@ function ClientCard({
 						) : (
 							<WifiIcon className="h-8 w-8" />
 						)}
+					</div>
+					<h3 className="mx-2 overflow-hidden text-ellipsis whitespace-nowrap text-lg font-semibold">
 						{device.deviceName || 'Unknown Device'}
 					</h3>
-					<div className="flex items-center gap-2">
+					<div className="ml-auto flex items-center gap-2">
 						{presenceEnabled && (
 							<PresenceHistoryDialog
 								clientMac={device.macAddress}
