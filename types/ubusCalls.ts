@@ -514,11 +514,20 @@ export const wireguardPeerConfigArraySchema = z.array(
 	wireguardPeerConfigSchema
 );
 
-export const wireguardPeerConfigClientSchema = z.object({
-	...wireguardPeerConfigSchema.shape,
-	'.type': z.string().optional(),
-	'.name': z.string().optional(),
-	public_key: z
-		.string('Public key is required')
-		.min(1, 'Public key is required')
-});
+export const wireguardPeerConfigClientSchema = z
+	.object({
+		...wireguardPeerConfigSchema.shape,
+		'.type': z.string().optional(),
+		'.name': z.string().optional(),
+		public_key: z
+			.string('Public key is required')
+			.min(1, 'Public key is required')
+	})
+	.transform((val) => {
+		Object.entries(val).forEach(([k, v]) => {
+			if (v === '') {
+				delete val[k as keyof typeof val];
+			}
+		});
+		return val;
+	});

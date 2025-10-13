@@ -28,7 +28,7 @@ import {
 	SelectTrigger,
 	SelectValue
 } from '@/components/ui/select';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import {
 	wireguardPeerConfigClientSchema,
@@ -77,6 +77,24 @@ export function AddEditWireguardPeer({
 			...initialValues
 		}
 	});
+
+	useEffect(() => {
+		if (isOpen) {
+			form.reset({
+				allowed_ips: [],
+				persistent_keepalive: '',
+				disabled: '',
+				route_allowed_ips: '',
+				endpoint_port: '',
+				endpoint_host: '',
+				description: '',
+				preshared_key: '',
+				private_key: '',
+				public_key: '',
+				...initialValues
+			});
+		}
+	}, [isOpen]);
 
 	async function handleGenerateKeyPair() {
 		setIsGeneratingKeys(true);
@@ -139,7 +157,6 @@ export function AddEditWireguardPeer({
 					toast.error(wireguardData.error, { richColors: true });
 					return;
 				}
-				await refetchWireguardInterfaces();
 				toast.success('WireGuard peer updated successfully', {
 					richColors: true
 				});
@@ -152,19 +169,12 @@ export function AddEditWireguardPeer({
 					toast.error(wireguardData.error, { richColors: true });
 					return;
 				}
-				await refetchWireguardInterfaces();
 				toast.success('WireGuard peer added successfully', {
 					richColors: true
 				});
 			}
 
-			if (peer) {
-				form.reset({
-					...values
-				});
-			} else {
-				form.reset();
-			}
+			await refetchWireguardInterfaces();
 			setIsOpen(false);
 		} catch (err) {
 			toast.error('Something went wrong', {
