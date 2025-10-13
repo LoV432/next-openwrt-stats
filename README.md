@@ -15,6 +15,10 @@ A web dashboard for monitoring and managing all your OpenWrt routers from a sing
 - **WiFi Client Monitoring**: Real-time traffic stats for connected wireless clients
 - **Signal Strength Monitoring**: View signal quality, noise levels, and connection details
 - **AP Configuration**: Enable/disable WiFi access points and edit settings
+- **Client Presence Tracking**: Monitor WiFi client connection/disconnection history with detailed event logs including:
+  - **Event Detection**: Automatically detects when clients connect, disconnect, or move between APs/routers
+  - **Historical Timeline**: View detailed connection history for each client (last 20 events)
+  - **Change Tracking**: Monitors when clients switch between WiFi networks, routers, or frequency bands
 
 ### 🔒 VPN & Security
 - **WireGuard Management**: Full WireGuard VPN interface and peer management
@@ -34,9 +38,10 @@ A web dashboard for monitoring and managing all your OpenWrt routers from a sing
        container_name: openwrtstats
        volumes:
          - ./drizzle/db/:/app/drizzle/db/
-      environment:
-        - MAX_TRAFFIC=100 # Maximum traffic threshold for charts (in Mbps)
-        - PBR_ENABLED=false # Enable Policy Based Routing features (requires OpenWrt pbr package)
+       environment:
+         - MAX_TRAFFIC=100 # Maximum traffic threshold for charts (in Mbps)
+         - PBR_ENABLED=false # Enable Policy Based Routing features (requires OpenWrt pbr package)
+         - PRESENCE_ENABLED=false # Enable WiFi client presence tracking and history
        ports:
          - 3000:3000
        restart: unless-stopped
