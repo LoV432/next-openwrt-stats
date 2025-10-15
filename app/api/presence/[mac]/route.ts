@@ -4,7 +4,7 @@ import {
 	presencesEventTable,
 	wifisTable
 } from '@/drizzle/schema/schema';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, lt, and, or } from 'drizzle-orm';
 import { NextRequest } from 'next/server';
 import { alias } from 'drizzle-orm/sqlite-core';
 
@@ -29,6 +29,10 @@ export async function GET(
 		return new Response('Not enabled', { status: 500 });
 	}
 	const { mac: clientMac } = await params;
+	const { searchParams } = new URL(req.url);
+	const cursor = searchParams.get('cursor');
+	const limit = parseInt(searchParams.get('limit') || '20');
+
 	if (!clientMac) {
 		return new Response(
 			JSON.stringify({
@@ -51,7 +55,9 @@ export async function GET(
 		return new Response(
 			JSON.stringify({
 				success: true,
-				data: []
+				data: [],
+				hasMore: false,
+				nextCursor: null
 			}),
 			{
 				status: 404,
@@ -63,6 +69,27 @@ export async function GET(
 	}
 	const fromWifiAlias = alias(wifisTable, 'fromWifi');
 	const toWifiAlias = alias(wifisTable, 'toWifi');
+
+	const whereConditions: any[] = [
+		eq(presencesEventTable.clientId, clientId[0].id)
+	];
+
+	if (cursor) {
+		const [cursorTimestamp, cursorId] = cursor.split('_');
+		const cursorTimestampNum = parseInt(cursorTimestamp);
+		const cursorIdNum = parseInt(cursorId);
+
+		whereConditions.push(
+			or(
+				lt(presencesEventTable.timestamp, cursorTimestampNum),
+				and(
+					eq(presencesEventTable.timestamp, cursorTimestampNum),
+					lt(presencesEventTable.id, cursorIdNum)
+				)
+			)
+		);
+	}
+
 	const presenceEvent = await db
 		.select({
 			id: presencesEventTable.id,
@@ -77,7 +104,7 @@ export async function GET(
 			toBand: toWifiAlias.band
 		})
 		.from(presencesEventTable)
-		.where(eq(presencesEventTable.clientId, clientId[0].id))
+		.where(and(...whereConditions))
 		.leftJoin(clientsTable, eq(clientsTable.id, presencesEventTable.clientId))
 		.leftJoin(
 			fromWifiAlias,
@@ -85,12 +112,22 @@ export async function GET(
 		)
 		.leftJoin(toWifiAlias, eq(toWifiAlias.id, presencesEventTable.toWifiId))
 		.orderBy(desc(presencesEventTable.timestamp))
-		.limit(20);
-	if (!presenceEvent.length) {
+		.limit(limit + 1);
+
+	const hasMore = presenceEvent.length > limit;
+	const data = hasMore ? presenceEvent.slice(0, -1) : presenceEvent;
+	const nextCursor =
+		hasMore && data.length > 0
+			? `${data[data.length - 1].timestamp}_${data[data.length - 1].id}`
+			: null;
+
+	if (!data.length) {
 		return new Response(
 			JSON.stringify({
 				success: true,
-				data: []
+				data: [],
+				hasMore: false,
+				nextCursor: null
 			}),
 			{
 				status: 200,
@@ -103,7 +140,9 @@ export async function GET(
 	return new Response(
 		JSON.stringify({
 			success: true,
-			data: presenceEvent
+			data,
+			hasMore,
+			nextCursor
 		}),
 		{
 			status: 200,

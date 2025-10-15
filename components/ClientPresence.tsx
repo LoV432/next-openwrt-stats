@@ -1,6 +1,7 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { useState, useCallback } from 'react';
+import { List, RowComponentProps } from 'react-window';
 import {
 	Dialog,
 	DialogContent,
@@ -10,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Loader2, History, Router, Wifi, Gauge } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { Separator } from './ui/separator';
 import { PresenceEvent } from '@/app/api/presence/[mac]/route';
 import { formatBand } from '@/lib/utils';
@@ -19,6 +20,8 @@ type PresenceEventQueryResult =
 	| {
 			success: true;
 			data: PresenceEvent[];
+			hasMore: boolean;
+			nextCursor: string | null;
 	  }
 	| {
 			success: false;
@@ -56,7 +59,7 @@ function eventStyles(evt: PresenceEvent['event']) {
 
 function ChipForEvent({ evt }: { evt: PresenceEvent }) {
 	return (
-		<li className="mx-auto w-fit space-y-2 rounded-md border border-neutral-800 bg-neutral-900 px-4 py-2 text-sm">
+		<div className="mx-auto w-fit space-y-2 rounded-md border border-neutral-800 bg-neutral-900 px-4 py-2 text-sm">
 			<div className="mx-auto flex gap-2 text-sm text-neutral-500">
 				<div className="flex w-full items-center justify-center gap-2">
 					<span
@@ -87,7 +90,29 @@ function ChipForEvent({ evt }: { evt: PresenceEvent }) {
 					</div>
 				</div>
 			)}
-		</li>
+		</div>
+	);
+}
+
+function PresenceEventRow({
+	index,
+	style,
+	events
+}: RowComponentProps<{
+	events: PresenceEvent[];
+}>) {
+	const evt = events[index];
+	const isFirst = index === 0;
+
+	return (
+		<div style={style} className="p-3">
+			<div className="flex flex-col items-center">
+				{!isFirst && (
+					<Separator orientation="vertical" className="mx-auto min-h-6" />
+				)}
+				<ChipForEvent evt={evt} />
+			</div>
+		</div>
 	);
 }
 
@@ -99,20 +124,50 @@ export function PresenceHistoryDialog({
 	clientName: string;
 }) {
 	const [open, setOpen] = useState(false);
-	const { data, isLoading, error } = useQuery({
+
+	const {
+		data,
+		isLoading,
+		error,
+		fetchNextPage,
+		hasNextPage,
+		isFetchingNextPage
+	} = useInfiniteQuery<PresenceEventQueryResult>({
 		queryKey: ['getClientPresence', clientMac],
-		queryFn: async () => {
-			const response = await fetch(
-				`/api/presence/${encodeURIComponent(clientMac)}`
-			);
-			const data = (await response.json()) as PresenceEventQueryResult;
-			if (!data.success) {
-				throw new Error(data.error);
+		queryFn: async ({ pageParam }) => {
+			const url = pageParam
+				? `/api/presence/${encodeURIComponent(clientMac)}?cursor=${encodeURIComponent(pageParam as string)}`
+				: `/api/presence/${encodeURIComponent(clientMac)}`;
+			const response = await fetch(url);
+			const result = (await response.json()) as PresenceEventQueryResult;
+			if (!result.success) {
+				throw new Error(result.error);
 			}
-			return data.data;
+			return result;
 		},
-		enabled: open
+		getNextPageParam: (lastPage) =>
+			lastPage.success ? lastPage.nextCursor : null,
+		enabled: open,
+		initialPageParam: null
 	});
+
+	const allEvents =
+		data?.pages.flatMap((page) => (page.success ? page.data : [])) || [];
+
+	const handleScroll = useCallback(
+		(e: React.UIEvent<HTMLDivElement>) => {
+			if (!hasNextPage || isFetchingNextPage) return;
+
+			const target = e.target as HTMLElement;
+			const { scrollTop, scrollHeight, clientHeight } = target;
+			const threshold = 100;
+
+			if (scrollHeight - scrollTop - clientHeight < threshold) {
+				fetchNextPage();
+			}
+		},
+		[hasNextPage, isFetchingNextPage, fetchNextPage]
+	);
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
@@ -140,26 +195,41 @@ export function PresenceHistoryDialog({
 				)}
 
 				{!isLoading && !error && (
-					<div className="h-full w-full overflow-auto rounded-md border border-neutral-800 bg-black bg-[radial-gradient(rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:16px_16px]">
-						<ul className="mx-auto w-full max-w-sm py-4">
-							{data?.length ? (
-								data.map((evt) => {
-									return (
-										<Fragment key={evt.id}>
-											<Separator
-												orientation="vertical"
-												className="mx-auto my-1 min-h-6 first:hidden last:hidden"
-											/>
-											<ChipForEvent evt={evt} />
-										</Fragment>
-									);
-								})
-							) : (
-								<li className="p-3 text-sm text-neutral-400">
-									No events recorded.
-								</li>
-							)}
-						</ul>
+					<div className="h-full min-h-36 w-full overflow-auto rounded-md border border-neutral-800 bg-black bg-[radial-gradient(rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:16px_16px]">
+						{allEvents.length ? (
+							<>
+								<List
+									className="h-full"
+									rowCount={allEvents.length}
+									overscanCount={10}
+									rowHeight={(index) =>
+										(allEvents[index].event === 'client-disconnected'
+											? 63
+											: 138) -
+										(index === 0
+											? 24
+											: index === allEvents.length - 1 && allEvents.length > 1
+												? -30
+												: 0)
+									}
+									rowProps={{
+										events: allEvents
+									}}
+									rowComponent={PresenceEventRow}
+									onScroll={handleScroll}
+								/>
+								{isFetchingNextPage && (
+									<div className="flex items-center justify-center gap-2 p-4 text-neutral-400">
+										<Loader2 className="h-4 w-4 animate-spin" />
+										Loading more…
+									</div>
+								)}
+							</>
+						) : (
+							<div className="flex h-full items-center justify-center p-3 text-center text-sm text-neutral-400">
+								No events recorded.
+							</div>
+						)}
 					</div>
 				)}
 			</DialogContent>
