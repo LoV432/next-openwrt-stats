@@ -16,6 +16,7 @@ import {
 	FormControl,
 	FormField,
 	FormItem,
+	FormLabel,
 	FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -217,6 +218,7 @@ export function AddEditWireguardPeer({
 							name="public_key"
 							render={({ field }) => (
 								<FormItem>
+									<FormLabel>Public Key</FormLabel>
 									<FormControl>
 										<Input placeholder="Public Key" {...field} />
 									</FormControl>
@@ -230,6 +232,7 @@ export function AddEditWireguardPeer({
 							name="private_key"
 							render={({ field }) => (
 								<FormItem>
+									<FormLabel>Private Key</FormLabel>
 									<FormControl>
 										<div className="relative">
 											<Input
@@ -263,6 +266,7 @@ export function AddEditWireguardPeer({
 							name="preshared_key"
 							render={({ field }) => (
 								<FormItem>
+									<FormLabel>Preshared Key</FormLabel>
 									<FormControl>
 										<div className="relative">
 											<Input
@@ -319,6 +323,7 @@ export function AddEditWireguardPeer({
 							name="description"
 							render={({ field }) => (
 								<FormItem>
+									<FormLabel>Description</FormLabel>
 									<FormControl>
 										<Input placeholder="Description (optional)" {...field} />
 									</FormControl>
@@ -333,6 +338,7 @@ export function AddEditWireguardPeer({
 								name="endpoint_host"
 								render={({ field }) => (
 									<FormItem className="flex-1">
+										<FormLabel>Endpoint Host</FormLabel>
 										<FormControl>
 											<Input
 												placeholder="Endpoint Host (optional)"
@@ -349,6 +355,7 @@ export function AddEditWireguardPeer({
 								name="endpoint_port"
 								render={({ field }) => (
 									<FormItem className="flex-1">
+										<FormLabel>Endpoint Port</FormLabel>
 										<FormControl>
 											<Input
 												placeholder="Endpoint Port (optional)"
@@ -366,6 +373,7 @@ export function AddEditWireguardPeer({
 							name="allowed_ips"
 							render={({ field }) => (
 								<FormItem>
+									<FormLabel>Allowed IPs</FormLabel>
 									<FormControl>
 										<Textarea
 											placeholder="Allowed IPs (one per line, optional)"
@@ -389,6 +397,7 @@ export function AddEditWireguardPeer({
 							name="persistent_keepalive"
 							render={({ field }) => (
 								<FormItem>
+									<FormLabel>Persistent Keepalive</FormLabel>
 									<FormControl>
 										<Input
 											placeholder="Persistent Keepalive (optional, e.g., 25)"
@@ -405,6 +414,7 @@ export function AddEditWireguardPeer({
 							name="route_allowed_ips"
 							render={({ field }) => (
 								<FormItem>
+									<FormLabel>Route Allowed IPs</FormLabel>
 									<Select
 										onValueChange={field.onChange}
 										defaultValue={field.value}
@@ -431,6 +441,7 @@ export function AddEditWireguardPeer({
 							name="disabled"
 							render={({ field }) => (
 								<FormItem>
+									<FormLabel>Status</FormLabel>
 									<Select
 										onValueChange={field.onChange}
 										defaultValue={field.value}

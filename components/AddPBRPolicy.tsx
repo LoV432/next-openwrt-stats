@@ -16,6 +16,7 @@ import {
 	FormControl,
 	FormField,
 	FormItem,
+	FormLabel,
 	FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -194,6 +195,7 @@ export function AddEditRule({
 								name="name"
 								render={({ field }) => (
 									<FormItem className="flex-1">
+										<FormLabel>Name</FormLabel>
 										<FormControl>
 											<Input placeholder="Name" {...field} />
 										</FormControl>
@@ -207,6 +209,7 @@ export function AddEditRule({
 								name="enabled"
 								render={({ field }) => (
 									<FormItem className="flex-1">
+										<FormLabel>Status</FormLabel>
 										<Select
 											onValueChange={field.onChange}
 											defaultValue={field.value}
@@ -234,6 +237,7 @@ export function AddEditRule({
 							name="src_addr"
 							render={({ field }) => (
 								<FormItem>
+									<FormLabel>Source Address</FormLabel>
 									<FormControl>
 										<Textarea
 											placeholder="Source Address"
@@ -251,6 +255,7 @@ export function AddEditRule({
 							name="src_port"
 							render={({ field }) => (
 								<FormItem>
+									<FormLabel>Source Port</FormLabel>
 									<FormControl>
 										<Input placeholder="Source Port" {...field} />
 									</FormControl>
@@ -264,6 +269,7 @@ export function AddEditRule({
 							name="dest_addr"
 							render={({ field }) => (
 								<FormItem>
+									<FormLabel>Destination Address</FormLabel>
 									<FormControl>
 										<Textarea
 											placeholder="Destination Address"
@@ -295,6 +301,7 @@ export function AddEditRule({
 							name="dest_port"
 							render={({ field }) => (
 								<FormItem>
+									<FormLabel>Destination Port</FormLabel>
 									<FormControl>
 										<Input placeholder="Destination Port" {...field} />
 									</FormControl>
@@ -308,6 +315,7 @@ export function AddEditRule({
 							name="chain"
 							render={({ field }) => (
 								<FormItem>
+									<FormLabel>Chain</FormLabel>
 									<Select
 										onValueChange={field.onChange}
 										defaultValue={field.value || 'prerouting'}
@@ -338,6 +346,7 @@ export function AddEditRule({
 								name="interface"
 								render={({ field }) => (
 									<FormItem className="flex-1">
+										<FormLabel>Interface</FormLabel>
 										<Select
 											onValueChange={field.onChange}
 											defaultValue={field.value}
@@ -371,6 +380,7 @@ export function AddEditRule({
 								name="proto"
 								render={({ field }) => (
 									<FormItem className="flex-1">
+										<FormLabel>Protocol</FormLabel>
 										<Select
 											onValueChange={field.onChange}
 											defaultValue={field.value || supportedProtocols[0]}
