@@ -26,6 +26,35 @@ A web dashboard for monitoring and managing all your OpenWrt APs from a single p
 - **Policy Based Routing (PBR)**: Manage OpenWrt's PBR package through the web interface
 
 
+## Screenshots
+
+### Main Dashboard
+![Main Page](preview/Main%20Page.png)
+
+### Router Management
+![Routers Manager](preview/Routers%20Manager.png)
+
+### Clients
+![Clients](preview/Clients.png)
+
+### WiFi Management
+![Wifi Details](preview/Wifi%20Details.png)
+
+### Client Presence Tracking
+
+| | |
+|---|---|
+| ![Presence 1](preview/Presence%201.png) | ![Presence 2](preview/Presence%202.png) |
+
+### Policy Based Routing
+![PBR 2](preview/PBR%202.png)
+
+### WireGuard VPN
+![Wireguard](preview/Wireguard.png)
+
+### System Logs
+![Logs](preview/Logs.png)
+
 ## Quick Start (Docker Compose)
 
 1. **Create Docker Compose configuration**
