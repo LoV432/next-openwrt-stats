@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { secondsToHumanReadable } from '@/lib/utils';
 import { RouterPicker } from './RouterPicker';
-import { RouterIcon, ServerIcon } from 'lucide-react';
+import { CloudDownloadIcon, RouterIcon, ServerIcon } from 'lucide-react';
 import { Button } from './ui/button';
 
 export function RouterInfo() {
@@ -70,6 +70,23 @@ export function RouterInfo() {
 		enabled: activeRouter !== undefined
 	});
 
+	const latestStableRelease = useQuery({
+		queryKey: ['getLatestStableRelease'],
+		queryFn: async () => {
+			const response = await fetch(
+				'https://downloads.openwrt.org/.versions.json'
+			);
+			const data = await response.json();
+			if (!data.stable_version) {
+				throw new Error('Unable to fetch latest stable release of OpenWrt');
+			}
+			return data.stable_version as string;
+		},
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		staleTime: Infinity
+	});
+
 	if (routerInfo.isLoading || allRouters.isLoading) {
 		return <LoadingError activeRouter={activeRouter} />;
 	}
@@ -93,6 +110,10 @@ export function RouterInfo() {
 					<h3 className="text-lg font-semibold">
 						<ServerIcon className="mb-1 mr-2 inline-block" />
 						Router Info
+						{latestStableRelease.data &&
+							latestStableRelease.data !== routerInfo.data?.release.version && (
+								<CloudDownloadIcon className="ml-2 inline-block h-5 w-5" />
+							)}
 					</h3>
 					{allRouters.data && (
 						<RouterPicker
