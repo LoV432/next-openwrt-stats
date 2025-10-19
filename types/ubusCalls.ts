@@ -255,7 +255,16 @@ export const wifiHostapdClientsSchema = z.object({
 export type WifiClientsType = z.infer<typeof wifiClientsSchema>;
 
 const wireguardPeerSchema = z.object({
-	name: z.string(),
+	name: z
+		.string()
+		.optional()
+		.nullable()
+		.transform((val) => {
+			if (val === null) {
+				return 'Untitled Peer';
+			}
+			return val;
+		}),
 	public_key: z.string(),
 	endpoint: z.string(),
 	allowed_ips: z.array(z.string()),
