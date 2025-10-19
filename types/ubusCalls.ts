@@ -267,11 +267,11 @@ const wireguardPeerSchema = z.object({
 		}),
 	public_key: z.string(),
 	endpoint: z.string(),
-	allowed_ips: z.array(z.string()),
+	// allowed_ips: z.array(z.string()),
 	latest_handshake: z.string(),
 	transfer_rx: z.string(),
-	transfer_tx: z.string(),
-	persistent_keepalive: z.string()
+	transfer_tx: z.string()
+	// persistent_keepalive: z.string()
 });
 
 const wireguardInterface = z.object({
