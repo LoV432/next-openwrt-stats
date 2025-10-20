@@ -195,7 +195,7 @@ export function PresenceHistoryDialog({
 				)}
 
 				{!isLoading && !error && (
-					<div className="h-full min-h-36 w-full overflow-auto rounded-md border border-neutral-800 bg-black bg-[radial-gradient(rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:16px_16px]">
+					<div className="h-full max-h-[calc(80vh-100px)] min-h-36 w-full overflow-auto rounded-md border border-neutral-800 bg-black bg-[radial-gradient(rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:16px_16px]">
 						{allEvents.length ? (
 							<>
 								<List
