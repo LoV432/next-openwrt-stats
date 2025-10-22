@@ -1,6 +1,7 @@
 import { ManageRouters } from '@/components/ManageRouters';
 import { InterfacePicker } from './InterfacePicker';
 import { PBRInfo } from './PBRInfo';
+import { UpdateManagerModal } from './UpdateManager';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -27,6 +28,7 @@ export function Header() {
 						<InterfacePicker />
 						{process.env.PBR_ENABLED === 'true' && <PBRInfo />}
 						<RouterLogs />
+						<UpdateManagerModal />
 						<ManageRouters />
 					</div>
 
@@ -48,6 +50,7 @@ export function Header() {
 									<InterfacePicker />
 									{process.env.PBR_ENABLED === 'true' && <PBRInfo />}
 									<RouterLogs />
+									<UpdateManagerModal />
 									<ManageRouters />
 								</div>
 							</DropdownMenuContent>
