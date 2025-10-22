@@ -17,13 +17,13 @@ import {
 } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-	Download,
 	AlertCircle,
 	CheckCircle,
 	Clock,
 	RefreshCw,
 	Edit,
-	HardDrive
+	HardDrive,
+	CloudDownloadIcon
 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Routers } from '@/lib/server/router';
@@ -68,11 +68,11 @@ export function UpdateManagerModal() {
 			<DialogTrigger asChild>
 				<div>
 					<Button variant="outline" className="hidden md:flex">
-						<Download className="h-4 w-4" />
+						<CloudDownloadIcon className="h-4 w-4" />
 						Update Manager
 					</Button>
 					<button className="flex w-full items-center justify-start gap-2 rounded-none border-b-2 p-2 md:hidden">
-						<Download className="h-4 w-4" />
+						<CloudDownloadIcon className="h-4 w-4" />
 						Update Manager
 					</button>
 				</div>
