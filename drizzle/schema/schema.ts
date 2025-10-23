@@ -39,10 +39,16 @@ export const presencesEventTable = sqliteTable('presences_event', {
 	clientId: int()
 		.notNull()
 		.references(() => clientsTable.id),
-	event: text().notNull(),
+	eventType: int().notNull().$type<1 | 2 | 3>(),
 	fromWifiId: int().references(() => wifisTable.id),
 	toWifiId: int().references(() => wifisTable.id)
 });
+
+export const eventTypeIdMap = {
+	client_connected: 1,
+	client_updated: 2,
+	client_disconnected: 3
+} as const;
 
 export const presencesRelations = relations(presencesEventTable, ({ one }) => ({
 	client: one(clientsTable, {

@@ -1,6 +1,7 @@
 import { db } from '@/lib/server/dbDriver';
 import {
 	clientsTable,
+	eventTypeIdMap,
 	presencesEventTable,
 	prevClientsTable,
 	wifisTable
@@ -16,7 +17,7 @@ export const dynamic = 'force-dynamic';
 type PresenceEvent = {
 	timestamp: number;
 	clientId: number;
-	event: 'client-connected' | 'client-updated' | 'client-disconnected';
+	eventType: (typeof eventTypeIdMap)[keyof typeof eventTypeIdMap];
 	fromWifiId?: number;
 	toWifiId?: number;
 };
@@ -91,7 +92,7 @@ export async function GET() {
 				await addEventToDB({
 					timestamp: Date.now(),
 					clientId: clientId[0].id,
-					event: 'client-connected',
+					eventType: eventTypeIdMap.client_connected,
 					toWifiId: wifiId[0].id
 				});
 				return;
@@ -114,7 +115,7 @@ export async function GET() {
 				await addEventToDB({
 					timestamp: Date.now(),
 					clientId: clientId[0].id,
-					event: 'client-updated',
+					eventType: eventTypeIdMap.client_updated,
 					fromWifiId: fromWifiId[0].id,
 					toWifiId: toWifiId[0].id
 				});
@@ -138,7 +139,7 @@ export async function GET() {
 				await addEventToDB({
 					timestamp: Date.now(),
 					clientId: clientId[0].id,
-					event: 'client-disconnected',
+					eventType: eventTypeIdMap.client_disconnected,
 					fromWifiId: fromWifiId[0].id
 				});
 				return;

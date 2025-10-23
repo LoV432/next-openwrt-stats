@@ -1,6 +1,7 @@
 import { db } from '@/lib/server/dbDriver';
 import {
 	clientsTable,
+	eventTypeIdMap,
 	presencesEventTable,
 	wifisTable
 } from '@/drizzle/schema/schema';
@@ -11,14 +12,13 @@ import { alias } from 'drizzle-orm/sqlite-core';
 export type PresenceEvent = {
 	id: number;
 	timestamp: number;
-	client: string;
-	event: 'client-connected' | 'client-updated' | 'client-disconnected' | string;
-	fromRouter?: string | null;
-	fromSSID?: string | null;
-	fromBand?: string | null;
-	toRouter?: string | null;
-	toSSID?: string | null;
-	toBand?: string | null;
+	eventType: (typeof eventTypeIdMap)[keyof typeof eventTypeIdMap];
+	fromRouter: string | null;
+	fromSSID: string | null;
+	fromBand: string | null;
+	toRouter: string | null;
+	toSSID: string | null;
+	toBand: string | null;
 };
 
 export async function GET(
@@ -90,12 +90,11 @@ export async function GET(
 		);
 	}
 
-	const presenceEvent = await db
+	const presenceEvent: PresenceEvent[] = await db
 		.select({
 			id: presencesEventTable.id,
 			timestamp: presencesEventTable.timestamp,
-			clientName: clientsTable.clientName,
-			event: presencesEventTable.event,
+			eventType: presencesEventTable.eventType,
 			fromRouter: fromWifiAlias.displayName,
 			fromSSID: fromWifiAlias.ssid,
 			fromBand: fromWifiAlias.band,
@@ -105,7 +104,7 @@ export async function GET(
 		})
 		.from(presencesEventTable)
 		.where(and(...whereConditions))
-		.leftJoin(clientsTable, eq(clientsTable.id, presencesEventTable.clientId))
+		.innerJoin(clientsTable, eq(clientsTable.id, presencesEventTable.clientId))
 		.leftJoin(
 			fromWifiAlias,
 			eq(fromWifiAlias.id, presencesEventTable.fromWifiId)

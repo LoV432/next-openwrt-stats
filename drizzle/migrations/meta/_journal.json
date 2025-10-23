@@ -29,6 +29,13 @@
       "when": 1760030001808,
       "tag": "0003_mute_micromacro",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1761217677991,
+      "tag": "0004_curious_human_robot",
+      "breakpoints": true
     }
   ]
 }

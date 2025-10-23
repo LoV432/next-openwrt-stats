@@ -15,6 +15,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { Separator } from './ui/separator';
 import { PresenceEvent } from '@/app/api/presence/[mac]/route';
 import { formatBand } from '@/lib/utils';
+import { eventTypeIdMap } from '@/drizzle/schema/schema';
 
 type PresenceEventQueryResult =
 	| {
@@ -28,21 +29,21 @@ type PresenceEventQueryResult =
 			error: string;
 	  };
 
-function eventStyles(evt: PresenceEvent['event']) {
+function eventStyles(evt: PresenceEvent['eventType']) {
 	switch (evt) {
-		case 'client-connected':
+		case eventTypeIdMap.client_connected:
 			return {
 				dot: 'bg-emerald-400/40',
 				text: 'text-emerald-200',
 				label: 'Connected'
 			};
-		case 'client-updated':
+		case eventTypeIdMap.client_updated:
 			return {
 				dot: 'bg-sky-400/40',
 				text: 'text-sky-200',
 				label: 'Updated'
 			};
-		case 'client-disconnected':
+		case eventTypeIdMap.client_disconnected:
 			return {
 				dot: 'bg-rose-400/40',
 				text: 'text-rose-200',
@@ -63,12 +64,12 @@ function ChipForEvent({ evt }: { evt: PresenceEvent }) {
 			<div className="mx-auto flex gap-2 text-sm text-neutral-500">
 				<div className="flex w-full items-center justify-center gap-2">
 					<span
-						className={`mt-0.5 h-2.5 w-2.5 rounded-full ${eventStyles(evt.event).dot}`}
+						className={`mt-0.5 h-2.5 w-2.5 rounded-full ${eventStyles(evt.eventType).dot}`}
 					/>
 					<span>{new Date(evt.timestamp).toLocaleString()}</span>
 				</div>
 			</div>
-			{evt.event !== 'client-disconnected' && (
+			{evt.eventType !== eventTypeIdMap.client_disconnected && (
 				<div className="grid items-center justify-between space-y-1 font-semibold">
 					<div className="flex items-center gap-1.5">
 						<Router
@@ -203,7 +204,8 @@ export function PresenceHistoryDialog({
 									rowCount={allEvents.length}
 									overscanCount={10}
 									rowHeight={(index) =>
-										(allEvents[index].event === 'client-disconnected'
+										(allEvents[index].eventType ===
+										eventTypeIdMap.client_disconnected
 											? 63
 											: 138) -
 										(index === 0
