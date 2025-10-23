@@ -666,7 +666,18 @@ function UpdateManager({ router }: { router: string }) {
 											</DialogHeader>
 											{error.cause && (
 												<pre className="overflow-x-auto whitespace-pre-wrap rounded-md bg-stone-800 p-2 text-sm">
-													{JSON.stringify(JSON.parse(error.cause), null, 2)}
+													{(() => {
+														//TODO: This feels so dumb
+														try {
+															return JSON.stringify(
+																JSON.parse(error.cause),
+																null,
+																2
+															);
+														} catch {
+															return JSON.stringify(error.cause, null, 2);
+														}
+													})()}
 												</pre>
 											)}
 										</DialogContent>
