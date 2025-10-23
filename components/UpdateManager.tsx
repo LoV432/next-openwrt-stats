@@ -405,6 +405,16 @@ function UpdateManager({ router }: { router: string }) {
 						/>
 						Check for updates
 					</Button>
+					<Button
+						onClick={() => downloadBackup.mutate()}
+						disabled={downloadBackup.isPending}
+						variant="outline"
+						className="mt-2 flex items-center justify-center font-semibold"
+						size={'lg'}
+					>
+						<HardDrive className="h-4 w-4" />
+						{downloadBackup.isPending ? 'Generating...' : 'Download Backup'}
+					</Button>
 				</CardContent>
 			</Card>
 		);
