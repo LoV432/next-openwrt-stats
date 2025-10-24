@@ -359,10 +359,11 @@ function UpdateManager({ router }: { router: string }) {
 				// The router going offline to update could be the reason of this failing.
 			}
 			let tries = 0;
+			let routerStatus;
 			while (true && tries < 20) {
 				await new Promise((resolve) => setTimeout(resolve, 5000));
 				try {
-					const routerStatus = await checkRouterStatusAction(router);
+					routerStatus = await checkRouterStatusAction(router);
 					if (routerStatus.success) {
 						break;
 					}
@@ -372,6 +373,9 @@ function UpdateManager({ router }: { router: string }) {
 				} finally {
 					tries++;
 				}
+			}
+			if (!routerStatus || !routerStatus.success) {
+				throw new Error('Failed to get router status');
 			}
 			dispatch({
 				router,
