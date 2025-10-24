@@ -8,6 +8,11 @@ const executeRequestSchema = z.object({
 	displayName: z.string().min(1, 'Display name is required')
 });
 
+const validateFirmwareResponseSchema = z.object({
+	valid: z.boolean(),
+	allow_backup: z.boolean()
+});
+
 export type FirmwareUpdateExecuteResponse =
 	| {
 			success: true;
@@ -48,6 +53,80 @@ export async function POST(request: NextRequest) {
 				JSON.stringify({
 					success: false,
 					error: 'No router found'
+				}),
+				{
+					status: 400,
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				}
+			);
+		}
+
+		const validateFirmware = await ubusCall({
+			displayName,
+			params: [
+				'system',
+				'validate_firmware_image',
+				{
+					path: '/tmp/firmware.bin'
+				}
+			]
+		});
+
+		if (!validateFirmware.success) {
+			console.log('[ERROR] Failed to validate sysupgrade image', {
+				error: validateFirmware.error
+			});
+			return new Response(
+				JSON.stringify({
+					success: false,
+					error: 'Failed to validate sysupgrade image'
+				}),
+				{
+					status: 400,
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				}
+			);
+		}
+
+		const validateFirmwareParsed = validateFirmwareResponseSchema.safeParse(
+			validateFirmware.data.result[1]
+		);
+
+		if (!validateFirmwareParsed.success) {
+			console.log(
+				'[ERROR] Failed to parse validate sysupgrade image response:',
+				validateFirmwareParsed.error
+			);
+			return new Response(
+				JSON.stringify({
+					success: false,
+					error: 'Failed to validate sysupgrade image'
+				}),
+				{
+					status: 400,
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				}
+			);
+		}
+
+		if (
+			!validateFirmwareParsed.data.valid &&
+			!validateFirmwareParsed.data.allow_backup
+		) {
+			console.log(
+				'[ERROR] Failed to validate sysupgrade image:',
+				validateFirmwareParsed.data
+			);
+			return new Response(
+				JSON.stringify({
+					success: false,
+					error: 'Failed to validate sysupgrade image'
 				}),
 				{
 					status: 400,

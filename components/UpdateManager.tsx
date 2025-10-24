@@ -302,9 +302,6 @@ function UpdateManager({ router }: { router: string }) {
 				throw new Error('Failed to get build update');
 			}
 			const data = (await response.json()) as FirmwareUpdateExecuteResponse;
-			if (!data.success) {
-				throw new Error(data.error);
-			}
 			return data;
 		}
 	});
@@ -344,13 +341,37 @@ function UpdateManager({ router }: { router: string }) {
 				type: 'updateStatus',
 				value: buildStatusEnum.flashing
 			});
-			await executeUpdateQuery.mutateAsync();
-			while (true) {
-				const routerStatus = await checkRouterStatusAction(router);
-				if (routerStatus.success) {
-					break;
+			try {
+				const response = await executeUpdateQuery.mutateAsync();
+				if (!response.success) {
+					dispatch({
+						router,
+						type: 'updateStatus',
+						value: buildStatusEnum.failed
+					});
+					console.log('[ERROR] Failed to execute update', {
+						error: response.error
+					});
+					return;
 				}
+			} catch {
+				// There is no way to gurantee that this means the request failed.
+				// The router going offline to update could be the reason of this failing.
+			}
+			let tries = 0;
+			while (true && tries < 20) {
 				await new Promise((resolve) => setTimeout(resolve, 5000));
+				try {
+					const routerStatus = await checkRouterStatusAction(router);
+					if (routerStatus.success) {
+						break;
+					}
+				} catch {
+					// There is no way to gurantee that this means the request failed.
+					// The router going offline to update could be the reason of this failing.
+				} finally {
+					tries++;
+				}
 			}
 			dispatch({
 				router,
