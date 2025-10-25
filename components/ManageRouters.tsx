@@ -227,6 +227,7 @@ function RebootRouter({ routerToReboot }: { routerToReboot: string }) {
 			let routerStatus = false;
 			let tries = 0;
 			while (!routerStatus && tries < 10) {
+				await new Promise((resolve) => setTimeout(resolve, 3000));
 				const status = await checkRouterStatusAction(routerToReboot);
 				if (status.success) {
 					routerStatus = true;
@@ -247,7 +248,6 @@ function RebootRouter({ routerToReboot }: { routerToReboot: string }) {
 					);
 					continue;
 				}
-				await new Promise((resolve) => setTimeout(resolve, 3000));
 			}
 			setIsOpen(false);
 		} finally {
