@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 			profile,
 			packages: packages,
 			distro: 'openwrt',
-			diff_packages: false,
+			diff_packages: true,
 			client: 'next-openwrt-stats/2.0.0'
 		};
 
