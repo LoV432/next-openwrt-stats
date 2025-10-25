@@ -391,7 +391,7 @@ function UpdateManager({ router }: { router: string }) {
 				value: buildStatusEnum.flashed
 			});
 			dispatch({ router, type: 'updateFlashModalOpen', value: false });
-			await checkUpdate.refetch();
+			await resetAllQueries();
 			dispatch({
 				router,
 				type: 'updateStatus',
@@ -416,6 +416,14 @@ function UpdateManager({ router }: { router: string }) {
 				});
 			}
 		}
+	}
+
+	async function resetAllQueries() {
+		firmwareBuildRequest.reset();
+		uploadBuild.reset();
+		executeUpdateQuery.reset();
+		downloadBackup.reset();
+		await checkUpdate.refetch();
 	}
 
 	if (!checkUpdate.data) {
