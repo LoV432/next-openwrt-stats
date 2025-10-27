@@ -224,30 +224,35 @@ function RebootRouter({ routerToReboot }: { routerToReboot: string }) {
 				richColors: true,
 				duration: 3000
 			});
-			let routerStatus = false;
+			let routerStatus;
 			let tries = 0;
-			while (!routerStatus && tries < 10) {
+			while (tries < 15) {
 				await new Promise((resolve) => setTimeout(resolve, 3000));
-				const status = await checkRouterStatusAction(routerToReboot);
-				if (status.success) {
-					routerStatus = true;
-					toast.success('Router rebooted successfully', {
+				try {
+					routerStatus = await checkRouterStatusAction(routerToReboot);
+					if (routerStatus.success) {
+						break;
+					}
+				} catch {
+					// There is no way to gurantee that this means the request failed.
+					// The router rebooting could mean the uesr was disconnected.
+				} finally {
+					tries++;
+				}
+			}
+			if (routerStatus && routerStatus.success) {
+				toast.success('Router rebooted successfully', {
+					richColors: true,
+					duration: 3000
+				});
+			} else {
+				toast.error(
+					'Router reboot was initiated, but it never came back online. Please manually check your router',
+					{
 						richColors: true,
 						duration: 3000
-					});
-					continue;
-				}
-				tries++;
-				if (tries === 10) {
-					toast.error(
-						'Router reboot was initiated, but it never came back online. Please manually check your router',
-						{
-							richColors: true,
-							duration: 3000
-						}
-					);
-					continue;
-				}
+					}
+				);
 			}
 			setIsOpen(false);
 		} finally {

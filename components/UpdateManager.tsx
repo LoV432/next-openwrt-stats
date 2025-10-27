@@ -368,7 +368,7 @@ function UpdateManager({ router }: { router: string }) {
 			}
 			let tries = 0;
 			let routerStatus;
-			while (true && tries < 20) {
+			while (tries < 20) {
 				await new Promise((resolve) => setTimeout(resolve, 5000));
 				try {
 					routerStatus = await checkRouterStatusAction(router);
