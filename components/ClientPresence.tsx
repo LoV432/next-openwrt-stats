@@ -10,7 +10,15 @@ import {
 	DialogTrigger
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Loader2, History, Router, Wifi, Gauge } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger
+} from '@/components/ui/popover';
+import { Loader2, History, Router, Wifi, Gauge, Filter } from 'lucide-react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Separator } from './ui/separator';
 import { PresenceEvent } from '@/app/api/presence/[mac]/route';
@@ -125,6 +133,22 @@ export function PresenceHistoryDialog({
 	clientName: string;
 }) {
 	const [open, setOpen] = useState(false);
+	const [filters, setFilters] = useState<{
+		eventType?: number[];
+		startTime?: string;
+		endTime?: string;
+	}>({ eventType: [1, 2, 3] });
+
+	function buildQueryUrl(pageParam: string | null) {
+		const params = new URLSearchParams();
+		if (pageParam) params.set('cursor', pageParam);
+		if (filters.eventType) params.set('eventType', filters.eventType.join(','));
+		if (filters.startTime) params.set('startTime', filters.startTime);
+		if (filters.endTime) params.set('endTime', filters.endTime);
+
+		const queryString = params.toString();
+		return `/api/presence/${encodeURIComponent(clientMac)}${queryString ? `?${queryString}` : ''}`;
+	}
 
 	const {
 		data,
@@ -132,13 +156,12 @@ export function PresenceHistoryDialog({
 		error,
 		fetchNextPage,
 		hasNextPage,
-		isFetchingNextPage
+		isFetchingNextPage,
+		refetch
 	} = useInfiniteQuery<PresenceEventQueryResult>({
-		queryKey: ['getClientPresence', clientMac],
+		queryKey: ['getClientPresence', clientMac, filters],
 		queryFn: async ({ pageParam }) => {
-			const url = pageParam
-				? `/api/presence/${encodeURIComponent(clientMac)}?cursor=${encodeURIComponent(pageParam as string)}`
-				: `/api/presence/${encodeURIComponent(clientMac)}`;
+			const url = buildQueryUrl(pageParam as string | null);
 			const response = await fetch(url);
 			const result = (await response.json()) as PresenceEventQueryResult;
 			if (!result.success) {
@@ -151,6 +174,34 @@ export function PresenceHistoryDialog({
 		enabled: open,
 		initialPageParam: null
 	});
+
+	const handleFilterChange = (key: string, value: string | number[]) => {
+		setFilters((prev) => ({ ...prev, [key]: value }));
+	};
+
+	const handleEventTypeChange = (eventType: number, checked: boolean) => {
+		setFilters((prev) => {
+			const currentEventTypes = prev.eventType || [];
+			if (checked) {
+				return { ...prev, eventType: [...currentEventTypes, eventType] };
+			} else {
+				return {
+					...prev,
+					eventType: currentEventTypes.filter((type) => type !== eventType)
+				};
+			}
+		});
+	};
+
+	function clearFilters() {
+		setFilters({
+			eventType: [1, 2, 3]
+		});
+	}
+
+	function applyFilters() {
+		refetch();
+	}
 
 	const allEvents =
 		data?.pages.flatMap((page) => (page.success ? page.data : [])) || [];
@@ -177,63 +228,213 @@ export function PresenceHistoryDialog({
 					<History className="h-4 w-4" />
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="max-h-[80vh] max-w-3xl border-neutral-800 bg-neutral-900 px-3 sm:px-4">
+			<DialogContent className="h-[80vh] max-w-3xl border-neutral-800 bg-neutral-900 px-3 sm:px-4">
 				<DialogHeader>
 					<DialogTitle className="text-white">
 						{clientName || clientMac} — Presence History
 					</DialogTitle>
 				</DialogHeader>
-
-				{isLoading && (
-					<div className="flex items-center gap-2 text-neutral-400">
-						<Loader2 className="h-4 w-4 animate-spin" />
-						Loading history…
-					</div>
-				)}
-
-				{error && (
-					<div className="text-sm text-rose-300">Failed to load history.</div>
-				)}
-
-				{!isLoading && !error && (
-					<div className="h-full max-h-[calc(80vh-100px)] min-h-36 w-full overflow-auto rounded-md border border-neutral-800 bg-black bg-[radial-gradient(rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:16px_16px]">
-						{allEvents.length ? (
-							<>
-								<List
-									className="h-full"
-									rowCount={allEvents.length}
-									overscanCount={10}
-									rowHeight={(index) =>
-										(allEvents[index].eventType ===
-										eventTypeIdMap.client_disconnected
-											? 63
-											: 138) -
-										(index === 0
-											? 24
-											: index === allEvents.length - 1 && allEvents.length > 1
-												? -30
-												: 0)
-									}
-									rowProps={{
-										events: allEvents
-									}}
-									rowComponent={PresenceEventRow}
-									onScroll={handleScroll}
-								/>
-								{isFetchingNextPage && (
-									<div className="flex items-center justify-center gap-2 p-4 text-neutral-400">
-										<Loader2 className="h-4 w-4 animate-spin" />
-										Loading more…
+				<div
+					className={`relative h-[calc(90vh-200px)] w-full overflow-auto rounded-md border border-neutral-800 bg-black bg-[radial-gradient(rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:16px_16px] ${isLoading || error || allEvents.length === 0 ? 'flex items-center justify-center' : ''}`}
+				>
+					<Popover>
+						<PopoverTrigger asChild>
+							<Button
+								size="sm"
+								className="absolute right-5 top-3 z-20 border-neutral-800 bg-neutral-900 text-white hover:bg-neutral-800"
+							>
+								<Filter className="h-4 w-4 text-neutral-400" />
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent className="w-80">
+							<div className="space-y-4">
+								<div className="space-y-2">
+									<Label className="text-xs text-neutral-400">Event Type</Label>
+									<div className="space-y-2">
+										<div className="flex items-center space-x-2">
+											<Checkbox
+												id="connected"
+												checked={
+													filters.eventType?.includes(
+														eventTypeIdMap.client_connected
+													) || false
+												}
+												onCheckedChange={(checked) =>
+													handleEventTypeChange(
+														eventTypeIdMap.client_connected,
+														checked as boolean
+													)
+												}
+											/>
+											<Label
+												htmlFor="connected"
+												className="text-sm text-neutral-200"
+											>
+												Connected
+											</Label>
+										</div>
+										<div className="flex items-center space-x-2">
+											<Checkbox
+												id="updated"
+												checked={
+													filters.eventType?.includes(
+														eventTypeIdMap.client_updated
+													) || false
+												}
+												onCheckedChange={(checked) =>
+													handleEventTypeChange(
+														eventTypeIdMap.client_updated,
+														checked as boolean
+													)
+												}
+											/>
+											<Label
+												htmlFor="updated"
+												className="text-sm text-neutral-200"
+											>
+												Updated
+											</Label>
+										</div>
+										<div className="flex items-center space-x-2">
+											<Checkbox
+												id="disconnected"
+												checked={
+													filters.eventType?.includes(
+														eventTypeIdMap.client_disconnected
+													) || false
+												}
+												onCheckedChange={(checked) =>
+													handleEventTypeChange(
+														eventTypeIdMap.client_disconnected,
+														checked as boolean
+													)
+												}
+											/>
+											<Label
+												htmlFor="disconnected"
+												className="text-sm text-neutral-200"
+											>
+												Disconnected
+											</Label>
+										</div>
 									</div>
-								)}
-							</>
-						) : (
-							<div className="flex h-full items-center justify-center p-3 text-center text-sm text-neutral-400">
-								No events recorded.
+								</div>
+
+								<div className="space-y-2">
+									<Label
+										htmlFor="start-time"
+										className="text-xs text-neutral-400"
+									>
+										Start Date
+									</Label>
+									<Input
+										id="start-time"
+										type={'date'}
+										value={
+											filters.startTime
+												? new Date(Number(filters.startTime))
+														.toISOString()
+														.split('T')[0]
+												: ''
+										}
+										onChange={(e) => {
+											const date =
+												e.target.valueAsDate?.getTime().toString() || '';
+											handleFilterChange('startTime', date);
+										}}
+										className="h-8 border-neutral-700 bg-neutral-800 text-neutral-200"
+									/>
+								</div>
+
+								<div className="space-y-2">
+									<Label
+										htmlFor="end-time"
+										className="text-xs text-neutral-400"
+									>
+										End Date
+									</Label>
+									<Input
+										id="end-time"
+										type={'date'}
+										value={
+											filters.endTime
+												? new Date(Number(filters.endTime))
+														.toISOString()
+														.split('T')[0]
+												: ''
+										}
+										onChange={(e) => {
+											const date =
+												e.target.valueAsDate
+													?.setHours(23, 59, 59, 999)
+													.toString() || '';
+											handleFilterChange('endTime', date);
+										}}
+										className="h-8 border-neutral-700 bg-neutral-800 text-neutral-200"
+									/>
+								</div>
+
+								<div className="flex gap-2 pt-2">
+									<Button
+										onClick={applyFilters}
+										className="h-8 w-24"
+										size={'sm'}
+									>
+										Apply
+									</Button>
+									<Button
+										onClick={clearFilters}
+										size={'sm'}
+										variant="outline"
+										className="h-8 w-24"
+									>
+										Clear
+									</Button>
+								</div>
 							</div>
-						)}
-					</div>
-				)}
+						</PopoverContent>
+					</Popover>
+					{allEvents.length ? (
+						<>
+							<List
+								className="h-full"
+								rowCount={allEvents.length}
+								overscanCount={10}
+								rowHeight={(index) =>
+									(allEvents[index].eventType ===
+									eventTypeIdMap.client_disconnected
+										? 63
+										: 138) -
+									(index === 0
+										? 24
+										: index === allEvents.length - 1 && allEvents.length > 1
+											? -30
+											: 0)
+								}
+								rowProps={{
+									events: allEvents
+								}}
+								rowComponent={PresenceEventRow}
+								onScroll={handleScroll}
+							/>
+							{isFetchingNextPage && (
+								<div className="flex items-center justify-center gap-2 p-4 text-neutral-400">
+									<Loader2 className="h-4 w-4 animate-spin" />
+									Loading more…
+								</div>
+							)}
+						</>
+					) : isLoading ? (
+						<div className="flex items-center justify-center gap-2">
+							<Loader2 className="mt-1 h-4 w-4 animate-spin" />
+							Loading history…
+						</div>
+					) : error ? (
+						<>Failed to load history.</>
+					) : (
+						<>No events recorded.</>
+					)}
+				</div>
 			</DialogContent>
 		</Dialog>
 	);

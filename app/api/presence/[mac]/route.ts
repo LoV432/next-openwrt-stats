@@ -5,9 +5,10 @@ import {
 	presencesEventTable,
 	wifisTable
 } from '@/drizzle/schema/schema';
-import { desc, eq, lt, and, or } from 'drizzle-orm';
+import { desc, eq, lt, gt, and, or, inArray } from 'drizzle-orm';
 import { NextRequest } from 'next/server';
 import { alias } from 'drizzle-orm/sqlite-core';
+import z from 'zod';
 
 export type PresenceEvent = {
 	id: number;
@@ -21,6 +22,21 @@ export type PresenceEvent = {
 	toBand: string | null;
 };
 
+const filterSchema = z.object({
+	eventType: z
+		.string()
+		.transform((val) => val.split(',').map((type) => Number(type)))
+		.optional(),
+	startTime: z
+		.string()
+		.transform((val) => Number(val))
+		.optional(),
+	endTime: z
+		.string()
+		.transform((val) => Number(val))
+		.optional()
+});
+
 export async function GET(
 	req: NextRequest,
 	{ params }: { params: Promise<{ mac: string }> }
@@ -32,6 +48,11 @@ export async function GET(
 	const { searchParams } = new URL(req.url);
 	const cursor = searchParams.get('cursor');
 	const limit = parseInt(searchParams.get('limit') || '20');
+	const filter = filterSchema.safeParse({
+		eventType: searchParams.get('eventType'),
+		startTime: searchParams.get('startTime') || undefined,
+		endTime: searchParams.get('endTime') || undefined
+	}).data;
 
 	if (!clientMac) {
 		return new Response(
@@ -73,6 +94,23 @@ export async function GET(
 	const whereConditions: any[] = [
 		eq(presencesEventTable.clientId, clientId[0].id)
 	];
+
+	if (filter?.eventType) {
+		whereConditions.push(
+			inArray(
+				presencesEventTable.eventType,
+				filter.eventType as (typeof eventTypeIdMap)[keyof typeof eventTypeIdMap][]
+			)
+		);
+	}
+
+	if (filter?.startTime) {
+		whereConditions.push(gt(presencesEventTable.timestamp, filter.startTime));
+	}
+
+	if (filter?.endTime) {
+		whereConditions.push(lt(presencesEventTable.timestamp, filter.endTime));
+	}
 
 	if (cursor) {
 		const [cursorTimestamp, cursorId] = cursor.split('_');
