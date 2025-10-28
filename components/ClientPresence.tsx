@@ -246,7 +246,7 @@ export function PresenceHistoryDialog({
 								<Filter className="h-4 w-4 text-neutral-400" />
 							</Button>
 						</PopoverTrigger>
-						<PopoverContent className="w-80">
+						<PopoverContent className="w-fit">
 							<div className="space-y-4">
 								<div className="space-y-2">
 									<Label className="text-xs text-neutral-400">Event Type</Label>
@@ -268,7 +268,7 @@ export function PresenceHistoryDialog({
 											/>
 											<Label
 												htmlFor="connected"
-												className="text-sm text-neutral-200"
+												className="text-sm text-neutral-200 w-full"
 											>
 												Connected
 											</Label>
@@ -290,7 +290,7 @@ export function PresenceHistoryDialog({
 											/>
 											<Label
 												htmlFor="updated"
-												className="text-sm text-neutral-200"
+												className="text-sm text-neutral-200 w-full"
 											>
 												Updated
 											</Label>
@@ -312,7 +312,7 @@ export function PresenceHistoryDialog({
 											/>
 											<Label
 												htmlFor="disconnected"
-												className="text-sm text-neutral-200"
+												className="text-sm text-neutral-200 w-full"
 											>
 												Disconnected
 											</Label>
