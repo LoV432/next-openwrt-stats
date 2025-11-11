@@ -236,7 +236,7 @@ export async function getWireguardInterfaces() {
 	}
 
 	const parsedLuciWireguardInterfaces = wireguardInterfacesSchema.safeParse(
-		luciWireguardInterfaces.result[1]
+		luciWireguardInterfaces
 	);
 	if (!parsedLuciWireguardInterfaces.success) {
 		logError({
