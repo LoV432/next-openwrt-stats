@@ -209,6 +209,8 @@ function ClientCard({
 							<SVGIcon iconName="wifi4" className="h-7 w-7 pb-1" />
 						) : wifiData.band === '5g' ? (
 							<SVGIcon iconName="wifi5" className="h-7 w-7 pb-1" />
+						) : wifiData.band === '6g' ? (
+							<SVGIcon iconName="wifi6" className="h-7 w-7 pb-1" />
 						) : (
 							<WifiIcon className="h-8 w-8" />
 						)}
