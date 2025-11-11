@@ -288,7 +288,13 @@ export async function deletePBRPolicyAction({ name }: { name: string }) {
 			errorMessage: 'Failed to delete pbr policy',
 			error
 		});
-		await revertPBRChanges();
+		const revertResponse = await revertPBRChanges();
+		if (!revertResponse.success) {
+			logError({
+				errorMessage: 'Failed to revert pbr changes',
+				...revertResponse
+			});
+		}
 		return {
 			success: false,
 			errorMessage: 'Something went wrong while committing the changes.'

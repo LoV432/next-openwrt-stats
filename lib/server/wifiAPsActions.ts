@@ -148,7 +148,13 @@ export async function enabledWifiAPAction({
 	} catch (error) {
 		console.error(error);
 		if (displayName) {
-			await revertWifiChanges(displayName);
+			const revertResponse = await revertWifiChanges(displayName);
+			if (!revertResponse.success) {
+				logError({
+					errorMessage: 'Failed to revert wifi changes',
+					...revertResponse
+				});
+			}
 		}
 		return {
 			success: false,

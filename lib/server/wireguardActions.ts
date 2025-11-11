@@ -338,7 +338,7 @@ export async function editWireguardPeerAction({
 		const commitChangesResponse = await commitWireguardChanges();
 		if (!commitChangesResponse.success) {
 			throw new Error('Something went wrong while committing the changes.', {
-				cause: (commitChangesResponse as any).error || (commitChangesResponse as any).ubusErrorMessage
+				cause: commitChangesResponse.errorMessage
 			});
 		}
 
@@ -350,7 +350,13 @@ export async function editWireguardPeerAction({
 			errorMessage: 'Failed to edit WireGuard peer',
 			error
 		});
-		await revertWireguardChanges();
+		const revertResponse = await revertWireguardChanges();
+		if (!revertResponse.success) {
+			logError({
+				errorMessage: 'Failed to revert WireGuard changes',
+				...revertResponse
+			});
+		}
 		return {
 			success: false,
 			errorMessage: 'Something went wrong while editing the WireGuard peer.'
@@ -409,7 +415,13 @@ export async function deleteWireguardPeerAction({
 			errorMessage: 'Failed to delete WireGuard peer',
 			error
 		});
-		await revertWireguardChanges();
+		const revertResponse = await revertWireguardChanges();
+		if (!revertResponse.success) {
+			logError({
+				errorMessage: 'Failed to revert WireGuard changes',
+				...revertResponse
+			});
+		}
 		return {
 			success: false,
 			errorMessage: 'Something went wrong while deleting the WireGuard peer.'
