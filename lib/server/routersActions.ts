@@ -28,7 +28,7 @@ export async function registerRouterAction(
 		});
 		return {
 			success: false,
-			error: checkCredentials.ubusErrorMessage || 'Invalid credentials'
+			errorMessage: checkCredentials.ubusErrorMessage || 'Invalid credentials'
 		} as const;
 	}
 
@@ -66,7 +66,7 @@ export async function registerRouterAction(
 		});
 		return {
 			success: false,
-			error: 'Failed to add router'
+			errorMessage: 'Failed to add router'
 		} as const;
 	}
 }
@@ -89,7 +89,7 @@ export async function updateRouterAction({
 		if (!router.success) {
 			return {
 				success: false,
-				error: `Failed to get router with router ${routerToUpdate}`
+				errorMessage: `Failed to get router with router ${routerToUpdate}`
 			} as const;
 		}
 		await db.transaction(async (tx) => {
@@ -138,7 +138,7 @@ export async function updateRouterAction({
 		});
 		return {
 			success: false,
-			error: 'Failed to update router'
+			errorMessage: 'Failed to update router'
 		} as const;
 	}
 }
@@ -149,7 +149,7 @@ export async function deleteRouterAction(routerToDelete: string) {
 		if (!router.success) {
 			return {
 				success: false,
-				error: `Failed to get router with router ${routerToDelete}`
+				errorMessage: `Failed to get router with router ${routerToDelete}`
 			} as const;
 		}
 		await db.transaction(async (tx) => {
@@ -186,7 +186,7 @@ export async function deleteRouterAction(routerToDelete: string) {
 		});
 		return {
 			success: false,
-			error: 'Failed to delete router'
+			errorMessage: 'Failed to delete router'
 		} as const;
 	}
 }
@@ -197,7 +197,7 @@ export async function rebootRouterAction(routerToReboot: string) {
 		if (!router.success) {
 			return {
 				success: false,
-				error: `Failed to get router with router ${routerToReboot}`
+				errorMessage: `Failed to get router with router ${routerToReboot}`
 			} as const;
 		}
 		const reboot = await ubusCall({
@@ -213,7 +213,7 @@ export async function rebootRouterAction(routerToReboot: string) {
 			});
 			return {
 				success: false,
-				error: reboot.error
+				errorMessage: reboot.error
 			} as const;
 		}
 		return {
@@ -223,7 +223,7 @@ export async function rebootRouterAction(routerToReboot: string) {
 	} catch {
 		return {
 			success: false,
-			error: 'Failed to reboot router'
+			errorMessage: 'Failed to reboot router'
 		} as const;
 	}
 }
@@ -234,7 +234,7 @@ export async function checkRouterStatusAction(routerToCheck: string) {
 		if (!router.success) {
 			return {
 				success: false,
-				error: `Failed to get router with router ${routerToCheck}`
+				errorMessage: `Failed to get router with router ${routerToCheck}`
 			} as const;
 		}
 		const loginAction = await login({
@@ -246,18 +246,18 @@ export async function checkRouterStatusAction(routerToCheck: string) {
 		if (!loginAction.success) {
 			return {
 				success: false,
-				error: 'Router is offline'
+				errorMessage: 'Router is offline'
 			} as const;
 		}
 
 		return {
 			success: true,
-			error: 'Router is online'
+			errorMessage: 'Router is online'
 		} as const;
 	} catch {
 		return {
 			success: false,
-			error: 'Failed to check router status'
+			errorMessage: 'Failed to check router status'
 		} as const;
 	}
 }

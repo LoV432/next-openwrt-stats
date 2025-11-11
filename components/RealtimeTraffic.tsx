@@ -55,7 +55,7 @@ export function RealtimeTraffic({ MAX_TRAFFIC }: { MAX_TRAFFIC: number }) {
 					(activeDevice.device || activeDevice.l3_device)
 			).then((res) => res.json() as Promise<RealTimeTraffic>);
 			if (!trafficData.success) {
-				throw new Error(trafficData.error);
+				throw new Error(trafficData.errorMessage);
 			}
 
 			setTrafficHistory((prev) => {

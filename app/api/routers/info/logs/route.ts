@@ -13,7 +13,7 @@ export type RouterLogs = Awaited<
 	  }
 	| {
 			success: false;
-			error: string;
+			errorMessage: string;
 	  }
 >;
 export async function GET(request: NextRequest) {
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'No router name provided'
+					errorMessage: 'No router name provided'
 				}),
 				{
 					status: 400,
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'This router does not exist.'
+					errorMessage: 'This router does not exist.'
 				}),
 				{
 					status: 400,
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to get logs.'
+					errorMessage: 'Failed to get logs.'
 				}),
 				{
 					status: 400,
@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'No logs found'
+					errorMessage: 'No logs found'
 				}),
 				{
 					status: 400,
@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
 		return new Response(
 			JSON.stringify({
 				success: false,
-				error: 'Failed to get router logs.'
+				errorMessage: 'Failed to get router logs.'
 			}),
 			{
 				status: 500,

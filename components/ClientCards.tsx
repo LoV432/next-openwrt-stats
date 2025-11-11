@@ -29,7 +29,7 @@ export default function ClientCards({
 				(res) => res.json() as Promise<DhcpDevices>
 			);
 			if (!dhcpDevices.success) {
-				throw new Error(dhcpDevices.error);
+				throw new Error(dhcpDevices.errorMessage);
 			}
 
 			return dhcpDevices.data;
@@ -53,7 +53,7 @@ export default function ClientCards({
 				body: JSON.stringify({ ifnames: wifiAPs.data.wifiAPsIfname })
 			}).then((res) => res.json() as Promise<WifiClients>);
 			if (!wifiClients.success) {
-				throw new Error(wifiClients.error);
+				throw new Error(wifiClients.errorMessage);
 			}
 
 			return wifiClients.data;
@@ -77,7 +77,7 @@ export default function ClientCards({
 				}
 			).then((res) => res.json() as Promise<WifiClientsTraffic>);
 			if (!wifiClientsTraffic.success) {
-				throw new Error(wifiClientsTraffic.error);
+				throw new Error(wifiClientsTraffic.errorMessage);
 			}
 			return wifiClientsTraffic.data;
 		},

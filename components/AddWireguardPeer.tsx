@@ -102,7 +102,7 @@ export function AddEditWireguardPeer({
 		try {
 			const result = await generateWireguardKeyPair();
 			if (!result.success) {
-				toast.error(result.error, { richColors: true });
+				toast.error(result.errorMessage, { richColors: true });
 				return;
 			}
 
@@ -123,7 +123,7 @@ export function AddEditWireguardPeer({
 		try {
 			const result = await generateWireguardPsk();
 			if (!result.success) {
-				toast.error(result.error, { richColors: true });
+				toast.error(result.errorMessage, { richColors: true });
 				return;
 			}
 
@@ -155,7 +155,7 @@ export function AddEditWireguardPeer({
 					sectionName: peer
 				});
 				if (!wireguardData.success) {
-					toast.error(wireguardData.error, { richColors: true });
+					toast.error(wireguardData.errorMessage, { richColors: true });
 					return;
 				}
 				toast.success('WireGuard peer updated successfully', {
@@ -167,7 +167,7 @@ export function AddEditWireguardPeer({
 					interfaceName: wireguardInterface
 				});
 				if (!wireguardData.success) {
-					toast.error(wireguardData.error, { richColors: true });
+					toast.error(wireguardData.errorMessage, { richColors: true });
 					return;
 				}
 				toast.success('WireGuard peer added successfully', {

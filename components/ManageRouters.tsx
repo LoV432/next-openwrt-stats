@@ -56,7 +56,7 @@ export function ManageRouters() {
 					(res) => res.json() as Promise<Routers>
 				);
 				if (!routers.success) {
-					throw new Error(routers.error);
+					throw new Error(routers.errorMessage);
 				}
 				return routers.data;
 			} catch (error) {
@@ -131,7 +131,7 @@ function DeleteRouter({ routerToDelete }: { routerToDelete: string }) {
 		try {
 			const deleteRouterRequest = await deleteRouterAction(routerToDelete);
 			if (!deleteRouterRequest.success) {
-				toast.error(deleteRouterRequest.error, {
+				toast.error(deleteRouterRequest.errorMessage, {
 					richColors: true,
 					duration: 3000
 				});
@@ -340,7 +340,7 @@ function EditRouter({
 				isPrimary
 			});
 			if (!addRouterRequest.success) {
-				toast.error(addRouterRequest.error, {
+				toast.error(addRouterRequest.errorMessage, {
 					richColors: true,
 					duration: 3000
 				});
@@ -460,7 +460,7 @@ function AddRouter() {
 				isPrimary
 			);
 			if (!addRouterRequest.success) {
-				toast.error(addRouterRequest.error, {
+				toast.error(addRouterRequest.errorMessage, {
 					richColors: true,
 					duration: 3000
 				});

@@ -241,7 +241,7 @@ export async function getWifiClients(ifnames: {
 	if (!ifnames) {
 		return {
 			success: false,
-			error: 'No ifnames provided'
+			errorMessage: 'No ifnames provided'
 		} as const;
 	}
 	const wifiUsers: {
@@ -467,8 +467,8 @@ export async function getWifiClientsTraffic(ifnames: {
 		console.error(error);
 		return {
 			success: false,
-			error:
-				'Something went wrong while getting the wifi clients traffic. Please see logs for more details'
+			errorMessage:
+				'Something went wrong while getting the wifi clients. Please see logs for more details'
 		} as const;
 	}
 }

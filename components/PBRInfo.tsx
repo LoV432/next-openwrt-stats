@@ -62,7 +62,7 @@ export function PBRInfo() {
 				(res) => res.json() as Promise<PbrPolicy>
 			);
 			if (!pbrData.success) {
-				throw new Error(pbrData.error);
+				throw new Error(pbrData.errorMessage);
 			}
 			return pbrData.data;
 		},
@@ -75,7 +75,7 @@ export function PBRInfo() {
 			const pbrData = await fetch('/api/pbr/pbr-interfaces').then(
 				(res) => res.json() as Promise<PbrInterfaces>
 			);
-			if (!pbrData.success) throw new Error(pbrData.error);
+			if (!pbrData.success) throw new Error(pbrData.errorMessage);
 			return pbrData.data;
 		},
 		enabled: isOpen
@@ -241,7 +241,7 @@ function DeletePolicy({
 				name: policyName
 			});
 			if (!deleteResponse.success) {
-				toast.error(deleteResponse.error, {
+				toast.error(deleteResponse.errorMessage, {
 					richColors: true
 				});
 				return;

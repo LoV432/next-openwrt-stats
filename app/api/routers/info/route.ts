@@ -11,7 +11,7 @@ export type getRouterInfo =
 	  }
 	| {
 			success: false;
-			error: string;
+			errorMessage: string;
 	  };
 export async function GET(request: NextRequest) {
 	try {
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'No router IP provided'
+					errorMessage: 'No router IP provided'
 				}),
 				{
 					status: 400,
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to get router info'
+					errorMessage: 'Failed to get router info'
 				}),
 				{
 					status: 400,
@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to parse router info'
+					errorMessage: 'Failed to parse router info'
 				}),
 				{
 					status: 400,
@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
 		return new Response(
 			JSON.stringify({
 				success: false,
-				error: 'Failed to get router info'
+				errorMessage: 'Failed to get router info'
 			}),
 			{
 				status: 500,

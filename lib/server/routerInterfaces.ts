@@ -32,7 +32,7 @@ export async function getNetworkInterfaces() {
 		});
 		return {
 			success: false,
-			error: 'Something went wrong while getting the network interfaces.'
+			errorMessage: 'Something went wrong while getting the network interfaces.'
 		} as const;
 	}
 
@@ -48,7 +48,7 @@ export async function getNetworkInterfaces() {
 		});
 		return {
 			success: false,
-			error: 'Failed to parse ubus response'
+			errorMessage: 'Failed to parse ubus response'
 		} as const;
 	}
 
@@ -63,7 +63,7 @@ export async function getNetworkInterfaces() {
 
 	return {
 		success: false,
-		error: 'Failed to parse ubus response'
+		errorMessage: 'Failed to parse ubus response'
 	} as const;
 }
 
@@ -94,7 +94,7 @@ export async function getRealTimeTraffic(device: string) {
 		});
 		return {
 			success: false,
-			error: 'Something went wrong while getting the real time traffic.'
+			errorMessage: 'Something went wrong while getting the real time traffic.'
 		} as const;
 	}
 
@@ -111,7 +111,7 @@ export async function getRealTimeTraffic(device: string) {
 		});
 		return {
 			success: false,
-			error: 'Failed to parse ubus response'
+			errorMessage: 'Failed to parse ubus response'
 		} as const;
 	}
 
@@ -126,7 +126,7 @@ export async function getRealTimeTraffic(device: string) {
 
 	return {
 		success: false,
-		error: 'Failed to parse ubus response'
+		errorMessage: 'Failed to parse ubus response'
 	} as const;
 }
 
@@ -185,7 +185,8 @@ export async function getWireguardInterfaces() {
 		});
 		return {
 			success: false,
-			error: 'Something went wrong while getting the wireguard interfaces.'
+			errorMessage:
+				'Something went wrong while getting the wireguard interfaces.'
 		} as const;
 	}
 
@@ -209,7 +210,7 @@ export async function getWireguardInterfaces() {
 			});
 		return {
 			success: false,
-			error: 'Failed to parse ubus response'
+			errorMessage: 'Failed to parse ubus response'
 		} as const;
 	}
 
@@ -231,7 +232,7 @@ export async function getWireguardInterfaces() {
 		});
 		return {
 			success: false,
-			error: 'Failed to parse ubus response'
+			errorMessage: 'Failed to parse ubus response'
 		} as const;
 	}
 
@@ -246,7 +247,7 @@ export async function getWireguardInterfaces() {
 		});
 		return {
 			success: false,
-			error: 'Failed to parse ubus response'
+			errorMessage: 'Failed to parse ubus response'
 		} as const;
 	}
 

@@ -21,7 +21,7 @@ export async function GET() {
 		return new Response(
 			JSON.stringify({
 				success: false,
-				error: 'Something went wrong while fetching wifi APs'
+				errorMessage: 'Something went wrong while fetching wifi APs'
 			}),
 			{
 				status: 500,

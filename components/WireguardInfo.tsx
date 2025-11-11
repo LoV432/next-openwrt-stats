@@ -30,7 +30,7 @@ export function WireguardInfo({ interfaceName }: { interfaceName: string }) {
 				(res) => res.json() as Promise<WireguardInterfaces>
 			);
 			if (!response.success) {
-				throw new Error(response.error);
+				throw new Error(response.errorMessage);
 			}
 			return response.data[interfaceName];
 		},

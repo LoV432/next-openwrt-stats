@@ -71,7 +71,7 @@ export async function disableWifiAPAction({
 		}
 		return {
 			success: false,
-			error: 'Something went wrong while disabling wifi AP.'
+			errorMessage: 'Something went wrong while disabling wifi AP.'
 		} as const;
 	}
 }
@@ -88,7 +88,7 @@ export async function enabledWifiAPAction({
 		if (!router.success) {
 			return {
 				success: false,
-				error: 'Router not found'
+				errorMessage: 'Router not found'
 			} as const;
 		}
 
@@ -152,7 +152,7 @@ export async function enabledWifiAPAction({
 		}
 		return {
 			success: false,
-			error: 'Something went wrong while enabling wifi AP.'
+			errorMessage: 'Something went wrong while enabling wifi AP.'
 		} as const;
 	}
 }
@@ -166,7 +166,7 @@ export async function updateWifiAPAction({ params }: { params: any }) {
 		if (!router.success) {
 			return {
 				success: false,
-				error: 'Router not found'
+				errorMessage: 'Router not found'
 			} as const;
 		}
 		const parentValues = {
@@ -352,7 +352,7 @@ export async function updateWifiAPAction({ params }: { params: any }) {
 		}
 		return {
 			success: false,
-			error: 'Something went wrong while updating the AP.'
+			errorMessage: 'Something went wrong while updating the AP.'
 		} as const;
 	}
 }

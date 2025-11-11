@@ -24,7 +24,7 @@ export async function generateWireguardKeyPair() {
 		});
 		return {
 			success: false,
-			error: 'Failed to generate WireGuard key pair'
+			errorMessage: 'Failed to generate WireGuard key pair'
 		} as const;
 	}
 
@@ -37,7 +37,7 @@ export async function generateWireguardKeyPair() {
 	if (!private_key || !public_key) {
 		return {
 			success: false,
-			error: 'Failed to generate WireGuard key pair'
+			errorMessage: 'Failed to generate WireGuard key pair'
 		} as const;
 	}
 
@@ -69,14 +69,14 @@ export async function generateWireguardPsk() {
 		});
 		return {
 			success: false,
-			error: 'Failed to generate WireGuard PSK'
+			errorMessage: 'Failed to generate WireGuard PSK'
 		} as const;
 	}
 	const psk = pskResponse.data?.result[1]?.psk as string | undefined;
 	if (!psk) {
 		return {
 			success: false,
-			error: 'Failed to generate WireGuard PSK'
+			errorMessage: 'Failed to generate WireGuard PSK'
 		} as const;
 	}
 
@@ -114,7 +114,7 @@ export async function addWireguardPeerAction({
 			});
 			return {
 				success: false,
-				error: 'Invalid form values'
+				errorMessage: 'Invalid form values'
 			} as const;
 		}
 		const primaryRouter = await getPrimaryRouter();
@@ -177,7 +177,7 @@ export async function addWireguardPeerAction({
 		}
 		return {
 			success: false,
-			error: 'Something went wrong while adding the WireGuard peer.'
+			errorMessage: 'Something went wrong while adding the WireGuard peer.'
 		} as const;
 	}
 }
@@ -210,14 +210,14 @@ export async function editWireguardPeerAction({
 			});
 			return {
 				success: false,
-				error: 'Invalid form values'
+				errorMessage: 'Invalid form values'
 			} as const;
 		}
 		const primaryRouter = await getPrimaryRouter();
 		if (!primaryRouter.success) {
 			return {
 				success: false,
-				error: 'Failed to get primary router'
+				errorMessage: 'Failed to get primary router'
 			} as const;
 		}
 
@@ -240,7 +240,7 @@ export async function editWireguardPeerAction({
 			});
 			return {
 				success: false,
-				error: 'Failed to get current WireGuard configuration'
+				errorMessage: 'Failed to get current WireGuard configuration'
 			} as const;
 		}
 
@@ -254,7 +254,7 @@ export async function editWireguardPeerAction({
 			});
 			return {
 				success: false,
-				error: 'WireGuard peer not found'
+				errorMessage: 'WireGuard peer not found'
 			} as const;
 		}
 
@@ -338,7 +338,7 @@ export async function editWireguardPeerAction({
 		const commitChangesResponse = await commitWireguardChanges();
 		if (!commitChangesResponse.success) {
 			throw new Error('Something went wrong while committing the changes.', {
-				cause: commitChangesResponse.error
+				cause: (commitChangesResponse as any).error || (commitChangesResponse as any).ubusErrorMessage
 			});
 		}
 
@@ -353,7 +353,7 @@ export async function editWireguardPeerAction({
 		await revertWireguardChanges();
 		return {
 			success: false,
-			error: 'Something went wrong while editing the WireGuard peer.'
+			errorMessage: 'Something went wrong while editing the WireGuard peer.'
 		} as const;
 	}
 }
@@ -412,7 +412,7 @@ export async function deleteWireguardPeerAction({
 		await revertWireguardChanges();
 		return {
 			success: false,
-			error: 'Something went wrong while deleting the WireGuard peer.'
+			errorMessage: 'Something went wrong while deleting the WireGuard peer.'
 		} as const;
 	}
 }
@@ -422,7 +422,7 @@ async function commitWireguardChanges() {
 	if (!primaryRouter.success) {
 		return {
 			success: false,
-			error: 'Failed to commit WireGuard changes.'
+			errorMessage: 'Failed to commit WireGuard changes.'
 		};
 	}
 
@@ -454,7 +454,7 @@ async function revertWireguardChanges() {
 	if (!primaryRouter.success) {
 		return {
 			success: false,
-			error: 'Failed to find router'
+			errorMessage: 'Failed to find router'
 		};
 	}
 

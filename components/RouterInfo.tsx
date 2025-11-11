@@ -19,7 +19,7 @@ export function RouterInfo() {
 			const response = await fetch('/api/routers/all');
 			const data = (await response.json()) as Routers;
 			if (!data.success) {
-				throw new Error(data.error);
+				throw new Error(data.errorMessage);
 			}
 			if (!data.data || data.data.length === 0) {
 				throw new Error('No routers found');
@@ -63,7 +63,7 @@ export function RouterInfo() {
 			);
 			const data = (await response.json()) as getRouterInfo;
 			if (!data.success) {
-				throw new Error(data.error);
+				throw new Error(data.errorMessage);
 			}
 			return data.data;
 		},

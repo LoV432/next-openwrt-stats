@@ -24,7 +24,7 @@ export async function getRouters() {
 		});
 		return {
 			success: false,
-			error: 'DB query to get routers threw an error'
+			errorMessage: 'DB query to get routers threw an error'
 		} as const;
 	}
 }
@@ -51,7 +51,7 @@ export async function getRouter(displayName: string) {
 			});
 			return {
 				success: false,
-				error: 'No router found'
+				errorMessage: 'No router found'
 			} as const;
 		}
 
@@ -67,7 +67,7 @@ export async function getRouter(displayName: string) {
 		});
 		return {
 			success: false,
-			error: 'DB query to get router threw an error'
+			errorMessage: 'DB query to get router threw an error'
 		} as const;
 	}
 }
@@ -86,7 +86,7 @@ export async function getPrimaryRouter() {
 			console.log('[INFO] No primary router found');
 			return {
 				success: false,
-				error: 'No primary router found'
+				errorMessage: 'No primary router found'
 			} as const;
 		}
 
@@ -101,7 +101,7 @@ export async function getPrimaryRouter() {
 		});
 		return {
 			success: false,
-			error: 'DB query to get primary router threw an error'
+			errorMessage: 'DB query to get primary router threw an error'
 		} as const;
 	}
 }

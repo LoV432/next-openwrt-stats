@@ -10,7 +10,7 @@ export function useWifiAPsQuery() {
 				(res) => res.json() as Promise<WifiAPs>
 			);
 			if (!wifiAPs.success) {
-				throw new Error(wifiAPs.error);
+				throw new Error(wifiAPs.errorMessage);
 			}
 
 			return wifiAPs.data;

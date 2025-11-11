@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'No ifnames provided'
+					errorMessage: 'No ifnames provided'
 				}),
 				{
 					status: 400,
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 		return new Response(
 			JSON.stringify({
 				success: false,
-				error: 'Something went wrong while fetching wifi clients'
+				errorMessage: 'Something went wrong while fetching wifi clients'
 			}),
 			{
 				status: 500,

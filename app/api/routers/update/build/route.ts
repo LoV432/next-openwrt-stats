@@ -19,7 +19,7 @@ export type BuildAndStatusResponse =
 	  }
 	| {
 			success: false;
-			error: string;
+			errorMessage: string;
 			errorDetails?: string;
 	  };
 
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Invalid request body'
+					errorMessage: 'Invalid request body'
 				}),
 				{
 					status: 400,
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to start build',
+					errorMessage: 'Failed to start build',
 					errorDetails: errorText
 				}),
 				{
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to parse build response'
+					errorMessage: 'Failed to parse build response'
 				}),
 				{
 					status: 500,
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
 		return new Response(
 			JSON.stringify({
 				success: false,
-				error: error?.message
+				errorMessage: error?.message
 					? `Failed to build sysupgrade: ${error.message}`
 					: 'Failed to build sysupgrade',
 				errorDetails: error?.cause

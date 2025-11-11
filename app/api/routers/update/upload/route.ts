@@ -39,7 +39,7 @@ export type UploadFirmwareResponse =
 	  }
 	| {
 			success: false;
-			error: string;
+			errorMessage: string;
 	  };
 
 export async function POST(request: NextRequest) {
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Invalid request body'
+					errorMessage: 'Invalid request body'
 				}),
 				{
 					status: 400,
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'No router found'
+					errorMessage: 'No router found'
 				}),
 				{
 					status: 400,
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'No bin_dir found'
+					errorMessage: 'No bin_dir found'
 				}),
 				{
 					status: 400,
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'No firmware images found'
+					errorMessage: 'No firmware images found'
 				}),
 				{
 					status: 400,
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'No valid firmware image found'
+					errorMessage: 'No valid firmware image found'
 				}),
 				{
 					status: 400,
@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to download sysupgrade image'
+					errorMessage: 'Failed to download sysupgrade image'
 				}),
 				{
 					status: 400,
@@ -223,7 +223,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to upload sysupgrade image to router'
+					errorMessage: 'Failed to upload sysupgrade image to router'
 				}),
 				{
 					status: 400,
@@ -247,7 +247,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to upload sysupgrade image to router'
+					errorMessage: 'Failed to upload sysupgrade image to router'
 				}),
 				{
 					status: 400,
@@ -278,7 +278,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to validate sysupgrade image'
+					errorMessage: 'Failed to validate sysupgrade image'
 				}),
 				{
 					status: 400,
@@ -303,7 +303,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to validate sysupgrade image'
+					errorMessage: 'Failed to validate sysupgrade image'
 				}),
 				{
 					status: 400,
@@ -327,7 +327,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to validate sysupgrade image'
+					errorMessage: 'Failed to validate sysupgrade image'
 				}),
 				{
 					status: 400,
@@ -357,7 +357,7 @@ export async function POST(request: NextRequest) {
 		return new Response(
 			JSON.stringify({
 				success: false,
-				error: 'Failed to upload sysupgrade'
+				errorMessage: 'Failed to upload sysupgrade'
 			}),
 			{
 				status: 500,

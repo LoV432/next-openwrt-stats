@@ -21,7 +21,7 @@ export async function GET() {
 		return new Response(
 			JSON.stringify({
 				success: false,
-				error: 'Something went wrong while fetching routers'
+				errorMessage: 'Something went wrong while fetching routers'
 			}),
 			{
 				status: 500,

@@ -36,7 +36,7 @@ export function NetworkProvider({ children }: { children: ReactNode }) {
 				'/api/routers/primary/interfaces'
 			).then((res) => res.json() as Promise<NetworkInterfaces>);
 			if (!networkInterfaces.success) {
-				throw new Error(networkInterfaces.error);
+				throw new Error(networkInterfaces.errorMessage);
 			}
 			if (networkInterfaces.data.length === 0) {
 				throw new Error('No network interfaces found');

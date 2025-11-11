@@ -7,7 +7,7 @@ export async function GET(request: Request) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'No device provided'
+					errorMessage: 'No device provided'
 				}),
 				{
 					status: 400,
@@ -36,7 +36,7 @@ export async function GET(request: Request) {
 		return new Response(
 			JSON.stringify({
 				success: false,
-				error: 'Something went wrong while fetching real time traffic'
+				errorMessage: 'Something went wrong while fetching real time traffic'
 			}),
 			{
 				status: 500,

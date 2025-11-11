@@ -26,7 +26,7 @@ export async function setPBRPolicyAction({
 		if (!parsedForm.success) {
 			return {
 				success: false,
-				error: 'Invalid form values'
+				errorMessage: 'Invalid form values'
 			} as const;
 		}
 		const primaryRouter = await getPrimaryRouter();
@@ -60,7 +60,7 @@ export async function setPBRPolicyAction({
 				...pbrPolicyResponse
 			});
 			throw new Error('Something went wrong while adding the policy.', {
-				cause: pbrPolicyResponse.error
+				cause: pbrPolicyResponse.ubusErrorMessage
 			});
 		}
 
@@ -72,7 +72,7 @@ export async function setPBRPolicyAction({
 				...commitChangesResponse
 			});
 			throw new Error('Something went wrong while committing the changes.', {
-				cause: commitChangesResponse.error
+				cause: commitChangesResponse.errorMessage
 			});
 		}
 
@@ -93,7 +93,7 @@ export async function setPBRPolicyAction({
 		}
 		return {
 			success: false,
-			error: 'Something went wrong while adding the policy.'
+			errorMessage: 'Something went wrong while adding the policy.'
 		} as const;
 	}
 }
@@ -110,22 +110,22 @@ export async function editPBRPolicyAction({
 		if (!parsedNewValues.success) {
 			return {
 				success: false,
-				error: 'Invalid form values'
+				errorMessage: 'Invalid form values'
 			} as const;
 		}
 		const primaryRouter = await getPrimaryRouter();
 		if (!primaryRouter.success) {
 			return {
 				success: false,
-				error: 'Failed to get primary router'
+				errorMessage: 'Failed to get primary router'
 			} as const;
 		}
 
 		const currentPolicies = await getPBRPolicy();
-		if (currentPolicies.error) {
+		if (!currentPolicies.success) {
 			return {
 				success: false,
-				error: 'Something went wrong while getting the current policies.'
+				errorMessage: 'Something went wrong while getting the current policies.'
 			} as const;
 		}
 
@@ -139,7 +139,7 @@ export async function editPBRPolicyAction({
 			});
 			return {
 				success: false,
-				error: 'Policy not found'
+				errorMessage: 'Policy not found'
 			} as const;
 		}
 
@@ -171,7 +171,7 @@ export async function editPBRPolicyAction({
 					...deleteResponse
 				});
 				throw new Error('Something went wrong while editing the policy.', {
-					cause: deleteResponse.error
+					cause: deleteResponse.ubusErrorMessage
 				});
 			}
 		}
@@ -202,7 +202,7 @@ export async function editPBRPolicyAction({
 					...pbrPolicyResponse
 				});
 				throw new Error('Something went wrong while editing the policy.', {
-					cause: pbrPolicyResponse.error
+					cause: pbrPolicyResponse.ubusErrorMessage
 				});
 			}
 		}
@@ -215,7 +215,7 @@ export async function editPBRPolicyAction({
 				...commitChangesResponse
 			});
 			throw new Error('Something went wrong while committing the changes.', {
-				cause: commitChangesResponse.error
+				cause: commitChangesResponse.errorMessage
 			});
 		}
 
@@ -233,7 +233,7 @@ export async function editPBRPolicyAction({
 		}
 		return {
 			success: false,
-			error: 'Something went wrong while editing the policy.'
+			errorMessage: 'Something went wrong while editing the policy.'
 		} as const;
 	}
 }
@@ -264,7 +264,7 @@ export async function deletePBRPolicyAction({ name }: { name: string }) {
 				...pbrPolicyResponse
 			});
 			throw new Error('Something went wrong while deleting the policy.', {
-				cause: pbrPolicyResponse.error
+				cause: pbrPolicyResponse.ubusErrorMessage
 			});
 		}
 
@@ -276,7 +276,7 @@ export async function deletePBRPolicyAction({ name }: { name: string }) {
 				...commitChangesResponse
 			});
 			throw new Error('Something went wrong while committing the changes.', {
-				cause: commitChangesResponse.error
+				cause: commitChangesResponse.errorMessage
 			});
 		}
 
@@ -291,7 +291,7 @@ export async function deletePBRPolicyAction({ name }: { name: string }) {
 		await revertPBRChanges();
 		return {
 			success: false,
-			error: 'Something went wrong while committing the changes.'
+			errorMessage: 'Something went wrong while committing the changes.'
 		};
 	}
 }
@@ -301,7 +301,7 @@ async function commitPBRchanges() {
 	if (!primaryRouter.success) {
 		return {
 			success: false,
-			error: 'Failed to commmit pbr changes.'
+			errorMessage: 'Failed to commmit pbr changes.'
 		};
 	}
 
@@ -333,7 +333,7 @@ async function revertPBRChanges() {
 	if (!primaryRouter.success) {
 		return {
 			success: false,
-			error: 'Failed to find router'
+			errorMessage: 'Failed to find router'
 		};
 	}
 

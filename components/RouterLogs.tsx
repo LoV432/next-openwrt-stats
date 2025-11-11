@@ -47,7 +47,7 @@ export function RouterLogs() {
 			const response = await fetch('/api/routers/all');
 			const data = (await response.json()) as Routers;
 			if (!data.success) {
-				throw new Error(data.error);
+				throw new Error(data.errorMessage);
 			}
 			if (!data.data || data.data.length === 0) {
 				throw new Error('No routers found');
@@ -80,7 +80,7 @@ export function RouterLogs() {
 			);
 			const data = (await response.json()) as getRouterTimezone;
 			if (!data.success) {
-				throw new Error(data.error);
+				throw new Error(data.errorMessage);
 			}
 			const timeZoneOffset =
 				data.data === 'UTC'
@@ -110,7 +110,7 @@ export function RouterLogs() {
 			);
 			const data = (await response.json()) as RouterLogs;
 			if (!data.success) {
-				throw new Error(data.error);
+				throw new Error(data.errorMessage);
 			}
 			return data.data;
 		},

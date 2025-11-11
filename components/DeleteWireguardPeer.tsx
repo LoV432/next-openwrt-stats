@@ -43,7 +43,7 @@ export function DeleteWireguardPeer({
 				});
 				setOpen(false);
 			} else {
-				toast.error(result.error || 'Failed to delete WireGuard peer', {
+				toast.error(result.errorMessage || 'Failed to delete WireGuard peer', {
 					richColors: true
 				});
 			}

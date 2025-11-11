@@ -10,7 +10,7 @@ export type getRouterTimezone =
 	  }
 	| {
 			success: false;
-			error: string;
+			errorMessage: string;
 	  };
 export async function GET(request: NextRequest) {
 	try {
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'No router IP provided'
+					errorMessage: 'No router IP provided'
 				}),
 				{
 					status: 400,
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to get timezone.'
+					errorMessage: 'Failed to get timezone.'
 				}),
 				{
 					status: 400,
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to parse router timezone.'
+					errorMessage: 'Failed to parse router timezone.'
 				}),
 				{
 					status: 400,
@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
 		return new Response(
 			JSON.stringify({
 				success: false,
-				error: 'Failed to get router timezone'
+				errorMessage: 'Failed to get router timezone'
 			}),
 			{
 				status: 500,

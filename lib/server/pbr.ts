@@ -30,8 +30,8 @@ export async function getPBRPolicy() {
 		});
 		return {
 			success: false,
-			error:
-				'Something went wrong while getting the pbr policy. Please see logs for more details'
+			errorMessage:
+				'Something went wrong while getting pbr policy. Please see logs for more details'
 		} as const;
 	}
 
@@ -47,7 +47,7 @@ export async function getPBRPolicy() {
 		});
 		return {
 			success: false,
-			error: 'Failed to parse pbr policy response'
+			errorMessage: 'Failed to parse pbr policy response'
 		} as const;
 	}
 
@@ -77,8 +77,8 @@ export async function getPBRInterfaces() {
 		});
 		return {
 			success: false,
-			error:
-				'Something went wrong while getting the pbr interfaces. Please see logs for more details'
+			errorMessage:
+				'Something went wrong while getting pbr interfaces. Please see logs for more details'
 		} as const;
 	}
 
@@ -94,7 +94,7 @@ export async function getPBRInterfaces() {
 		});
 		return {
 			success: false,
-			error: 'Failed to parse pbr policy response'
+			errorMessage: 'Failed to parse pbr policy response'
 		} as const;
 	}
 

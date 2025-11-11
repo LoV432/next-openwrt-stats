@@ -53,7 +53,7 @@ export function UpdateManagerModal() {
 			const response = await fetch('/api/routers/all');
 			const data = (await response.json()) as Routers;
 			if (!data.success) {
-				throw new Error(data.error);
+				throw new Error(data.errorMessage);
 			}
 			if (!data.data || data.data.length === 0) {
 				throw new Error('No routers found');
@@ -183,7 +183,7 @@ function UpdateManager({ router }: { router: string }) {
 				});
 				const data = (await response.json()) as BuildAndStatusResponse;
 				if (!data.success) {
-					throw new Error(data.error, {
+					throw new Error(data.errorMessage, {
 						cause: data.errorDetails
 					});
 				}
@@ -198,7 +198,7 @@ function UpdateManager({ router }: { router: string }) {
 				});
 				const data = (await response.json()) as BuildAndStatusResponse;
 				if (!data.success) {
-					throw new Error(data.error, {
+					throw new Error(data.errorMessage, {
 						cause: data.errorDetails
 					});
 				}
@@ -229,7 +229,7 @@ function UpdateManager({ router }: { router: string }) {
 			});
 			const data = (await response.json()) as UploadFirmwareResponse;
 			if (!data.success) {
-				throw new Error(data.error);
+				throw new Error(data.errorMessage);
 			}
 			return data;
 		}
@@ -363,7 +363,7 @@ function UpdateManager({ router }: { router: string }) {
 					logError({
 						displayName: router,
 						errorMessage: 'Failed to execute update',
-						error: response.error
+						error: response.errorMessage
 					});
 					return;
 				}

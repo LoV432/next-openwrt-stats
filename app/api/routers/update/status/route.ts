@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Invalid request body'
+					errorMessage: 'Invalid request body'
 				}),
 				{
 					status: 400,
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to check build status',
+					errorMessage: 'Failed to check build status',
 					errorDetails: errorText
 				}),
 				{
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to parse build status response'
+					errorMessage: 'Failed to parse build status response'
 				}),
 				{
 					status: 500,
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
 		return new Response(
 			JSON.stringify({
 				success: false,
-				error: error.message
+				errorMessage: error.message
 					? `Failed to check build status: ${error.message}`
 					: 'Failed to check build status',
 				errorDetails: error?.cause

@@ -58,7 +58,7 @@ export async function GET(
 		return new Response(
 			JSON.stringify({
 				success: false,
-				error: 'No clientMac provided'
+				errorMessage: 'No clientMac provided'
 			}),
 			{
 				status: 400,

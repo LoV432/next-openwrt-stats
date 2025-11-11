@@ -6,7 +6,7 @@ export async function POST(request: Request) {
 		const body = await request.json();
 		if (!body.ifnames) {
 			return NextResponse.json(
-				{ success: false, error: 'No ifnames provided' },
+				{ success: false, errorMessage: 'No ifnames provided' },
 				{ status: 400 }
 			);
 		}
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 	} catch (error) {
 		console.error(error);
 		return NextResponse.json(
-			{ success: false, error: 'Something went wrong' },
+			{ success: false, errorMessage: 'Something went wrong' },
 			{
 				status: 500,
 				headers: {

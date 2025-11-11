@@ -32,7 +32,7 @@ export type RouterUpdateInfo =
 	  }
 	| {
 			success: false;
-			error: string;
+			errorMessage: string;
 	  };
 
 export async function GET(request: NextRequest) {
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'No router name provided'
+					errorMessage: 'No router name provided'
 				}),
 				{
 					status: 400,
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'No router found'
+					errorMessage: 'No router found'
 				}),
 				{
 					status: 400,
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to get board info'
+					errorMessage: 'Failed to get board info'
 				}),
 				{
 					status: 400,
@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to get board info'
+					errorMessage: 'Failed to get board info'
 				}),
 				{
 					status: 400,
@@ -178,7 +178,7 @@ export async function GET(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to fetch latest stable release of OpenWrt'
+					errorMessage: 'Failed to fetch latest stable release of OpenWrt'
 				}),
 				{
 					status: latestVersionRequest.status,
@@ -197,7 +197,7 @@ export async function GET(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Unable to fetch latest stable release of OpenWrt'
+					errorMessage: 'Unable to fetch latest stable release of OpenWrt'
 				}),
 				{
 					status: 400,
@@ -256,7 +256,7 @@ export async function GET(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to get installed packages'
+					errorMessage: 'Failed to get installed packages'
 				}),
 				{
 					status: 400,
@@ -314,7 +314,7 @@ export async function GET(request: NextRequest) {
 		return new Response(
 			JSON.stringify({
 				success: false,
-				error: 'Failed to check for updates'
+				errorMessage: 'Failed to check for updates'
 			}),
 			{
 				status: 500,

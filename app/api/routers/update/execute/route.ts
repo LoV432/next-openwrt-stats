@@ -20,7 +20,7 @@ export type FirmwareUpdateExecuteResponse =
 	  }
 	| {
 			success: false;
-			error: string;
+			errorMessage: string;
 	  };
 
 export async function POST(request: NextRequest) {
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Invalid request body'
+					errorMessage: 'Failed to validate sysupgrade image'
 				}),
 				{
 					status: 400,
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'No router found'
+					errorMessage: 'No router found'
 				}),
 				{
 					status: 400,
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to validate sysupgrade image'
+					errorMessage: 'Failed to validate sysupgrade image'
 				}),
 				{
 					status: 400,
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to validate sysupgrade image'
+					errorMessage: 'Failed to validate sysupgrade image'
 				}),
 				{
 					status: 400,
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to validate sysupgrade image'
+					errorMessage: 'Failed to validate sysupgrade image'
 				}),
 				{
 					status: 400,
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to execute sysupgrade'
+					errorMessage: 'Failed to execute sysupgrade'
 				}),
 				{
 					status: 400,
@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
 		return new Response(
 			JSON.stringify({
 				success: false,
-				error: 'Failed to execute sysupgrade'
+				errorMessage: 'Failed to execute sysupgrade'
 			}),
 			{
 				status: 500,

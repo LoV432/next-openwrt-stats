@@ -275,7 +275,7 @@ function EnableDisableWifiAP({
 				);
 				setIsOpen(false);
 			} else {
-				toast.error(`Failed to update wifi AP: ${response.error}`, {
+				toast.error(`Failed to update wifi AP: ${response.errorMessage}`, {
 					richColors: true
 				});
 			}

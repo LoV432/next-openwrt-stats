@@ -37,7 +37,7 @@ export default function Register() {
 				true
 			);
 			if (!addRouterRequest.success) {
-				toast.error(addRouterRequest.error, {
+				toast.error(addRouterRequest.errorMessage, {
 					richColors: true,
 					duration: 3000
 				});

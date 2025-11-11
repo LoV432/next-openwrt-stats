@@ -34,7 +34,7 @@ type PresenceEventQueryResult =
 	  }
 	| {
 			success: false;
-			error: string;
+			errorMessage: string;
 	  };
 
 function eventStyles(evt: PresenceEvent['eventType']) {
@@ -165,7 +165,7 @@ export function PresenceHistoryDialog({
 			const response = await fetch(url);
 			const result = (await response.json()) as PresenceEventQueryResult;
 			if (!result.success) {
-				throw new Error(result.error);
+				throw new Error(result.errorMessage);
 			}
 			return result;
 		},
@@ -268,7 +268,7 @@ export function PresenceHistoryDialog({
 											/>
 											<Label
 												htmlFor="connected"
-												className="text-sm text-neutral-200 w-full"
+												className="w-full text-sm text-neutral-200"
 											>
 												Connected
 											</Label>
@@ -290,7 +290,7 @@ export function PresenceHistoryDialog({
 											/>
 											<Label
 												htmlFor="updated"
-												className="text-sm text-neutral-200 w-full"
+												className="w-full text-sm text-neutral-200"
 											>
 												Updated
 											</Label>
@@ -312,7 +312,7 @@ export function PresenceHistoryDialog({
 											/>
 											<Label
 												htmlFor="disconnected"
-												className="text-sm text-neutral-200 w-full"
+												className="w-full text-sm text-neutral-200"
 											>
 												Disconnected
 											</Label>

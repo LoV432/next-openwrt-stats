@@ -10,7 +10,7 @@ export async function getDhcpDevices() {
 	if (!allRouters.success) {
 		return {
 			success: false,
-			error: allRouters.error
+			errorMessage: allRouters.errorMessage
 		} as const;
 	}
 	const dhcpDevices: {

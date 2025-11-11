@@ -55,7 +55,7 @@ export async function GET() {
 		return new Response(
 			JSON.stringify({
 				success: false,
-				error: wifiIfnames.error
+				errorMessage: wifiIfnames.errorMessage
 			}),
 			{
 				status: 500,
@@ -70,7 +70,7 @@ export async function GET() {
 		return new Response(
 			JSON.stringify({
 				success: false,
-				error: 'Failed to get wifi clients'
+				errorMessage: 'Failed to get wifi clients'
 			}),
 			{
 				status: 500,
@@ -243,7 +243,7 @@ async function getIfnames() {
 		});
 		return {
 			success: false,
-			error:
+			errorMessage:
 				'Something went wrong while getting the wifi ifnames for presence detection. Please see logs for more details'
 		} as const;
 	}

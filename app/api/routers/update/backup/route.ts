@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Invalid request body'
+					errorMessage: 'Invalid request body'
 				}),
 				{
 					status: 400,
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'No router found'
+					errorMessage: 'No router found'
 				}),
 				{
 					status: 400,
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to get backup',
+					errorMessage: 'Failed to get backup',
 					errorDetails: errorText
 				}),
 				{
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
 		return new Response(
 			JSON.stringify({
 				success: false,
-				error: error?.message
+				errorMessage: error?.message
 					? `Failed to get backup: ${error.message}`
 					: 'Failed to get backup'
 			}),
