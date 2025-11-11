@@ -8,7 +8,7 @@ import {
 	DialogTrigger
 } from '@/components/ui/dialog';
 import { useQuery } from '@tanstack/react-query';
-import { EditIcon, LoaderCircle } from 'lucide-react';
+import { LoaderCircle } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
@@ -114,7 +114,7 @@ function EditWifiAP({
 			ssid: wifiAPEditForm.wifiAPConfig.ssid,
 			password: wifiAPEditForm.wifiAPConfig.key || '',
 			channel: wifiAPEditForm.wifiAPParentConfig.channel || 'auto',
-			hidden: wifiAPEditForm.wifiAPConfig.hidden || '0',
+			hidden: wifiAPEditForm.wifiAPConfig.hidden === '1' ? '1' : '0',
 			txpower: wifiAPEditForm.wifiAPParentConfig.txpower || 'delete',
 			country: wifiAPEditForm.wifiAPParentConfig.country || 'delete'
 		}

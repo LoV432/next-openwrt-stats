@@ -2,6 +2,7 @@ import 'server-only';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { buildResponseSchema } from '../types';
+import { logError } from '@/lib/client/errorLog';
 
 const buildRequestSchema = z.object({
 	displayName: z.string().min(1, 'Display name is required'),
@@ -73,9 +74,11 @@ export async function POST(request: NextRequest) {
 
 		if (!buildResponse.ok) {
 			const errorText = await buildResponse.text();
-			console.log('[ERROR] Failed to start build', {
-				status: buildResponse.status,
-				error: errorText
+			logError({
+				displayName: parsedBody.data.displayName,
+				errorMessage: 'Failed to start build',
+				rawResponse: errorText,
+				status: buildResponse.status
 			});
 			return new Response(
 				JSON.stringify({
@@ -96,10 +99,12 @@ export async function POST(request: NextRequest) {
 
 		const parsedBuildData = buildResponseSchema.safeParse(buildData);
 		if (!parsedBuildData.success) {
-			console.log(
-				'[ERROR] Failed to parse build response:',
-				parsedBuildData.error
-			);
+			logError({
+				displayName: parsedBody.data.displayName,
+				errorMessage: 'Failed to parse build response',
+				zodError: parsedBuildData.error,
+				rawResponse: buildData
+			});
 			return new Response(
 				JSON.stringify({
 					success: false,
@@ -127,7 +132,8 @@ export async function POST(request: NextRequest) {
 			}
 		);
 	} catch (error: any) {
-		console.log('[ERROR] Failed to build sysupgrade', {
+		logError({
+			errorMessage: 'Failed to build sysupgrade',
 			error
 		});
 		return new Response(

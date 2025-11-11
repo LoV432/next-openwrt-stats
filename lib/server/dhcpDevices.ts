@@ -2,6 +2,7 @@ import 'server-only';
 import { ubusCall } from './ubusCalls';
 import { dhcpDevicesSchema } from '@/types/ubusCalls';
 import { getRouters } from './router';
+import { logError } from '../client/errorLog';
 
 export type DhcpDevices = Awaited<ReturnType<typeof getDhcpDevices>>;
 export async function getDhcpDevices() {
@@ -25,15 +26,22 @@ export async function getDhcpDevices() {
 				params: ['luci-rpc', 'getDHCPLeases', {}]
 			});
 			if (!dhcpDevicesResponse.success) {
+				logError({
+					displayName: router.displayName,
+					errorMessage: 'Failed to get dhcp devices',
+					...dhcpDevicesResponse
+				});
 				return;
 			}
 			const parsedDhcpDevicesResponse = dhcpDevicesSchema.safeParse(
 				dhcpDevicesResponse.data
 			);
 			if (!parsedDhcpDevicesResponse.success) {
-				console.log('[ERROR] Failed to parse dhcp devices response', {
+				logError({
 					displayName: router.displayName,
-					error: parsedDhcpDevicesResponse.error
+					errorMessage: 'Failed to parse dhcp devices response',
+					zodError: parsedDhcpDevicesResponse.error,
+					...dhcpDevicesResponse
 				});
 				return;
 			}

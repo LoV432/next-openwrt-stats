@@ -1,7 +1,8 @@
 import 'server-only';
-import { db } from './dbDriver';
 import { routersTable } from '@/drizzle/schema/schema';
+import { db } from './dbDriver';
 import { eq } from 'drizzle-orm';
+import { logError } from '../client/errorLog';
 
 export type Routers = Awaited<ReturnType<typeof getRouters>>;
 export async function getRouters() {
@@ -17,7 +18,8 @@ export async function getRouters() {
 			data: allRouters
 		} as const;
 	} catch (error) {
-		console.log('[ERROR] DB query to get routers threw an error', {
+		logError({
+			errorMessage: 'DB query to get routers threw an error',
 			error
 		});
 		return {
@@ -58,8 +60,9 @@ export async function getRouter(displayName: string) {
 			data: router[0]
 		} as const;
 	} catch (error) {
-		console.log('[ERROR] DB query to get router threw an error', {
+		logError({
 			displayName,
+			errorMessage: 'DB query to get router threw an error',
 			error
 		});
 		return {
@@ -92,7 +95,8 @@ export async function getPrimaryRouter() {
 			data: primaryRouter[0]
 		} as const;
 	} catch (error) {
-		console.log('[ERROR] DB query to get primary router threw an error', {
+		logError({
+			errorMessage: 'DB query to get primary router threw an error',
 			error
 		});
 		return {

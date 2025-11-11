@@ -1,12 +1,13 @@
 import 'server-only';
 import { getRouters } from './router';
-import { ubusBatchCall, ubusCall } from './ubusCalls';
+import { ubusBatchCall } from './ubusCalls';
 import {
 	wifiAPsLiveDataSchema,
 	wifiClientsSchema,
 	wifiConfigSchema,
 	wifiHostapdClientsSchema
 } from '@/types/ubusCalls';
+import { logError } from '../client/errorLog';
 
 export type WifiAPs = Awaited<ReturnType<typeof getWifiAPs>>;
 export async function getWifiAPs() {
@@ -60,43 +61,48 @@ export async function getWifiAPs() {
 
 	await Promise.all(
 		allRouters.data.map(async (router) => {
-			const [getWifiConfigs, getWifiAPsLiveData] = await Promise.all([
-				// I need the wireless config to get disabled APs
-				// Then to get accruate data of APS i need to get the live data
-				ubusCall({
-					displayName: router.displayName,
-					params: ['uci', 'get', { config: 'wireless' }]
-				}),
-				ubusCall({
-					displayName: router.displayName,
-					params: ['luci-rpc', 'getWirelessDevices', {}]
-				})
-			]);
-			if (!getWifiConfigs.success) {
-				return;
-			}
-			const wirelessConfig = wifiConfigSchema.safeParse(getWifiConfigs.data);
-			if (!wirelessConfig.success) {
-				console.log(
-					'[ERROR] Failed to parse ubus response from wirelessConfig',
+			const wifiData = await ubusBatchCall({
+				displayName: router.displayName,
+				calls: [
 					{
-						displayName: router.displayName,
-						error: wirelessConfig.error
+						id: 1,
+						params: ['uci', 'get', { config: 'wireless' }]
+					},
+					{
+						id: 2,
+						params: ['luci-rpc', 'getWirelessDevices', {}]
 					}
-				);
-				return;
-			}
-			if (!getWifiAPsLiveData.success) {
-				return;
-			}
-			const wifiAPsLiveData = wifiAPsLiveDataSchema.safeParse(
-				getWifiAPsLiveData.data
-			);
-			if (!wifiAPsLiveData.success) {
-				console.log('[ERROR] Failed to parse ubus response from wifiAPs', {
+				]
+			});
+			if (!wifiData.success) {
+				logError({
 					displayName: router.displayName,
-					error: wifiAPsLiveData.error
+					errorMessage: 'Failed to get wifi data',
+					...wifiData
 				});
+				return;
+			}
+			const wirelessConfig = wifiConfigSchema.safeParse(
+				wifiData.data.find((response) => response.id === 1)
+			);
+			const wifiAPsLiveData = wifiAPsLiveDataSchema.safeParse(
+				wifiData.data.find((response) => response.id === 2)
+			);
+			if (!wirelessConfig.success || !wifiAPsLiveData.success) {
+				!wirelessConfig.success &&
+					logError({
+						displayName: router.displayName,
+						errorMessage: 'Failed to parse wireless config',
+						zodError: wirelessConfig.error,
+						...wifiData
+					});
+				!wifiAPsLiveData.success &&
+					logError({
+						displayName: router.displayName,
+						errorMessage: 'Failed to parse wifi APs live data',
+						zodError: wifiAPsLiveData.error,
+						...wifiData
+					});
 				return;
 			}
 			const allWifiConfigs = Object.values(
@@ -272,68 +278,72 @@ export async function getWifiClients(ifnames: {
 					]
 				});
 				if (!ubusResponse.success) {
+					logError({
+						displayName: router,
+						errorMessage: 'Failed to get iwinfo or hostapd data',
+						...ubusResponse
+					});
 					continue;
 				}
-				const parsedClientsResponse = wifiClientsSchema.safeParse(
+				const assoclistResponse = wifiClientsSchema.safeParse(
 					ubusResponse.data.find((response) => response.id === 1)
 				);
-				const parsedHostapdResponse = wifiHostapdClientsSchema.safeParse(
+				const hostapdResponse = wifiHostapdClientsSchema.safeParse(
 					ubusResponse.data.find((response) => response.id === 2)
 				);
-				if (!parsedClientsResponse.success || !parsedHostapdResponse.success) {
-					console.log(
-						'[ERROR] Failed to parse ubus response from wifiClients',
-						{
-							displayName: router,
-							error: [parsedClientsResponse.error, parsedHostapdResponse.error]
-						}
-					);
+				if (!assoclistResponse.success && !hostapdResponse.success) {
+					logError({
+						displayName: router,
+						errorMessage: 'Failed to parse iwinfo or hostapd data',
+						zodErrors: [assoclistResponse.error, hostapdResponse.error],
+						...ubusResponse
+					});
 					continue;
 				}
-				const wifiClients = parsedClientsResponse.data.result[1].results;
-				for (const client of wifiClients) {
-					wifiUsers[client.mac.toUpperCase()] = {
-						...client,
-						displayName: router,
-						ssid: ifname.ssid,
-						band: ifname.band,
-						mac: client.mac.toUpperCase()
-					};
+				if (assoclistResponse.success) {
+					const wifiClients = assoclistResponse.data.result[1].results;
+					for (const client of wifiClients) {
+						wifiUsers[client.mac.toUpperCase()] = {
+							...client,
+							displayName: router,
+							ssid: ifname.ssid,
+							band: ifname.band,
+							mac: client.mac.toUpperCase()
+						};
+					}
 				}
-				const hostapdClients = Object.keys(
-					parsedHostapdResponse.data.result[1].clients
-				).map((key) => {
-					if (wifiUsers[key.toUpperCase()]) {
-						return null;
-					}
-					const client = parsedHostapdResponse.data.result[1].clients[key];
-					if (!client.bytes) {
-						// TODO: this is temp, remove this later
-						console.log('undefined hostapd client found', client, key);
-					}
-					return {
-						signal: client.signal || 0,
-						displayName: router,
-						ssid: ifname.ssid,
-						band: ifname.band,
-						mac: key.toUpperCase(),
-						rx: {
-							packets: client.packets?.rx || 0,
-							bytes: client.bytes?.rx || 0
-						},
-						tx: {
-							packets: client.packets?.tx || 0,
-							bytes: client.bytes?.tx || 0
+				if (hostapdResponse.success) {
+					const hostapdClients = Object.keys(
+						hostapdResponse.data.result[1].clients
+					).map((key) => {
+						if (wifiUsers[key.toUpperCase()]) {
+							return null;
 						}
-					};
-				});
-				for (const client of hostapdClients) {
-					if (!client) {
-						continue;
+						const client = hostapdResponse.data.result[1].clients[key];
+						return {
+							signal: client.signal || 0,
+							displayName: router,
+							ssid: ifname.ssid,
+							band: ifname.band,
+							mac: key.toUpperCase(),
+							rx: {
+								packets: client.packets?.rx || 0,
+								bytes: client.bytes?.rx || 0
+							},
+							tx: {
+								packets: client.packets?.tx || 0,
+								bytes: client.bytes?.tx || 0
+							}
+						};
+					});
+					for (const client of hostapdClients) {
+						if (!client) {
+							continue;
+						}
+						wifiUsers[client.mac.toUpperCase()] = {
+							...client
+						};
 					}
-					wifiUsers[client.mac.toUpperCase()] = {
-						...client
-					};
 				}
 			}
 		})
@@ -379,6 +389,11 @@ export async function getWifiClientsTraffic(ifnames: {
 						]
 					});
 					if (!ubusResponse.success) {
+						logError({
+							displayName: router,
+							errorMessage: 'Failed to get iwinfo or hostapd data',
+							...ubusResponse
+						});
 						continue;
 					}
 					const parsedClientsResponse = wifiClientsSchema.safeParse(
@@ -388,56 +403,57 @@ export async function getWifiClientsTraffic(ifnames: {
 						ubusResponse.data.find((response) => response.id === 2)
 					);
 					if (
-						!parsedClientsResponse.success ||
+						!parsedClientsResponse.success &&
 						!parsedHostapdResponse.success
 					) {
-						console.log(
-							'[ERROR] Failed to parse ubus response from wifiClients',
-							{
-								displayName: router,
-								error: [
-									parsedClientsResponse.error,
-									parsedHostapdResponse.error
-								]
-							}
-						);
+						logError({
+							displayName: router,
+							errorMessage: 'Failed to parse iwinfo or hostapd data',
+							zodErrors: [
+								parsedClientsResponse.error,
+								parsedHostapdResponse.error
+							],
+							...ubusResponse
+						});
 						continue;
 					}
-					const wifiClients = parsedClientsResponse.data.result[1].results;
-					for (const client of wifiClients) {
-						trafficStats[client.mac.toUpperCase()] = {
-							rxBytes: client.rx.bytes,
-							txBytes: client.tx.bytes,
-							time: Date.now() / 1000
-						};
+					if (parsedClientsResponse.success) {
+						const wifiClients = parsedClientsResponse.data.result[1].results;
+						for (const client of wifiClients) {
+							trafficStats[client.mac.toUpperCase()] = {
+								rxBytes: client.rx.bytes,
+								txBytes: client.tx.bytes,
+								time: Date.now() / 1000
+							};
+						}
 					}
 
-					const hostapdClients = Object.keys(
-						parsedHostapdResponse.data.result[1].clients
-					).map((key) => {
-						if (trafficStats[key.toUpperCase()]) {
-							return null;
+					if (parsedHostapdResponse.success) {
+						const hostapdClients = Object.keys(
+							parsedHostapdResponse.data.result[1].clients
+						).map((key) => {
+							if (trafficStats[key.toUpperCase()]) {
+								return null;
+							}
+							const client = parsedHostapdResponse.data.result[1].clients[key];
+							if (!client.bytes) {
+								return null;
+							}
+							return {
+								rxBytes: client.bytes.rx,
+								txBytes: client.bytes.tx,
+								time: Date.now() / 1000,
+								mac: key.toUpperCase()
+							};
+						});
+						for (const client of hostapdClients) {
+							if (!client) {
+								continue;
+							}
+							trafficStats[client.mac.toUpperCase()] = {
+								...client
+							};
 						}
-						const client = parsedHostapdResponse.data.result[1].clients[key];
-						if (!client.bytes) {
-							// TODO: this is temp, remove this later
-							console.log('undefined hostapd client found', client, key);
-							return null;
-						}
-						return {
-							rxBytes: client.bytes.rx,
-							txBytes: client.bytes.tx,
-							time: Date.now() / 1000,
-							mac: key.toUpperCase()
-						};
-					});
-					for (const client of hostapdClients) {
-						if (!client) {
-							continue;
-						}
-						trafficStats[client.mac.toUpperCase()] = {
-							...client
-						};
 					}
 				}
 			})

@@ -2,6 +2,7 @@ import 'server-only';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { getRouter } from '@/lib/server/router';
+import { logError } from '@/lib/client/errorLog';
 
 const backupRequestSchema = z.object({
 	displayName: z.string().min(1, 'Display name is required')
@@ -58,9 +59,12 @@ export async function POST(request: NextRequest) {
 
 		if (!backupResponse.ok) {
 			const errorText = await backupResponse.text();
-			console.log('[ERROR] Failed to get backup', {
+			logError({
+				displayName,
+				errorMessage: 'Failed to get backup',
+				routerIP: router.data.routerIP,
 				status: backupResponse.status,
-				error: errorText
+				rawResponse: errorText
 			});
 			return new Response(
 				JSON.stringify({
@@ -84,7 +88,8 @@ export async function POST(request: NextRequest) {
 			}
 		});
 	} catch (error: any) {
-		console.log('[ERROR] Failed to get backup', {
+		logError({
+			errorMessage: 'Failed to get backup',
 			error
 		});
 		return new Response(

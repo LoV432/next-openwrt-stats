@@ -31,6 +31,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { BuildAndStatusResponse } from '@/app/api/routers/update/build/route';
 import { RouterUpdateInfo } from '@/app/api/routers/update/check/route';
 import { checkRouterStatusAction } from '@/lib/server/routersActions';
+import { logError } from '@/lib/client/errorLog';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -272,7 +273,9 @@ function UpdateManager({ router }: { router: string }) {
 			});
 		} catch (error: any) {
 			dispatch({ router, type: 'updateStatus', value: buildStatusEnum.failed });
-			console.log('[ERROR] Firmware build or upload failed', {
+			logError({
+				displayName: router,
+				errorMessage: 'Firmware build or upload failed',
 				error
 			});
 			if (error?.message) {
@@ -357,7 +360,9 @@ function UpdateManager({ router }: { router: string }) {
 						type: 'updateStatus',
 						value: buildStatusEnum.failed
 					});
-					console.log('[ERROR] Failed to execute update', {
+					logError({
+						displayName: router,
+						errorMessage: 'Failed to execute update',
 						error: response.error
 					});
 					return;
@@ -399,7 +404,9 @@ function UpdateManager({ router }: { router: string }) {
 			});
 		} catch (error: any) {
 			dispatch({ router, type: 'updateStatus', value: buildStatusEnum.failed });
-			console.log('[ERROR] Failed to execute update', {
+			logError({
+				displayName: router,
+				errorMessage: 'Failed to execute update',
 				error
 			});
 			if (error?.message) {

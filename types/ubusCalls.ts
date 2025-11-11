@@ -30,7 +30,13 @@ export const accessDeniedSchema = z.object({
 	})
 });
 
-export const validBatchResponseSchema = z.array(validResponseSchema);
+export const batchResponseSchema = z.array(
+	z.object({
+		jsonrpc: z.string(),
+		id: z.number(),
+		result: z.tuple([z.number(), z.any()]).optional()
+	})
+);
 
 export const routerInfoSchema = z.object({
 	localtime: z.number(),
@@ -50,29 +56,29 @@ export const routerInfoSchema = z.object({
 		used: z.number(),
 		avail: z.number()
 	}),
-	tmp: z.object({
-		total: z.number(),
-		free: z.number(),
-		used: z.number(),
-		avail: z.number()
-	}),
-	swap: z.object({ total: z.number(), free: z.number() }),
-	kernel: z.string(),
-	hostname: z.string(),
+	// tmp: z.object({
+	// 	total: z.number(),
+	// 	free: z.number(),
+	// 	used: z.number(),
+	// 	avail: z.number()
+	// }),
+	// swap: z.object({ total: z.number(), free: z.number() }),
+	// kernel: z.string(),
+	// hostname: z.string(),
 	system: z.string(),
 	model: z.string(),
 	board_name: z.string(),
 	rootfs_type: z.string(),
 	release: z.object({
-		distribution: z.string(),
+		// distribution: z.string(),
 		version: z.string(),
-		revision: z.string(),
-		target: z.string(),
-		description: z.string(),
-		builddate: z.string()
-	}),
-	revision: z.string(),
-	branch: z.string()
+		// revision: z.string(),
+		target: z.string()
+		// description: z.string(),
+		// builddate: z.string()
+	})
+	// revision: z.string(),
+	// branch: z.string()
 });
 
 const networkInterface = z.object({

@@ -5,6 +5,7 @@ import { db } from './dbDriver';
 import { login, ubusCall } from './ubusCalls';
 import { eq, ne } from 'drizzle-orm';
 import { getRouter, getRouters } from './router';
+import { logError } from '../client/errorLog';
 
 export async function registerRouterAction(
 	displayName: string,
@@ -20,17 +21,14 @@ export async function registerRouterAction(
 	});
 
 	if (!checkCredentials.success) {
-		console.log(
-			checkCredentials.error,
+		logError({
 			displayName,
-			routerIP,
-			username,
-			password,
-			isPrimary
-		);
+			errorMessage: 'Failed to add router - invalid credentials',
+			...checkCredentials
+		});
 		return {
 			success: false,
-			error: checkCredentials.errorMessage
+			error: checkCredentials.ubusErrorMessage || 'Invalid credentials'
 		} as const;
 	}
 
@@ -59,8 +57,9 @@ export async function registerRouterAction(
 			} as const;
 		});
 	} catch (error) {
-		console.log('[ERROR] Failed to add router', {
+		logError({
 			displayName,
+			errorMessage: 'Failed to add router',
 			routerIP,
 			username,
 			error
@@ -131,8 +130,9 @@ export async function updateRouterAction({
 			data: 'Successfully updated router'
 		} as const;
 	} catch (error) {
-		console.log('[ERROR] Failed to update router', {
-			routerToUpdate,
+		logError({
+			displayName: routerToUpdate,
+			errorMessage: 'Failed to update router',
 			username,
 			error
 		});
@@ -179,8 +179,9 @@ export async function deleteRouterAction(routerToDelete: string) {
 			data: 'Successfully deleted router'
 		} as const;
 	} catch (error) {
-		console.log('[ERROR] Failed to delete router', {
-			routerToDelete,
+		logError({
+			displayName: routerToDelete,
+			errorMessage: 'Failed to delete router',
 			error
 		});
 		return {
@@ -205,6 +206,11 @@ export async function rebootRouterAction(routerToReboot: string) {
 		});
 
 		if (!reboot.success) {
+			logError({
+				displayName: router.data.displayName,
+				errorMessage: 'Failed to reboot router',
+				...reboot
+			});
 			return {
 				success: false,
 				error: reboot.error

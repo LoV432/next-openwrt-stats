@@ -4,6 +4,7 @@ import { addPolicyForm } from '@/types/ubusCalls';
 import { ubusCall } from './ubusCalls';
 import { getPrimaryRouter } from './router';
 import { getPBRPolicy } from './pbr';
+import { logError } from '../client/errorLog';
 
 export async function setPBRPolicyAction({
 	values
@@ -20,58 +21,81 @@ export async function setPBRPolicyAction({
 		chain?: string;
 	};
 }) {
-	const parsedForm = addPolicyForm.safeParse(values);
-	if (!parsedForm.success) {
-		return {
-			success: false,
-			error: 'Invalid form values'
-		} as const;
-	}
-	const primaryRouter = await getPrimaryRouter();
-	if (!primaryRouter.success) {
-		return primaryRouter;
-	}
-
-	const postData: Record<string, string> = {};
-	Object.entries(parsedForm.data).forEach(([key, value]) => {
-		if (value && value !== '') {
-			postData[key] = value;
+	try {
+		const parsedForm = addPolicyForm.safeParse(values);
+		if (!parsedForm.success) {
+			return {
+				success: false,
+				error: 'Invalid form values'
+			} as const;
 		}
-	});
+		const primaryRouter = await getPrimaryRouter();
+		if (!primaryRouter.success) {
+			return primaryRouter;
+		}
 
-	const pbrPolicyResponse = await ubusCall({
-		displayName: primaryRouter.data.displayName,
-		params: [
-			'uci',
-			'add',
-			{
-				config: 'pbr',
-				type: 'policy',
-				values: postData
+		const postData: Record<string, string> = {};
+		Object.entries(parsedForm.data).forEach(([key, value]) => {
+			if (value && value !== '') {
+				postData[key] = value;
 			}
-		]
-	});
-	if (!pbrPolicyResponse.success) {
+		});
+
+		const pbrPolicyResponse = await ubusCall({
+			displayName: primaryRouter.data.displayName,
+			params: [
+				'uci',
+				'add',
+				{
+					config: 'pbr',
+					type: 'policy',
+					values: postData
+				}
+			]
+		});
+		if (!pbrPolicyResponse.success) {
+			logError({
+				displayName: primaryRouter.data.displayName,
+				errorMessage: 'Failed to add pbr policy',
+				...pbrPolicyResponse
+			});
+			throw new Error('Something went wrong while adding the policy.', {
+				cause: pbrPolicyResponse.error
+			});
+		}
+
+		const commitChangesResponse = await commitPBRchanges();
+		if (!commitChangesResponse.success) {
+			logError({
+				displayName: primaryRouter.data.displayName,
+				errorMessage: 'Failed to commit pbr changes',
+				...commitChangesResponse
+			});
+			throw new Error('Something went wrong while committing the changes.', {
+				cause: commitChangesResponse.error
+			});
+		}
+
+		return {
+			success: true
+		} as const;
+	} catch (error) {
+		logError({
+			errorMessage: 'Failed to add pbr policy',
+			error
+		});
+		const revertResponse = await revertPBRChanges();
+		if (!revertResponse.success) {
+			logError({
+				errorMessage: 'Failed to revert pbr changes',
+				...revertResponse
+			});
+		}
 		return {
 			success: false,
-			error:
-				'Something went wrong while adding the policy. Please see logs for more details'
+			error: 'Something went wrong while adding the policy.'
 		} as const;
 	}
-
-	const commitChangesResponse = await commitPBRchanges();
-	if (!commitChangesResponse.success) {
-		return {
-			success: false,
-			error:
-				'Something went wrong while committing the changes. Please see logs for more details'
-		} as const;
-	}
-
-	return {
-		success: true,
-		data: commitChangesResponse.data
-	} as const;
 }
 
 export async function editPBRPolicyAction({
@@ -101,16 +125,17 @@ export async function editPBRPolicyAction({
 		if (currentPolicies.error) {
 			return {
 				success: false,
-				error:
-					'Something went wrong while getting the current policies. Please see logs for more details'
+				error: 'Something went wrong while getting the current policies.'
 			} as const;
 		}
 
 		let policyToEdit = currentPolicies.data[policy];
 		if (!policyToEdit || policyToEdit['.type'] !== 'policy') {
-			console.log('[ERROR] Attempted to edit policy that does not exist', {
+			logError({
 				displayName: primaryRouter.data.displayName,
-				policy
+				errorMessage: 'Attempted to edit policy that does not exist',
+				policy,
+				availablePolicies: Object.keys(currentPolicies.data)
 			});
 			return {
 				success: false,
@@ -140,12 +165,14 @@ export async function editPBRPolicyAction({
 				]
 			});
 			if (!deleteResponse.success) {
-				throw new Error(
-					'Something went wrong while editing the policy. Please see logs for more details',
-					{
-						cause: deleteResponse.error
-					}
-				);
+				logError({
+					displayName: primaryRouter.data.displayName,
+					errorMessage: 'Failed to delete pbr policy',
+					...deleteResponse
+				});
+				throw new Error('Something went wrong while editing the policy.', {
+					cause: deleteResponse.error
+				});
 			}
 		}
 
@@ -169,36 +196,44 @@ export async function editPBRPolicyAction({
 				]
 			});
 			if (!pbrPolicyResponse.success) {
-				throw new Error(
-					'Something went wrong while editing the policy. Please see logs for more details',
-					{
-						cause: pbrPolicyResponse.error
-					}
-				);
+				logError({
+					displayName: primaryRouter.data.displayName,
+					errorMessage: 'Failed to edit pbr policy',
+					...pbrPolicyResponse
+				});
+				throw new Error('Something went wrong while editing the policy.', {
+					cause: pbrPolicyResponse.error
+				});
 			}
 		}
 
 		const commitChangesResponse = await commitPBRchanges();
 		if (!commitChangesResponse.success) {
-			throw new Error(
-				'Something went wrong while committing the changes. Please see logs for more details',
-				{
-					cause: commitChangesResponse.error
-				}
-			);
+			logError({
+				displayName: primaryRouter.data.displayName,
+				errorMessage: 'Failed to commit pbr changes',
+				...commitChangesResponse
+			});
+			throw new Error('Something went wrong while committing the changes.', {
+				cause: commitChangesResponse.error
+			});
 		}
 
 		return {
-			success: true,
-			data: commitChangesResponse.data
+			success: true
 		} as const;
 	} catch (error) {
 		console.error(error);
-		await revertPBRChanges();
+		const revertResponse = await revertPBRChanges();
+		if (!revertResponse.success) {
+			logError({
+				errorMessage: 'Failed to revert pbr changes',
+				...revertResponse
+			});
+		}
 		return {
 			success: false,
-			error:
-				'Something went wrong while editing the policy. Please see logs for more details'
+			error: 'Something went wrong while editing the policy.'
 		} as const;
 	}
 }
@@ -223,35 +258,40 @@ export async function deletePBRPolicyAction({ name }: { name: string }) {
 			]
 		});
 		if (!pbrPolicyResponse.success) {
-			throw new Error(
-				'Something went wrong while deleting the policy. Please see logs for more details',
-				{
-					cause: pbrPolicyResponse.error
-				}
-			);
+			logError({
+				displayName: primaryRouter.data.displayName,
+				errorMessage: 'Failed to delete pbr policy',
+				...pbrPolicyResponse
+			});
+			throw new Error('Something went wrong while deleting the policy.', {
+				cause: pbrPolicyResponse.error
+			});
 		}
 
 		const commitChangesResponse = await commitPBRchanges();
 		if (!commitChangesResponse.success) {
-			throw new Error(
-				'Something went wrong while committing the changes. Please see logs for more details',
-				{
-					cause: commitChangesResponse.error
-				}
-			);
+			logError({
+				displayName: primaryRouter.data.displayName,
+				errorMessage: 'Failed to commit pbr changes',
+				...commitChangesResponse
+			});
+			throw new Error('Something went wrong while committing the changes.', {
+				cause: commitChangesResponse.error
+			});
 		}
 
 		return {
-			success: true,
-			data: commitChangesResponse.data
+			success: true
 		} as const;
 	} catch (error) {
-		console.error(error);
+		logError({
+			errorMessage: 'Failed to delete pbr policy',
+			error
+		});
 		await revertPBRChanges();
 		return {
 			success: false,
-			error:
-				'Something went wrong while committing the changes. Please see logs for more details'
+			error: 'Something went wrong while committing the changes.'
 		};
 	}
 }
@@ -261,7 +301,7 @@ async function commitPBRchanges() {
 	if (!primaryRouter.success) {
 		return {
 			success: false,
-			error: 'Failed to commmit pbr changes. Please see logs for more details'
+			error: 'Failed to commmit pbr changes.'
 		};
 	}
 
@@ -279,14 +319,12 @@ async function commitPBRchanges() {
 
 	if (!commitChangesResponse.success) {
 		return {
-			success: false,
-			error: commitChangesResponse.error
-		};
+			...commitChangesResponse
+		} as const;
 	}
 
 	return {
-		success: true,
-		data: commitChangesResponse.data
+		...commitChangesResponse
 	} as const;
 }
 
@@ -313,13 +351,11 @@ async function revertPBRChanges() {
 
 	if (!revertResponse.success) {
 		return {
-			success: false,
-			error: revertResponse.error
+			...revertResponse
 		} as const;
 	}
 
 	return {
-		success: true,
-		data: revertResponse.data
+		...revertResponse
 	} as const;
 }

@@ -3,6 +3,7 @@ import 'server-only';
 import { getRouter } from './router';
 import { ubusCall } from './ubusCalls';
 import { wifiAPUpdateFormServer } from '@/types/ubusCalls';
+import { logError } from '../client/errorLog';
 
 export async function disableWifiAPAction({
 	displayName,
@@ -33,6 +34,11 @@ export async function disableWifiAPAction({
 		});
 
 		if (!ubusResponse.success) {
+			logError({
+				displayName: router.data.displayName,
+				errorMessage: 'Failed to disable wifi AP',
+				...ubusResponse
+			});
 			throw new Error('Something went wrong while disabling wifi AP');
 		}
 
@@ -41,25 +47,32 @@ export async function disableWifiAPAction({
 		);
 
 		if (!commitChangesResponse.success) {
-			throw new Error('Something went wrong while committing changes', {
-				cause: commitChangesResponse.error
+			logError({
+				displayName: router.data.displayName,
+				errorMessage: 'Failed to commit changes during wifi AP update',
+				...commitChangesResponse
 			});
+			throw new Error('Something went wrong while committing changes');
 		}
 
 		return {
-			success: true,
-			data: true
+			success: true
 		} as const;
 	} catch (error) {
 		console.error(error);
 		if (displayName) {
-			await revertWifiChanges(displayName);
+			const revertResponse = await revertWifiChanges(displayName);
+			if (!revertResponse.success) {
+				logError({
+					errorMessage: 'Failed to revert wifi changes',
+					...revertResponse
+				});
+			}
 		}
 		return {
 			success: false,
-			error:
-				'Something went wrong while disabling wifi AP. Please see logs for more details' as string
-		};
+			error: 'Something went wrong while disabling wifi AP.'
+		} as const;
 	}
 }
 
@@ -79,7 +92,7 @@ export async function enabledWifiAPAction({
 			} as const;
 		}
 
-		const [delte1, delete2] = await Promise.all([
+		const [delete1, delete2] = await Promise.all([
 			ubusCall({
 				displayName: router.data.displayName,
 				params: [
@@ -106,7 +119,13 @@ export async function enabledWifiAPAction({
 			})
 		]);
 
-		if (!delte1.success || !delete2.success) {
+		if (!delete1.success || !delete2.success) {
+			logError({
+				displayName: router.data.displayName,
+				errorMessage: 'Failed to delete keys during wifi AP update',
+				delete1,
+				delete2
+			});
 			throw new Error('Something went wrong while disabling wifi AP');
 		}
 
@@ -115,14 +134,16 @@ export async function enabledWifiAPAction({
 		);
 
 		if (!commitChangesResponse.success) {
-			throw new Error('Something went wrong while committing changes', {
-				cause: commitChangesResponse.error
+			logError({
+				displayName: router.data.displayName,
+				errorMessage: 'Failed to commit changes during wifi AP update',
+				...commitChangesResponse
 			});
+			throw new Error('Something went wrong while committing changes');
 		}
 
 		return {
-			success: true,
-			data: true
+			success: true
 		} as const;
 	} catch (error) {
 		console.error(error);
@@ -131,9 +152,8 @@ export async function enabledWifiAPAction({
 		}
 		return {
 			success: false,
-			error:
-				'Something went wrong while enabling wifi AP. Please see logs for more details' as string
-		};
+			error: 'Something went wrong while enabling wifi AP.'
+		} as const;
 	}
 }
 
@@ -149,7 +169,6 @@ export async function updateWifiAPAction({ params }: { params: any }) {
 				error: 'Router not found'
 			} as const;
 		}
-
 		const parentValues = {
 			channel: values.channel,
 			txpower: values.txpower,
@@ -180,8 +199,13 @@ export async function updateWifiAPAction({ params }: { params: any }) {
 				]
 			});
 			if (!deleteResponse.success) {
+				logError({
+					displayName: router.data.displayName,
+					errorMessage: 'Failed to delete parent section during wifi AP update',
+					...deleteResponse
+				});
 				throw new Error(
-					'Something went wrong while deleting the parent section. Please see logs for more details',
+					'Something went wrong while deleting the parent section.',
 					{
 						cause: deleteResponse.error
 					}
@@ -213,8 +237,13 @@ export async function updateWifiAPAction({ params }: { params: any }) {
 				]
 			});
 			if (!updateResponse.success) {
+				logError({
+					displayName: router.data.displayName,
+					errorMessage: 'Failed to update parent section during wifi AP update',
+					...updateResponse
+				});
 				throw new Error(
-					'Something went wrong while updating the parent section. Please see logs for more details',
+					'Something went wrong while updating the parent section.',
 					{
 						cause: updateResponse.error
 					}
@@ -225,7 +254,7 @@ export async function updateWifiAPAction({ params }: { params: any }) {
 		const childKeys = {
 			ssid: values.ssid,
 			key: values.password,
-			hidden: values.hidden ? '1' : '0'
+			hidden: values.hidden === '1' ? '1' : '0'
 		};
 
 		if (values.password === '' || values.password === undefined) {
@@ -242,12 +271,14 @@ export async function updateWifiAPAction({ params }: { params: any }) {
 				]
 			});
 			if (!deleteResponse.success) {
-				throw new Error(
-					'Something went wrong while deleting the key. Please see logs for more details',
-					{
-						cause: deleteResponse.error
-					}
-				);
+				logError({
+					displayName: router.data.displayName,
+					errorMessage: 'Failed to delete key during wifi AP update',
+					...deleteResponse
+				});
+				throw new Error('Something went wrong while deleting the key.', {
+					cause: deleteResponse.error
+				});
 			}
 		}
 
@@ -278,8 +309,13 @@ export async function updateWifiAPAction({ params }: { params: any }) {
 				]
 			});
 			if (!updateAP.success) {
+				logError({
+					displayName: router.data.displayName,
+					errorMessage: 'Failed to update child section during wifi AP update',
+					...updateAP
+				});
 				throw new Error(
-					'Something went wrong while updating the child section. Please see logs for more details',
+					'Something went wrong while updating the child section.',
 					{
 						cause: updateAP.error
 					}
@@ -291,10 +327,12 @@ export async function updateWifiAPAction({ params }: { params: any }) {
 			router.data.displayName
 		);
 		if (!commitChangesResponse.success) {
-			throw new Error(
-				'Something went wrong while committing the changes. Please see logs for more details',
-				{ cause: commitChangesResponse.error }
-			);
+			logError({
+				displayName: router.data.displayName,
+				errorMessage: 'Failed to commit changes during wifi AP update',
+				...commitChangesResponse
+			});
+			throw new Error('Something went wrong while committing the changes.');
 		}
 
 		return {
@@ -302,14 +340,19 @@ export async function updateWifiAPAction({ params }: { params: any }) {
 			data: 'AP updated successfully!'
 		} as const;
 	} catch (error) {
-		console.log('Update AP Error: ', error);
+		console.log(error);
 		if (params?.displayName && params.displayName !== '') {
-			await revertWifiChanges(params.displayName);
+			const revertResponse = await revertWifiChanges(params.displayName);
+			if (!revertResponse.success) {
+				logError({
+					errorMessage: 'Failed to revert wifi changes',
+					...revertResponse
+				});
+			}
 		}
 		return {
 			success: false,
-			error:
-				'Something went wrong while updating the AP. Please see logs for more details'
+			error: 'Something went wrong while updating the AP.'
 		} as const;
 	}
 }
@@ -319,8 +362,8 @@ async function commitWifiChanges(router: string) {
 	if (!primaryRouter.success) {
 		return {
 			success: false,
-			error: 'Failed to find router'
-		};
+			errorMessage: 'Failed to find router'
+		} as const;
 	}
 
 	const commitChangesResponse = await ubusCall({
@@ -337,14 +380,12 @@ async function commitWifiChanges(router: string) {
 
 	if (!commitChangesResponse.success) {
 		return {
-			success: false,
-			error: commitChangesResponse.error
+			...commitChangesResponse
 		} as const;
 	}
 
 	return {
-		success: true,
-		data: commitChangesResponse.data
+		...commitChangesResponse
 	} as const;
 }
 
@@ -353,7 +394,7 @@ async function revertWifiChanges(router: string) {
 	if (!primaryRouter.success) {
 		return {
 			success: false,
-			error: 'Failed to find router'
+			errorMessage: 'Failed to find router'
 		};
 	}
 
@@ -371,13 +412,11 @@ async function revertWifiChanges(router: string) {
 
 	if (!revertResponse.success) {
 		return {
-			success: false,
-			error: revertResponse.error
+			...revertResponse
 		} as const;
 	}
 
 	return {
-		success: true,
-		data: 'Changes reverted successfully!'
+		...revertResponse
 	} as const;
 }

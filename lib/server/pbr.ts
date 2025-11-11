@@ -1,7 +1,8 @@
 import 'server-only';
-import { pbrInterfacesSchema, pbrPolicySchema } from '@/types/ubusCalls';
+import { pbrPolicySchema, pbrInterfacesSchema } from '@/types/ubusCalls';
 import { ubusCall } from './ubusCalls';
 import { getPrimaryRouter } from './router';
+import { logError } from '../client/errorLog';
 
 export type PbrPolicy = Awaited<ReturnType<typeof getPBRPolicy>>;
 export async function getPBRPolicy() {
@@ -22,6 +23,11 @@ export async function getPBRPolicy() {
 	});
 
 	if (!pbrPolicyResponse.success) {
+		logError({
+			displayName: primaryRouter.data.displayName,
+			errorMessage: 'Failed to get pbr policy',
+			...pbrPolicyResponse
+		});
 		return {
 			success: false,
 			error:
@@ -33,9 +39,11 @@ export async function getPBRPolicy() {
 		pbrPolicyResponse.data
 	);
 	if (!parsedPbrPolicyResponse.success) {
-		console.log('[ERROR] Failed to parse pbr policy response', {
+		logError({
 			displayName: primaryRouter.data.displayName,
-			error: parsedPbrPolicyResponse.error
+			errorMessage: 'Failed to parse pbr policy response',
+			zodError: parsedPbrPolicyResponse.error,
+			...pbrPolicyResponse
 		});
 		return {
 			success: false,
@@ -62,6 +70,11 @@ export async function getPBRInterfaces() {
 	});
 
 	if (!pbrInterfacesResponse.success) {
+		logError({
+			displayName: primaryRouter.data.displayName,
+			errorMessage: 'Failed to get pbr interfaces',
+			...pbrInterfacesResponse
+		});
 		return {
 			success: false,
 			error:
@@ -73,9 +86,11 @@ export async function getPBRInterfaces() {
 		pbrInterfacesResponse.data
 	);
 	if (!parsedPbrPolicyResponse.success) {
-		console.log('[ERROR] Failed to parse pbr policy response', {
+		logError({
 			displayName: primaryRouter.data.displayName,
-			error: parsedPbrPolicyResponse.error
+			errorMessage: 'Failed to parse pbr interfaces response',
+			zodError: parsedPbrPolicyResponse.error,
+			...pbrInterfacesResponse
 		});
 		return {
 			success: false,

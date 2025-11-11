@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { getRouter } from '@/lib/server/router';
 import { ubusBatchCall } from '@/lib/server/ubusCalls';
 import { z } from 'zod';
+import { logError } from '@/lib/client/errorLog';
 
 const updateInfoSchema = z.object({
 	board_name: z.string(),
@@ -86,8 +87,10 @@ export async function GET(request: NextRequest) {
 		});
 
 		if (!response.success) {
-			console.log('[ERROR] Failed to get board info', {
-				error: response.error
+			logError({
+				displayName: router.data.displayName,
+				errorMessage: 'Failed to get board info',
+				...response
 			});
 			return new Response(
 				JSON.stringify({
@@ -103,15 +106,23 @@ export async function GET(request: NextRequest) {
 			);
 		}
 
-		const boardData = response.data[0].result[1];
-		const efiData = response.data[1].result[1];
-		const parsedBoardInfo = updateInfoSchema.safeParse(boardData);
-		if (!parsedBoardInfo.success) {
-			console.log('[ERROR] Board info parse error:', parsedBoardInfo.error);
+		const parsedBoardData = updateInfoSchema.safeParse(
+			response.data.find((data) => data.id === 1)?.result?.[1]
+		);
+		const efiData = response.data.filter((data) => data.id === 2)[0];
+		if (!parsedBoardData.success || !efiData.success) {
+			logError({
+				displayName: router.data.displayName,
+				...parsedBoardData
+			});
+			logError({
+				displayName: router.data.displayName,
+				...efiData
+			});
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to parse board info'
+					error: 'Failed to get board info'
 				}),
 				{
 					status: 400,
@@ -122,7 +133,7 @@ export async function GET(request: NextRequest) {
 			);
 		}
 
-		const isSnapshot = boardData.release.target.includes('snapshot');
+		const isSnapshot = parsedBoardData.data.release.target.includes('snapshot');
 		if (isSnapshot) {
 			return new Response(
 				JSON.stringify({
@@ -130,11 +141,11 @@ export async function GET(request: NextRequest) {
 					data: {
 						displayName: router.data.displayName,
 						hasUpdate: false,
-						currentVersion: parsedBoardInfo.data.release.version,
+						currentVersion: parsedBoardData.data.release.version,
 						latestVersion: '',
-						target: parsedBoardInfo.data.release.target,
-						profile: parsedBoardInfo.data.board_name,
-						rootfs_type: parsedBoardInfo.data.rootfs_type,
+						target: parsedBoardData.data.release.target,
+						profile: parsedBoardData.data.board_name,
+						rootfs_type: parsedBoardData.data.rootfs_type,
 						packages: [],
 						isEfi: false,
 						isSnapshot: true
@@ -159,9 +170,10 @@ export async function GET(request: NextRequest) {
 		);
 		if (!latestVersionRequest.ok) {
 			const errorText = await latestVersionRequest.text();
-			console.log('[ERROR] Failed to fetch latest stable release of OpenWrt', {
-				status: latestVersionRequest.status,
-				error: errorText
+			logError({
+				displayName: router.data.displayName,
+				errorMessage: 'Failed to fetch latest stable release of OpenWrt',
+				rawResponse: errorText
 			});
 			return new Response(
 				JSON.stringify({
@@ -178,7 +190,10 @@ export async function GET(request: NextRequest) {
 		}
 		const latestVersionResponse = await latestVersionRequest.json();
 		if (!latestVersionResponse.stable_version) {
-			console.log('[ERROR] Unable to fetch latest stable release of OpenWrt');
+			logError({
+				displayName: router.data.displayName,
+				errorMessage: 'Unable to fetch latest stable release of OpenWrt'
+			});
 			return new Response(
 				JSON.stringify({
 					success: false,
@@ -193,7 +208,7 @@ export async function GET(request: NextRequest) {
 			);
 		}
 		const latestVersion = latestVersionResponse.stable_version as string;
-		const currentVersion = parsedBoardInfo.data.release.version;
+		const currentVersion = parsedBoardData.data.release.version;
 		const hasUpdate = currentVersion !== latestVersion;
 		if (!hasUpdate) {
 			return new Response(
@@ -204,9 +219,9 @@ export async function GET(request: NextRequest) {
 						hasUpdate: false,
 						currentVersion: currentVersion,
 						latestVersion: latestVersion,
-						target: parsedBoardInfo.data.release.target,
-						profile: parsedBoardInfo.data.board_name,
-						rootfs_type: parsedBoardInfo.data.rootfs_type,
+						target: parsedBoardData.data.release.target,
+						profile: parsedBoardData.data.board_name,
+						rootfs_type: parsedBoardData.data.rootfs_type,
 						packages: [],
 						isEfi: false
 					}
@@ -233,9 +248,10 @@ export async function GET(request: NextRequest) {
 
 		if (!packagesListRequest.ok) {
 			const errorText = await packagesListRequest.text();
-			console.log('[ERROR] Failed to get installed packages', {
-				status: packagesListRequest.status,
-				error: errorText
+			logError({
+				displayName: router.data.displayName,
+				errorMessage: 'Failed to get installed packages',
+				rawResponse: errorText
 			});
 			return new Response(
 				JSON.stringify({
@@ -270,12 +286,12 @@ export async function GET(request: NextRequest) {
 			hasUpdate,
 			currentVersion: currentVersion,
 			latestVersion: latestVersion,
-			target: parsedBoardInfo.data.release.target,
-			profile: parsedBoardInfo.data.board_name,
+			target: parsedBoardData.data.release.target,
+			profile: parsedBoardData.data.board_name,
 			packages: packagesListClean,
 			displayName: router.data.displayName,
-			rootfs_type: parsedBoardInfo.data.rootfs_type,
-			isEfi: efiData ? true : false
+			rootfs_type: parsedBoardData.data.rootfs_type,
+			isEfi: efiData.result[1] ? true : false
 		};
 
 		return new Response(
@@ -291,7 +307,8 @@ export async function GET(request: NextRequest) {
 			}
 		);
 	} catch (error) {
-		console.log('[ERROR] Failed to check for updates', {
+		logError({
+			errorMessage: 'Failed to check for updates',
 			error
 		});
 		return new Response(

@@ -2,6 +2,7 @@ import 'server-only';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { buildResponseSchema } from '../types';
+import { logError } from '@/lib/client/errorLog';
 
 const statusRequestSchema = z.object({
 	requestHash: z.string().min(1, 'Request hash is required')
@@ -41,9 +42,11 @@ export async function POST(request: NextRequest) {
 
 		if (!statusResponse.ok) {
 			const errorText = await statusResponse.text();
-			console.log('[ERROR] Failed to check build status', {
+			logError({
+				errorMessage: 'Failed to check build status',
+				requestHash,
 				status: statusResponse.status,
-				error: errorText
+				rawResponse: errorText
 			});
 			return new Response(
 				JSON.stringify({
@@ -64,10 +67,12 @@ export async function POST(request: NextRequest) {
 
 		const parsedStatusData = buildResponseSchema.safeParse(statusData);
 		if (!parsedStatusData.success) {
-			console.log(
-				'[ERROR] Failed to parse build status response:',
-				parsedStatusData.error
-			);
+			logError({
+				errorMessage: 'Failed to parse build status response',
+				requestHash,
+				zodError: parsedStatusData.error,
+				rawResponse: statusData
+			});
 			return new Response(
 				JSON.stringify({
 					success: false,
@@ -95,7 +100,8 @@ export async function POST(request: NextRequest) {
 			}
 		);
 	} catch (error: any) {
-		console.log('[ERROR] Failed to check build status', {
+		logError({
+			errorMessage: 'Failed to check build status',
 			error
 		});
 		return new Response(

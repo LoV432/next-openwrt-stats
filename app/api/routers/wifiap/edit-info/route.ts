@@ -1,3 +1,4 @@
+import { logError } from '@/lib/client/errorLog';
 import { getRouter } from '@/lib/server/router';
 import { ubusBatchCall } from '@/lib/server/ubusCalls';
 import {
@@ -117,6 +118,11 @@ export async function GET(reuqest: NextRequest) {
 		});
 
 		if (!data.success) {
+			logError({
+				displayName: router.data.displayName,
+				errorMessage: 'Failed to get wifi AP info for editing',
+				...data
+			});
 			throw new Error('Something went wrong');
 		}
 
@@ -137,10 +143,10 @@ export async function GET(reuqest: NextRequest) {
 		);
 
 		const wifiAPParentConfig = wifiConfigParent.parse(
-			wifiAPParentConfigResponse.result[1].values
+			wifiAPParentConfigResponse.result?.[1].values
 		);
 		const wifiAPConfig = wifiConfig.parse(
-			wifiAPConfigResponse.result[1].values
+			wifiAPConfigResponse.result?.[1].values
 		);
 
 		return new Response(
@@ -158,7 +164,10 @@ export async function GET(reuqest: NextRequest) {
 			}
 		);
 	} catch (error) {
-		console.log(error);
+		logError({
+			errorMessage: 'Something went wrong while getting the wifi AP info',
+			error
+		});
 		return new Response('Something went wrong', {
 			status: 500
 		});

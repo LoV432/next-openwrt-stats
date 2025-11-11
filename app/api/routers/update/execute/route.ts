@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { getRouter } from '@/lib/server/router';
 import { z } from 'zod';
 import { ubusCall } from '@/lib/server/ubusCalls';
+import { logError } from '@/lib/client/errorLog';
 
 const executeRequestSchema = z.object({
 	displayName: z.string().min(1, 'Display name is required')
@@ -28,8 +29,9 @@ export async function POST(request: NextRequest) {
 		const parsedBody = executeRequestSchema.safeParse(body);
 
 		if (!parsedBody.success) {
-			console.log('[ERROR] Invalid request body', {
-				error: parsedBody.error
+			logError({
+				errorMessage: 'Invalid request body',
+				zodError: parsedBody.error
 			});
 			return new Response(
 				JSON.stringify({
@@ -75,8 +77,10 @@ export async function POST(request: NextRequest) {
 		});
 
 		if (!validateFirmware.success) {
-			console.log('[ERROR] Failed to validate sysupgrade image', {
-				error: validateFirmware.error
+			logError({
+				displayName,
+				errorMessage: 'Failed to validate sysupgrade image',
+				...validateFirmware
 			});
 			return new Response(
 				JSON.stringify({
@@ -97,10 +101,12 @@ export async function POST(request: NextRequest) {
 		);
 
 		if (!validateFirmwareParsed.success) {
-			console.log(
-				'[ERROR] Failed to parse validate sysupgrade image response:',
-				validateFirmwareParsed.error
-			);
+			logError({
+				displayName,
+				errorMessage: 'Failed to validate sysupgrade image',
+				zodError: validateFirmwareParsed.error,
+				...validateFirmware
+			});
 			return new Response(
 				JSON.stringify({
 					success: false,
@@ -119,10 +125,11 @@ export async function POST(request: NextRequest) {
 			!validateFirmwareParsed.data.valid &&
 			!validateFirmwareParsed.data.allow_backup
 		) {
-			console.log(
-				'[ERROR] Failed to validate sysupgrade image:',
-				validateFirmwareParsed.data
-			);
+			logError({
+				displayName,
+				errorMessage: 'Failed to validate sysupgrade image',
+				...validateFirmware
+			});
 			return new Response(
 				JSON.stringify({
 					success: false,
@@ -151,8 +158,10 @@ export async function POST(request: NextRequest) {
 		});
 
 		if (!sysupgradeUbusCall.success) {
-			console.log('[ERROR] Failed to execute sysupgrade', {
-				error: sysupgradeUbusCall.error
+			logError({
+				displayName,
+				errorMessage: 'Failed to execute sysupgrade',
+				...sysupgradeUbusCall
 			});
 			return new Response(
 				JSON.stringify({
@@ -180,7 +189,8 @@ export async function POST(request: NextRequest) {
 			}
 		);
 	} catch (error) {
-		console.log('[ERROR] Failed to execute sysupgrade', {
+		logError({
+			errorMessage: 'Failed to execute sysupgrade',
 			error
 		});
 		return new Response(

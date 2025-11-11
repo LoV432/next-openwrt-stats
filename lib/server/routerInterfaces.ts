@@ -8,6 +8,7 @@ import {
 import { ubusBatchCall, ubusCall } from './ubusCalls';
 import { calcMbps } from '../utils';
 import { getPrimaryRouter } from './router';
+import { logError } from '../client/errorLog';
 
 export type NetworkInterfaces = Awaited<
 	ReturnType<typeof getNetworkInterfaces>
@@ -24,10 +25,14 @@ export async function getNetworkInterfaces() {
 	});
 
 	if (!ubusResponse.success) {
+		logError({
+			displayName: primaryRouter.data.displayName,
+			errorMessage: 'Failed to get network interfaces',
+			...ubusResponse
+		});
 		return {
 			success: false,
-			error:
-				'Something went wrong while getting the network interfaces. Please see logs for more details'
+			error: 'Something went wrong while getting the network interfaces.'
 		} as const;
 	}
 
@@ -35,9 +40,11 @@ export async function getNetworkInterfaces() {
 		ubusResponse.data
 	);
 	if (!parsedUbusResponse.success) {
-		console.log('[ERROR] Failed to parse ubus response', {
+		logError({
 			displayName: primaryRouter.data.displayName,
-			error: parsedUbusResponse.error
+			errorMessage: 'Failed to parse network interfaces response',
+			zodError: parsedUbusResponse.error,
+			...ubusResponse
 		});
 		return {
 			success: false,
@@ -80,10 +87,14 @@ export async function getRealTimeTraffic(device: string) {
 	});
 
 	if (!ubusResponse.success) {
+		logError({
+			displayName: primaryRouter.data.displayName,
+			errorMessage: 'Failed to get real time traffic',
+			...ubusResponse
+		});
 		return {
 			success: false,
-			error:
-				'Something went wrong while getting the real time traffic. Please see logs for more details'
+			error: 'Something went wrong while getting the real time traffic.'
 		} as const;
 	}
 
@@ -92,9 +103,11 @@ export async function getRealTimeTraffic(device: string) {
 	);
 
 	if (!parsedUbusResponse.success) {
-		console.log('[ERROR] Failed to parse ubus response', {
+		logError({
 			displayName: primaryRouter.data.displayName,
-			error: parsedUbusResponse.error
+			errorMessage: 'Failed to parse real-time traffic stats response',
+			zodError: parsedUbusResponse.error,
+			...ubusResponse
 		});
 		return {
 			success: false,
@@ -165,22 +178,43 @@ export async function getWireguardInterfaces() {
 	});
 
 	if (!ubusResponse.success) {
+		logError({
+			displayName: primaryRouter.data.displayName,
+			errorMessage: 'Failed to get wireguard interfaces',
+			...ubusResponse
+		});
 		return {
 			success: false,
-			error:
-				'Something went wrong while getting the wireguard interfaces. Please see logs for more details'
+			error: 'Something went wrong while getting the wireguard interfaces.'
 		} as const;
 	}
 
 	const luciWireguardInterfaces = ubusResponse.data
 		.filter((response) => response.id === 1)
-		.map((response) => response);
+		.map((response) => response)[0];
 	const networkInterfaces = ubusResponse.data
 		.filter((response) => response.id === 2)
-		.map((response) => response.result);
+		.map((response) => response)[0];
+
+	if (!luciWireguardInterfaces.success || !networkInterfaces.success) {
+		!luciWireguardInterfaces.success &&
+			logError({
+				displayName: primaryRouter.data.displayName,
+				...luciWireguardInterfaces
+			});
+		!networkInterfaces.success &&
+			logError({
+				displayName: primaryRouter.data.displayName,
+				...networkInterfaces
+			});
+		return {
+			success: false,
+			error: 'Failed to parse ubus response'
+		} as const;
+	}
 
 	const peersFromNetworkInterfaces = Object.values(
-		networkInterfaces[0][1].values
+		networkInterfaces.result[1].values
 	).filter((interfaceConfig: any) =>
 		interfaceConfig?.['.type'].startsWith('wireguard')
 	);
@@ -190,9 +224,10 @@ export async function getWireguardInterfaces() {
 	);
 
 	if (!parsedWireguardPeers.success) {
-		console.log('[ERROR] Failed to parse ubus response', {
+		logError({
 			displayName: primaryRouter.data.displayName,
-			error: parsedWireguardPeers.error
+			zodError: parsedWireguardPeers.error,
+			...peersFromNetworkInterfaces
 		});
 		return {
 			success: false,
@@ -201,12 +236,13 @@ export async function getWireguardInterfaces() {
 	}
 
 	const parsedLuciWireguardInterfaces = wireguardInterfacesSchema.safeParse(
-		luciWireguardInterfaces[0]
+		luciWireguardInterfaces.result[1]
 	);
 	if (!parsedLuciWireguardInterfaces.success) {
-		console.log('[ERROR] Failed to parse ubus response', {
+		logError({
 			displayName: primaryRouter.data.displayName,
-			error: parsedLuciWireguardInterfaces.error
+			zodError: parsedLuciWireguardInterfaces.error,
+			...luciWireguardInterfaces
 		});
 		return {
 			success: false,

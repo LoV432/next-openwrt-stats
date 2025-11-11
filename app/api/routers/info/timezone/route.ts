@@ -1,3 +1,4 @@
+import { logError } from '@/lib/client/errorLog';
 import { ubusCall } from '@/lib/server/ubusCalls';
 import { routerTimezoneSchema } from '@/types/ubusCalls';
 import { NextRequest } from 'next/server';
@@ -29,30 +30,21 @@ export async function GET(request: NextRequest) {
 			);
 		}
 
-		const response = await ubusCall({
+		const getTimezoneResponse = await ubusCall({
 			displayName,
 			params: ['luci', 'getTimezones', {}]
 		});
 
-		if (!response.success) {
-			return new Response(JSON.stringify(response), {
-				status: 400,
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			});
-		}
-
-		const parsedResponse = routerTimezoneSchema.safeParse(response.data);
-		if (!parsedResponse.success) {
-			console.log('[ERROR] Failed to parse router timezone', {
+		if (!getTimezoneResponse.success) {
+			logError({
 				displayName,
-				error: parsedResponse.error
+				errorMessage: 'Failed to get timezone',
+				...getTimezoneResponse
 			});
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'Failed to parse router timezone'
+					error: 'Failed to get timezone.'
 				}),
 				{
 					status: 400,
@@ -62,9 +54,33 @@ export async function GET(request: NextRequest) {
 				}
 			);
 		}
-		const activeTimezone = Object.keys(parsedResponse.data.result[1]).find(
-			(key) => parsedResponse.data.result[1][key].active
+
+		const parsedTimezoneResponse = routerTimezoneSchema.safeParse(
+			getTimezoneResponse.data
 		);
+		if (!parsedTimezoneResponse.success) {
+			logError({
+				displayName,
+				errorMessage: 'Failed to parse timezone.',
+				zodError: parsedTimezoneResponse.error,
+				...getTimezoneResponse
+			});
+			return new Response(
+				JSON.stringify({
+					success: false,
+					error: 'Failed to parse router timezone.'
+				}),
+				{
+					status: 400,
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				}
+			);
+		}
+		const activeTimezone = Object.keys(
+			parsedTimezoneResponse.data.result[1]
+		).find((key) => parsedTimezoneResponse.data.result[1][key].active);
 
 		return new Response(
 			JSON.stringify({
@@ -79,7 +95,8 @@ export async function GET(request: NextRequest) {
 			}
 		);
 	} catch (error) {
-		console.log('[ERROR] Failed to get router timezone', {
+		logError({
+			errorMessage: 'Failed to get router timezone.',
 			error
 		});
 		return new Response(

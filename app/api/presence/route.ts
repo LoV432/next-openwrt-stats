@@ -12,6 +12,7 @@ import { DhcpDevices, getDhcpDevices } from '@/lib/server/dhcpDevices';
 import { getRouters } from '@/lib/server/router';
 import { ubusCall } from '@/lib/server/ubusCalls';
 import { wifiAPsLiveDataSchema } from '@/types/ubusCalls';
+import { logError } from '@/lib/client/errorLog';
 export const dynamic = 'force-dynamic';
 
 type PresenceEvent = {
@@ -69,7 +70,7 @@ export async function GET() {
 		return new Response(
 			JSON.stringify({
 				success: false,
-				error: allClients.error
+				error: 'Failed to get wifi clients'
 			}),
 			{
 				status: 500,
@@ -185,15 +186,24 @@ async function getIfnames() {
 					params: ['luci-rpc', 'getWirelessDevices', {}]
 				});
 				if (!wifiAPsLiveData.success) {
+					logError({
+						displayName: router.displayName,
+						errorMessage:
+							'Failed to get wifi devices during presence detection',
+						...wifiAPsLiveData
+					});
 					return;
 				}
 				const wifiAPsLiveDataParsed = wifiAPsLiveDataSchema.safeParse(
 					wifiAPsLiveData.data
 				);
 				if (!wifiAPsLiveDataParsed.success) {
-					console.log('[ERROR] Failed to parse ubus response from wifiAPs', {
+					logError({
 						displayName: router.displayName,
-						error: wifiAPsLiveDataParsed.error
+						zodError: wifiAPsLiveDataParsed.error,
+						errorMessage:
+							'Failed to parse wifi devices during presence detection',
+						...wifiAPsLiveData
 					});
 					return;
 				}
@@ -226,7 +236,11 @@ async function getIfnames() {
 			data: wifiIfnames
 		} as const;
 	} catch (error) {
-		console.error(error);
+		logError({
+			errorMessage:
+				'Something went wrong while getting the wifi ifnames for presence detection',
+			error
+		});
 		return {
 			success: false,
 			error:

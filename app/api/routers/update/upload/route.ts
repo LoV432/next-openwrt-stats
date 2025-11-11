@@ -4,6 +4,7 @@ import { getRouter } from '@/lib/server/router';
 import { z } from 'zod';
 import { buildResponseSchema } from '../types';
 import { ubusCall } from '@/lib/server/ubusCalls';
+import { logError } from '@/lib/client/errorLog';
 
 const uploadRequestSchema = z.object({
 	displayName: z.string(),
@@ -47,8 +48,9 @@ export async function POST(request: NextRequest) {
 		const parsedBody = uploadRequestSchema.safeParse(body);
 
 		if (!parsedBody.success) {
-			console.log('[ERROR] Invalid request body', {
-				error: parsedBody.error
+			logError({
+				errorMessage: 'Invalid request body',
+				zodError: parsedBody.error
 			});
 			return new Response(
 				JSON.stringify({
@@ -83,7 +85,11 @@ export async function POST(request: NextRequest) {
 		}
 
 		if (!buildStatus.bin_dir) {
-			console.log('[ERROR] No bin_dir found');
+			logError({
+				displayName,
+				errorMessage: 'No bin_dir found',
+				buildStatus
+			});
 			return new Response(
 				JSON.stringify({
 					success: false,
@@ -100,7 +106,11 @@ export async function POST(request: NextRequest) {
 
 		const allImages = buildStatus.images;
 		if (!allImages || allImages.length === 0) {
-			console.log('[ERROR] No firmware images found');
+			logError({
+				displayName,
+				errorMessage: 'No firmware images found',
+				buildStatus
+			});
 			return new Response(
 				JSON.stringify({
 					success: false,
@@ -134,7 +144,12 @@ export async function POST(request: NextRequest) {
 			})[0];
 
 		if (!image) {
-			console.log('[ERROR] No valid firmware image found');
+			logError({
+				displayName,
+				errorMessage: 'No valid firmware image found',
+				routerUpdateInfo,
+				availableImages: allImages
+			});
 			return new Response(
 				JSON.stringify({
 					success: false,
@@ -160,9 +175,12 @@ export async function POST(request: NextRequest) {
 
 		if (!imageResponse.ok) {
 			const errorText = await imageResponse.text();
-			console.log('[ERROR] Failed to download sysupgrade image', {
+			logError({
+				displayName,
+				errorMessage: 'Failed to download sysupgrade image',
+				imageUrl: `https://sysupgrade.openwrt.org/store/${buildStatus.bin_dir}/${image.name}`,
 				status: imageResponse.status,
-				error: errorText
+				rawResponse: errorText
 			});
 			return new Response(
 				JSON.stringify({
@@ -195,9 +213,12 @@ export async function POST(request: NextRequest) {
 
 		if (!uploadResponse.ok) {
 			const errorText = await uploadResponse.text();
-			console.log('[ERROR] Failed to upload sysupgrade image', {
+			logError({
+				displayName,
+				errorMessage: 'Failed to upload sysupgrade image to router',
+				routerIP: router.data.routerIP,
 				status: uploadResponse.status,
-				error: errorText
+				rawResponse: errorText
 			});
 			return new Response(
 				JSON.stringify({
@@ -217,10 +238,12 @@ export async function POST(request: NextRequest) {
 		const uploadResponseSchema =
 			uploadImageResponseSchema.safeParse(uploadResponseJson);
 		if (!uploadResponseSchema.success) {
-			console.log(
-				'[ERROR] Failed to parse upload sysupgrade image response:',
-				uploadResponseSchema.error
-			);
+			logError({
+				displayName,
+				errorMessage: 'Failed to parse upload sysupgrade image response',
+				zodError: uploadResponseSchema.error,
+				rawResponse: uploadResponseJson
+			});
 			return new Response(
 				JSON.stringify({
 					success: false,
@@ -247,8 +270,10 @@ export async function POST(request: NextRequest) {
 		});
 
 		if (!validateFirmware.success) {
-			console.log('[ERROR] Failed to validate sysupgrade image', {
-				error: validateFirmware.error
+			logError({
+				displayName,
+				errorMessage: 'Failed to validate sysupgrade image',
+				...validateFirmware
 			});
 			return new Response(
 				JSON.stringify({
@@ -269,10 +294,12 @@ export async function POST(request: NextRequest) {
 		);
 
 		if (!validateFirmwareParsed.success) {
-			console.log(
-				'[ERROR] Failed to parse validate sysupgrade image response:',
-				validateFirmwareParsed.error
-			);
+			logError({
+				displayName,
+				errorMessage: 'Failed to parse validate sysupgrade image response',
+				zodError: validateFirmwareParsed.error,
+				...validateFirmware
+			});
 			return new Response(
 				JSON.stringify({
 					success: false,
@@ -291,10 +318,12 @@ export async function POST(request: NextRequest) {
 			!validateFirmwareParsed.data.valid &&
 			!validateFirmwareParsed.data.allow_backup
 		) {
-			console.log(
-				'[ERROR] Failed to validate sysupgrade image:',
-				validateFirmwareParsed.data
-			);
+			logError({
+				displayName,
+				errorMessage: 'Failed to validate sysupgrade image',
+				validationResult: validateFirmwareParsed.data,
+				...validateFirmware
+			});
 			return new Response(
 				JSON.stringify({
 					success: false,
@@ -321,7 +350,8 @@ export async function POST(request: NextRequest) {
 			}
 		);
 	} catch (error) {
-		console.log('[ERROR] Failed to upload sysupgrade', {
+		logError({
+			errorMessage: 'Failed to upload sysupgrade',
 			error
 		});
 		return new Response(

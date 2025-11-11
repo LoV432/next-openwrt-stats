@@ -4,6 +4,7 @@ import { routersTable } from '@/drizzle/schema/schema';
 import { eq } from 'drizzle-orm';
 import { ubusCall } from '@/lib/server/ubusCalls';
 import { NextRequest } from 'next/server';
+import { logError } from '@/lib/client/errorLog';
 
 export type RouterLogs = Awaited<
 	| {
@@ -41,13 +42,14 @@ export async function GET(request: NextRequest) {
 			.limit(1);
 
 		if (!router.length) {
-			console.log('[INFO] No router found with router', {
-				displayName
+			logError({
+				displayName,
+				errorMessage: 'This router does not exist.'
 			});
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: 'No router found'
+					error: 'This router does not exist.'
 				}),
 				{
 					status: 400,
@@ -70,10 +72,35 @@ export async function GET(request: NextRequest) {
 		});
 
 		if (!logsCall.success) {
+			logError({
+				displayName,
+				errorMessage: 'Failed to get logs',
+				...logsCall
+			});
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: logsCall.error
+					error: 'Failed to get logs.'
+				}),
+				{
+					status: 400,
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				}
+			);
+		}
+
+		if (!logsCall.data.result?.[1]?.stdout) {
+			logError({
+				displayName,
+				errorMessage: 'Failed to get logs',
+				...logsCall
+			});
+			return new Response(
+				JSON.stringify({
+					success: false,
+					error: 'No logs found'
 				}),
 				{
 					status: 400,
@@ -100,13 +127,14 @@ export async function GET(request: NextRequest) {
 			}
 		);
 	} catch (error) {
-		console.log('[ERROR] Failed to get router logs', {
+		logError({
+			errorMessage: 'Something went wrong while getting the router logs',
 			error
 		});
 		return new Response(
 			JSON.stringify({
 				success: false,
-				error: 'Failed to get router logs'
+				error: 'Failed to get router logs.'
 			}),
 			{
 				status: 500,

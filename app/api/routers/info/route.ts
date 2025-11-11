@@ -1,3 +1,4 @@
+import { logError } from '@/lib/client/errorLog';
 import { getRouter } from '@/lib/server/router';
 import { ubusBatchCall } from '@/lib/server/ubusCalls';
 import { routerInfoSchema } from '@/types/ubusCalls';
@@ -49,21 +50,32 @@ export async function GET(request: NextRequest) {
 				{
 					id: 2,
 					params: ['system', 'board', {}]
-				},
-				{
-					id: 3,
-					params: ['luci', 'getVersion', {}]
 				}
+				// {
+				// 	id: 3,
+				// 	params: ['luci', 'getVersion', {}]
+				// }
 			]
 		});
 
 		if (!response.success) {
-			return new Response(JSON.stringify(response), {
-				status: 400,
-				headers: {
-					'Content-Type': 'application/json'
-				}
+			logError({
+				displayName: router.data.displayName,
+				errorMessage: 'Failed to get router info',
+				...response
 			});
+			return new Response(
+				JSON.stringify({
+					success: false,
+					error: 'Failed to get router info'
+				}),
+				{
+					status: 400,
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				}
+			);
 		}
 		let flattenData: { [key: string]: any } = {};
 		response.data.forEach((data: any) => {
@@ -76,9 +88,11 @@ export async function GET(request: NextRequest) {
 
 		const parsedResponse = routerInfoSchema.safeParse(flattenData);
 		if (!parsedResponse.success) {
-			console.log('[ERROR] Failed to parse router info', {
+			logError({
 				displayName: router.data.displayName,
-				error: parsedResponse.error
+				errorMessage: 'Failed to parse router info',
+				zodError: parsedResponse.error,
+				...response
 			});
 			return new Response(
 				JSON.stringify({
@@ -107,7 +121,8 @@ export async function GET(request: NextRequest) {
 			}
 		);
 	} catch (error) {
-		console.log('[ERROR] Failed to get router info', {
+		logError({
+			errorMessage: 'Failed to get router info',
 			error
 		});
 		return new Response(
