@@ -118,12 +118,12 @@ export async function GET(reuqest: NextRequest) {
 		});
 
 		if (!data.success) {
-			logError({
-				displayName: router.data.displayName,
-				errorMessage: 'Failed to get wifi AP info for editing',
-				...data
+			throw new Error('Failed to get wifi AP info for editing', {
+				cause: {
+					displayName: router.data.displayName,
+					...data
+				}
 			});
-			throw new Error('Something went wrong');
 		}
 
 		const wifiAPFrequencyListResponse = data.data.filter((d) => d.id === 1)[0];
@@ -131,6 +131,21 @@ export async function GET(reuqest: NextRequest) {
 		const wifiAPCountryListResponse = data.data.filter((d) => d.id === 3)[0];
 		const wifiAPParentConfigResponse = data.data.filter((d) => d.id === 4)[0];
 		const wifiAPConfigResponse = data.data.filter((d) => d.id === 5)[0];
+
+		if (
+			!wifiAPFrequencyListResponse.success ||
+			!wifiAPTxPowerListResponse.success ||
+			!wifiAPCountryListResponse.success ||
+			!wifiAPParentConfigResponse.success ||
+			!wifiAPConfigResponse.success
+		) {
+			throw new Error('Failed to get wifi AP info for editing', {
+				cause: {
+					displayName: router.data.displayName,
+					...data
+				}
+			});
+		}
 
 		const wifiAPFrequencyList = wifiAPFrequencyListSchema.parse(
 			wifiAPFrequencyListResponse

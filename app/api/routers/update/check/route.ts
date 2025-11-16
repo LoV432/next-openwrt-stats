@@ -105,10 +105,27 @@ export async function GET(request: NextRequest) {
 				}
 			);
 		}
+		const boardData = response.data.find((data) => data.id === 1);
+		if (!boardData?.success) {
+			logError({
+				displayName: router.data.displayName,
+				...boardData
+			});
+			return new Response(
+				JSON.stringify({
+					success: false,
+					errorMessage: 'Failed to get board info'
+				}),
+				{
+					status: 400,
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				}
+			);
+		}
 
-		const parsedBoardData = updateInfoSchema.safeParse(
-			response.data.find((data) => data.id === 1)?.result?.[1]
-		);
+		const parsedBoardData = updateInfoSchema.safeParse(boardData.result?.[1]);
 		const efiData = response.data.filter((data) => data.id === 2)[0];
 		if (!parsedBoardData.success || !efiData.success) {
 			logError({

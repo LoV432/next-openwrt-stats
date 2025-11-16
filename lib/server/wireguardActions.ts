@@ -142,22 +142,22 @@ export async function addWireguardPeerAction({
 			]
 		});
 		if (!wireguardPeerResponse.success) {
-			logError({
-				displayName: primaryRouter.data.displayName,
-				errorMessage: 'Failed to add WireGuard peer',
-				...wireguardPeerResponse
+			throw new Error('Failed to add WireGuard peer', {
+				cause: {
+					displayName: primaryRouter.data.displayName,
+					...wireguardPeerResponse
+				}
 			});
-			throw new Error('Something went wrong while adding the WireGuard peer.');
 		}
 
 		const commitChangesResponse = await commitWireguardChanges();
 		if (!commitChangesResponse.success) {
-			logError({
-				displayName: primaryRouter.data.displayName,
-				errorMessage: 'Failed to commit WireGuard changes',
-				...commitChangesResponse
+			throw new Error('Failed to commit WireGuard changes', {
+				cause: {
+					displayName: primaryRouter.data.displayName,
+					...commitChangesResponse
+				}
 			});
-			throw new Error('Something went wrong while committing the changes.');
 		}
 
 		return {
@@ -280,17 +280,12 @@ export async function editWireguardPeerAction({
 				]
 			});
 			if (!deleteResponse.success) {
-				logError({
-					displayName: primaryRouter.data.displayName,
-					errorMessage: 'Failed to delete WireGuard peer',
-					...deleteResponse
-				});
-				throw new Error(
-					'Something went wrong while editing the WireGuard peer.',
-					{
-						cause: deleteResponse.error
+				throw new Error('Failed to delete WireGuard peer', {
+					cause: {
+						displayName: primaryRouter.data.displayName,
+						...deleteResponse
 					}
-				);
+				});
 			}
 		}
 
@@ -321,24 +316,22 @@ export async function editWireguardPeerAction({
 				]
 			});
 			if (!wireguardPeerResponse.success) {
-				logError({
-					displayName: primaryRouter.data.displayName,
-					errorMessage: 'Failed to edit WireGuard peer',
-					...wireguardPeerResponse
-				});
-				throw new Error(
-					'Something went wrong while editing the WireGuard peer.',
-					{
-						cause: wireguardPeerResponse.error
+				throw new Error('Failed to edit WireGuard peer', {
+					cause: {
+						displayName: primaryRouter.data.displayName,
+						...wireguardPeerResponse
 					}
-				);
+				});
 			}
 		}
 
 		const commitChangesResponse = await commitWireguardChanges();
 		if (!commitChangesResponse.success) {
-			throw new Error('Something went wrong while committing the changes.', {
-				cause: commitChangesResponse.errorMessage
+			throw new Error('Failed to commit WireGuard changes', {
+				cause: {
+					displayName: primaryRouter.data.displayName,
+					...commitChangesResponse
+				}
 			});
 		}
 
@@ -389,22 +382,22 @@ export async function deleteWireguardPeerAction({
 		});
 
 		if (!deleteResponse.success) {
-			logError({
-				displayName: primaryRouter.data.displayName,
-				errorMessage: 'Failed to delete WireGuard peer',
-				...deleteResponse
+			throw new Error('Failed to delete WireGuard peer', {
+				cause: {
+					displayName: primaryRouter.data.displayName,
+					...deleteResponse
+				}
 			});
-			throw new Error('Failed to delete WireGuard peer');
 		}
 
 		const commitChangesResponse = await commitWireguardChanges();
 		if (!commitChangesResponse.success) {
-			logError({
-				displayName: primaryRouter.data.displayName,
-				errorMessage: 'Failed to commit WireGuard changes',
-				...commitChangesResponse
+			throw new Error('Failed to commit changes', {
+				cause: {
+					displayName: primaryRouter.data.displayName,
+					...commitChangesResponse
+				}
 			});
-			throw new Error('Failed to commit changes');
 		}
 
 		return {
@@ -435,7 +428,7 @@ async function commitWireguardChanges() {
 		return {
 			success: false,
 			errorMessage: 'Failed to commit WireGuard changes.'
-		};
+		} as const;
 	}
 
 	const commitResponse = await ubusCall({
@@ -467,7 +460,7 @@ async function revertWireguardChanges() {
 		return {
 			success: false,
 			errorMessage: 'Failed to find router'
-		};
+		} as const;
 	}
 
 	const revertResponse = await ubusCall({

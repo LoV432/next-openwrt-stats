@@ -54,25 +54,21 @@ export async function setPBRPolicyAction({
 			]
 		});
 		if (!pbrPolicyResponse.success) {
-			logError({
-				displayName: primaryRouter.data.displayName,
-				errorMessage: 'Failed to add pbr policy',
-				...pbrPolicyResponse
-			});
-			throw new Error('Something went wrong while adding the policy.', {
-				cause: pbrPolicyResponse.ubusErrorMessage
+			throw new Error('Failed to add pbr policy', {
+				cause: {
+					displayName: primaryRouter.data.displayName,
+					...pbrPolicyResponse
+				}
 			});
 		}
 
 		const commitChangesResponse = await commitPBRchanges();
 		if (!commitChangesResponse.success) {
-			logError({
-				displayName: primaryRouter.data.displayName,
-				errorMessage: 'Failed to commit pbr changes',
-				...commitChangesResponse
-			});
-			throw new Error('Something went wrong while committing the changes.', {
-				cause: commitChangesResponse.errorMessage
+			throw new Error('Failed to commit pbr changes', {
+				cause: {
+					displayName: primaryRouter.data.displayName,
+					...commitChangesResponse
+				}
 			});
 		}
 
@@ -165,13 +161,11 @@ export async function editPBRPolicyAction({
 				]
 			});
 			if (!deleteResponse.success) {
-				logError({
-					displayName: primaryRouter.data.displayName,
-					errorMessage: 'Failed to delete pbr policy',
-					...deleteResponse
-				});
-				throw new Error('Something went wrong while editing the policy.', {
-					cause: deleteResponse.ubusErrorMessage
+				throw new Error('Failed to delete pbr policy', {
+					cause: {
+						displayName: primaryRouter.data.displayName,
+						...deleteResponse
+					}
 				});
 			}
 		}
@@ -196,26 +190,22 @@ export async function editPBRPolicyAction({
 				]
 			});
 			if (!pbrPolicyResponse.success) {
-				logError({
-					displayName: primaryRouter.data.displayName,
-					errorMessage: 'Failed to edit pbr policy',
-					...pbrPolicyResponse
-				});
-				throw new Error('Something went wrong while editing the policy.', {
-					cause: pbrPolicyResponse.ubusErrorMessage
+				throw new Error('Failed to edit pbr policy', {
+					cause: {
+						displayName: primaryRouter.data.displayName,
+						...pbrPolicyResponse
+					}
 				});
 			}
 		}
 
 		const commitChangesResponse = await commitPBRchanges();
 		if (!commitChangesResponse.success) {
-			logError({
-				displayName: primaryRouter.data.displayName,
-				errorMessage: 'Failed to commit pbr changes',
-				...commitChangesResponse
-			});
-			throw new Error('Something went wrong while committing the changes.', {
-				cause: commitChangesResponse.errorMessage
+			throw new Error('Failed to commit pbr changes', {
+				cause: {
+					displayName: primaryRouter.data.displayName,
+					...commitChangesResponse
+				}
 			});
 		}
 
@@ -223,7 +213,10 @@ export async function editPBRPolicyAction({
 			success: true
 		} as const;
 	} catch (error) {
-		console.error(error);
+		logError({
+			errorMessage: 'Failed to edit pbr policy',
+			error
+		});
 		const revertResponse = await revertPBRChanges();
 		if (!revertResponse.success) {
 			logError({
@@ -258,25 +251,21 @@ export async function deletePBRPolicyAction({ name }: { name: string }) {
 			]
 		});
 		if (!pbrPolicyResponse.success) {
-			logError({
-				displayName: primaryRouter.data.displayName,
-				errorMessage: 'Failed to delete pbr policy',
-				...pbrPolicyResponse
-			});
-			throw new Error('Something went wrong while deleting the policy.', {
-				cause: pbrPolicyResponse.ubusErrorMessage
+			throw new Error('Failed to delete pbr policy', {
+				cause: {
+					displayName: primaryRouter.data.displayName,
+					...pbrPolicyResponse
+				}
 			});
 		}
 
 		const commitChangesResponse = await commitPBRchanges();
 		if (!commitChangesResponse.success) {
-			logError({
-				displayName: primaryRouter.data.displayName,
-				errorMessage: 'Failed to commit pbr changes',
-				...commitChangesResponse
-			});
-			throw new Error('Something went wrong while committing the changes.', {
-				cause: commitChangesResponse.errorMessage
+			throw new Error('Failed to commit pbr changes', {
+				cause: {
+					displayName: primaryRouter.data.displayName,
+					...commitChangesResponse
+				}
 			});
 		}
 
@@ -308,7 +297,7 @@ async function commitPBRchanges() {
 		return {
 			success: false,
 			errorMessage: 'Failed to commmit pbr changes.'
-		};
+		} as const;
 	}
 
 	const commitChangesResponse = await ubusCall({
@@ -340,7 +329,7 @@ async function revertPBRChanges() {
 		return {
 			success: false,
 			errorMessage: 'Failed to find router'
-		};
+		} as const;
 	}
 
 	const revertResponse = await ubusCall({

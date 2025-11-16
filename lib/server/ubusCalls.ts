@@ -10,6 +10,27 @@ import { routersTable } from '@/drizzle/schema/schema';
 import { eq } from 'drizzle-orm';
 import { logError } from '../client/errorLog';
 
+type UbusCallReturnType =
+	| {
+			success: true;
+			data: {
+				jsonrpc: string;
+				id: number;
+				result: [number, any];
+			};
+			call: object;
+			rawResponse: object;
+	  }
+	| {
+			success: false;
+			ubusErrorMessage: string;
+			call: object;
+			rawResponse?: object;
+			error?: unknown;
+			loginRawResponse?: object;
+			loginCall?: object;
+	  };
+
 export async function ubusCall({
 	displayName,
 	params,
@@ -18,14 +39,14 @@ export async function ubusCall({
 	displayName: string;
 	params: [string, string, { [key: string]: any }];
 	attemptRetry?: boolean;
-}) {
+}): Promise<UbusCallReturnType> {
 	try {
 		const session = await getSession(displayName);
 		if (!session.success) {
 			return {
 				...session,
-				calls: params
-			} as const;
+				call: params
+			};
 		}
 		const ubusObject = {
 			jsonrpc: '2.0',
@@ -45,8 +66,8 @@ export async function ubusCall({
 			if (!newLogin.success) {
 				return {
 					...newLogin,
-					calls: params
-				} as const;
+					call: params
+				};
 			}
 			const newUbusObject = {
 				jsonrpc: '2.0',
@@ -56,30 +77,39 @@ export async function ubusCall({
 			};
 			callResponse = await sendUbus(session.data.routerIP, newUbusObject);
 			if (!callResponse.success) {
-				return {
-					...callResponse
-				} as const;
+				return callResponse;
 			}
 		}
 		if (!callResponse.success) {
-			return {
-				...callResponse
-			} as const;
+			return callResponse;
 		}
 		await updateLastAccessed(displayName);
-		return {
-			...callResponse
-		} as const;
+		return callResponse;
 	} catch (error) {
 		return {
 			success: false,
-			ubusErrorMessage:
-				'Something went wrong while executing the command. Please see logs for more details',
+			ubusErrorMessage: 'Something went wrong while executing the command.',
 			call: params,
 			error
-		} as const;
+		};
 	}
 }
+
+type UbusBatchCallReturnType = Promise<
+	| {
+			success: true;
+			data: UbusBatchResponses[];
+	  }
+	| {
+			success: false;
+			ubusErrorMessage: string;
+			calls: object;
+			rawResponse?: object;
+			error?: unknown;
+			loginRawResponse?: object;
+			loginCall?: object;
+	  }
+>;
 
 export async function ubusBatchCall({
 	displayName,
@@ -92,7 +122,7 @@ export async function ubusBatchCall({
 		params: [string, string, { [key: string]: any }];
 	}[];
 	attemptRetry?: boolean;
-}) {
+}): UbusBatchCallReturnType {
 	try {
 		const session = await getSession(displayName);
 		if (!session.success) {
@@ -156,7 +186,7 @@ export async function ubusBatchCall({
 	}
 }
 
-const loginPromises = new Map<string, ReturnType<typeof login>>();
+const loginPromises = new Map<string, LoginReturnType>();
 async function dedupedLogin({
 	routerIP,
 	username,
@@ -177,6 +207,23 @@ async function dedupedLogin({
 	return promise;
 }
 
+type LoginReturnType = Promise<
+	| {
+			success: true;
+			data: {
+				ubus_rpc_session: string;
+				timeout: number;
+				expires: number;
+			};
+	  }
+	| {
+			success: false;
+			ubusErrorMessage: string;
+			error?: unknown;
+			loginRawResponse?: object;
+			loginCall?: object;
+	  }
+>;
 export async function login({
 	routerIP,
 	username,
@@ -187,7 +234,7 @@ export async function login({
 	username: string;
 	password: string;
 	isNew?: boolean;
-}) {
+}): LoginReturnType {
 	const ubusObject = {
 		jsonrpc: '2.0',
 		id: 1,
@@ -222,7 +269,7 @@ export async function login({
 				ubusErrorMessage: 'Failed to parse ubus login response',
 				loginRawResponse: ubusResponse,
 				loginCall: ubusObject
-			} as const;
+			};
 		}
 
 		if (parsedUbusResponse.data.result[0] === 6) {
@@ -231,7 +278,7 @@ export async function login({
 				ubusErrorMessage: 'Login failed due to bad credentials',
 				loginRawResponse: ubusResponse,
 				loginCall: ubusObject
-			} as const;
+			};
 		}
 
 		if (!isNew) {
@@ -247,14 +294,14 @@ export async function login({
 		return {
 			success: true,
 			data: parsedUbusResponse.data.result[1]
-		} as const;
+		};
 	} catch (error) {
 		return {
 			success: false,
 			error,
 			ubusErrorMessage:
 				'Fetch request failed during login. Please check your router IP and make sure it is reachable'
-		} as const;
+		};
 	}
 }
 
@@ -314,12 +361,36 @@ async function getSession(displayName: string) {
 	} catch (error) {
 		return {
 			success: false,
+			ubusErrorMessage: 'Something went wrong while fetching the session.',
 			error
 		} as const;
 	}
 }
 
-async function sendUbus(routerIP: string, ubusObject: object, timeout = 2000) {
+type SendUbusReturnType = Promise<
+	| {
+			success: true;
+			data: {
+				jsonrpc: string;
+				id: number;
+				result: [number, any];
+			};
+			rawResponse: object;
+			call: object;
+	  }
+	| {
+			success: false;
+			ubusErrorMessage: string;
+			call: object;
+			error?: unknown;
+			rawResponse?: object;
+	  }
+>;
+async function sendUbus(
+	routerIP: string,
+	ubusObject: object,
+	timeout = 2000
+): SendUbusReturnType {
 	try {
 		const response = await fetch(routerIP + '/ubus', {
 			method: 'POST',
@@ -336,38 +407,72 @@ async function sendUbus(routerIP: string, ubusObject: object, timeout = 2000) {
 					success: false,
 					ubusErrorMessage: 'Access denied',
 					rawResponse: jsonResponse,
-					params: ubusObject
-				} as const;
+					call: ubusObject
+				};
 			}
 			return {
 				success: false,
 				ubusErrorMessage: 'Failed to parse ubus response',
 				error: parsedResponse.error,
 				rawResponse: jsonResponse,
-				params: ubusObject
-			} as const;
+				call: ubusObject
+			};
 		}
 		return {
 			success: true,
 			data: parsedResponse.data,
 			rawResponse: jsonResponse,
 			call: ubusObject
-		} as const;
+		};
 	} catch (error) {
 		return {
 			success: false,
 			error,
 			ubusErrorMessage:
-				'Fetch request failed during call. Please check your router IP and make sure it is reachable'
-		} as const;
+				'Fetch request failed during call. Please check your router IP and make sure it is reachable',
+			call: ubusObject
+		};
 	}
 }
 
+type UbusBatchResponses =
+	| {
+			success: true;
+			jsonrpc: string;
+			id: number;
+			result: [number, any];
+			rawResponse: object;
+			call: object;
+	  }
+	| {
+			success: false;
+			jsonrpc: string;
+			id: number;
+			ubusErrorMessage: string;
+			rawResponse: object;
+			call: object;
+	  };
+
+type SendUbusBatchReturnType = Promise<
+	| {
+			success: true;
+			data: UbusBatchResponses[];
+	  }
+	| {
+			success: false;
+			ubusErrorMessage: string;
+			calls: object[];
+			rawResponse?: object;
+			error?: unknown;
+			loginRawResponse?: object;
+			loginCall?: object;
+	  }
+>;
 async function sendUbusBatch(
 	routerIP: string,
 	calls: object[],
 	timeout = 2000
-) {
+): SendUbusBatchReturnType {
 	try {
 		const response = await fetch(routerIP + '/ubus', {
 			method: 'POST',
@@ -383,8 +488,8 @@ async function sendUbusBatch(
 				error: parsedResponse.error,
 				ubusErrorMessage: 'Failed to parse ubus batch response',
 				rawResponse: jsonResponse,
-				call: calls
-			} as const;
+				calls: calls
+			};
 		}
 		const filteredPrasedResponses = parsedResponse.data.map(
 			(filteredParsedResponse) => {
@@ -399,7 +504,7 @@ async function sendUbusBatch(
 						),
 						call: calls.find(
 							(call: any) => call.id === filteredParsedResponse.id
-						)
+						) as object
 					} as const;
 				} else {
 					return {
@@ -412,7 +517,7 @@ async function sendUbusBatch(
 						),
 						call: calls.find(
 							(call: any) => call.id === filteredParsedResponse.id
-						)
+						) as object
 					} as const;
 				}
 			}
@@ -420,13 +525,14 @@ async function sendUbusBatch(
 		return {
 			success: true,
 			data: filteredPrasedResponses
-		} as const;
+		};
 	} catch (error) {
 		return {
 			success: false,
 			error,
 			ubusErrorMessage:
-				'Fetch request failed during batch call. Please check your router IP and make sure it is reachable'
-		} as const;
+				'Fetch request failed during batch call. Please check your router IP and make sure it is reachable',
+			calls
+		};
 	}
 }
