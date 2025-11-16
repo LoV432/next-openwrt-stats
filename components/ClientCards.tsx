@@ -193,15 +193,15 @@ function ClientCard({
 		if (bytesHistory.length > 1) {
 			const traffic = calcMbps(bytesHistory[1], bytesHistory[0]);
 			setRealTimeTraffic({
-				rxBytes: traffic.rxMbps,
-				txBytes: traffic.txMbps
+				rxBytes: Number(traffic.rxMbps.toFixed(2)),
+				txBytes: Number(traffic.txMbps.toFixed(2))
 			});
 		}
 	}, [bytesHistory[0]]);
 	return (
 		<Card className="w-full gap-2">
 			<CardHeader className="relative pb-2 pt-1">
-				<span className="absolute -top-5 right-7 text-[13.2px] font-medium text-white/60">
+				<span className="absolute -top-5 right-7 text-[13.2px] font-medium text-white/70">
 					{wifiData &&
 					(realTimeTraffic?.rxBytes || realTimeTraffic?.txBytes) ? (
 						<>

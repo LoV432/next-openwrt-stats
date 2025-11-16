@@ -370,6 +370,7 @@ export async function getWifiClientsTraffic(ifnames: {
 			[key: string]: {
 				rxBytes: number;
 				txBytes: number;
+				signal: number;
 				time: number;
 			};
 		} = {};
@@ -420,38 +421,45 @@ export async function getWifiClientsTraffic(ifnames: {
 					if (parsedClientsResponse.success) {
 						const wifiClients = parsedClientsResponse.data.result[1].results;
 						for (const client of wifiClients) {
+							if (
+								trafficStats[client.mac.toUpperCase()] &&
+								// This is a workaround for the fact that sometimes a single device
+								// can be shown as connected to multiple APs
+								// (e.g. a device moved from one AP to another and the old AP still shows the device as connected)
+								// So we only update the traffic stats if the signal is higher
+								client.signal <= trafficStats[client.mac.toUpperCase()].signal
+							) {
+								continue;
+							}
 							trafficStats[client.mac.toUpperCase()] = {
 								rxBytes: client.rx.bytes,
 								txBytes: client.tx.bytes,
+								signal: client.signal,
 								time: Date.now() / 1000
 							};
 						}
 					}
 
 					if (parsedHostapdResponse.success) {
-						const hostapdClients = Object.keys(
+						for (const key of Object.keys(
 							parsedHostapdResponse.data.result[1].clients
-						).map((key) => {
-							if (trafficStats[key.toUpperCase()]) {
-								return null;
-							}
+						)) {
 							const client = parsedHostapdResponse.data.result[1].clients[key];
-							if (!client.bytes) {
-								return null;
-							}
-							return {
-								rxBytes: client.bytes.rx,
-								txBytes: client.bytes.tx,
-								time: Date.now() / 1000,
-								mac: key.toUpperCase()
-							};
-						});
-						for (const client of hostapdClients) {
-							if (!client) {
+							if (
+								trafficStats[key.toUpperCase()] &&
+								client.signal &&
+								client.signal <= trafficStats[key.toUpperCase()].signal
+							) {
 								continue;
 							}
-							trafficStats[client.mac.toUpperCase()] = {
-								...client
+							if (!client.bytes) {
+								continue;
+							}
+							trafficStats[key.toUpperCase()] = {
+								rxBytes: client.bytes.rx,
+								txBytes: client.bytes.tx,
+								signal: client.signal || -200,
+								time: Date.now() / 1000
 							};
 						}
 					}
