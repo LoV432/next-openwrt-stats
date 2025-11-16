@@ -200,7 +200,18 @@ function ClientCard({
 	}, [bytesHistory[0]]);
 	return (
 		<Card className="w-full gap-2">
-			<CardHeader className="pb-2">
+			<CardHeader className="relative pb-2 pt-1">
+				<span className="absolute -top-5 right-7 text-[13.2px] font-medium text-white/60">
+					{wifiData &&
+					(realTimeTraffic?.rxBytes || realTimeTraffic?.txBytes) ? (
+						<>
+							↓ {realTimeTraffic?.txBytes || '0.00'} / ↑{' '}
+							{realTimeTraffic?.rxBytes || '0.00'} Mbps
+						</>
+					) : (
+						<></>
+					)}
+				</span>
 				<div className="flex items-center overflow-hidden">
 					<div>
 						{!wifiData ? (
@@ -293,19 +304,10 @@ function ClientCard({
 						<span className="text-muted-foreground">MAC Address:</span>
 						<span>{device.macAddress}</span>
 					</p>
-					<p className="flex justify-between">
+					{/* <p className="flex justify-between">
 						<span className="text-muted-foreground">Realtime Traffic:</span>
-						<span>
-							{wifiData ? (
-								<>
-									↓ {realTimeTraffic?.txBytes || '0.00'} / ↑{' '}
-									{realTimeTraffic?.rxBytes || '0.00'} Mbps
-								</>
-							) : (
-								<>- - - -</>
-							)}
-						</span>
-					</p>
+
+					</p> */}
 					<p className="flex justify-between">
 						<span className="text-muted-foreground">Traffic Stats:</span>
 						<span>
