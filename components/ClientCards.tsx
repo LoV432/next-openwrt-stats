@@ -171,8 +171,8 @@ function ClientCard({
 	>([]);
 
 	const [realTimeTraffic, setRealTimeTraffic] = useState<{
-		rxBytes: number;
-		txBytes: number;
+		rxBytes: string | number;
+		txBytes: string | number;
 	} | null>(null);
 
 	useEffect(() => {
@@ -193,8 +193,8 @@ function ClientCard({
 		if (bytesHistory.length > 1) {
 			const traffic = calcMbps(bytesHistory[1], bytesHistory[0]);
 			setRealTimeTraffic({
-				rxBytes: Number(traffic.rxMbps.toFixed(2)),
-				txBytes: Number(traffic.txMbps.toFixed(2))
+				rxBytes: traffic.rxMbps,
+				txBytes: traffic.txMbps
 			});
 		}
 	}, [bytesHistory[0]]);

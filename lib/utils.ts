@@ -19,8 +19,8 @@ export function calcMbps(prev: number[], curr: number[]) {
 	const txMbps = (dtx * 8) / dt / 1_000_000;
 
 	return {
-		rxMbps: Number(rxMbps.toFixed(2)),
-		txMbps: Number(txMbps.toFixed(2))
+		rxMbps: Number(rxMbps.toFixed(2)) <= 0 ? 0 : rxMbps.toFixed(2),
+		txMbps: Number(txMbps.toFixed(2)) <= 0 ? 0 : txMbps.toFixed(2)
 	};
 }
 
