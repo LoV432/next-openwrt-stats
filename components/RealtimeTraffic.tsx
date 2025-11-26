@@ -161,7 +161,7 @@ export function RealtimeTraffic({ MAX_TRAFFIC }: { MAX_TRAFFIC: number }) {
 							Download:
 						</span>
 						<span className="ml-auto ">
-							{realtimeTrafficQuery.data?.rxMbps} Mbps
+							{realtimeTrafficQuery.data?.rxMbps.toFixed(2)} Mbps
 						</span>
 					</div>
 					<Progress className="w-full" value={downloadPercent} />
@@ -171,7 +171,7 @@ export function RealtimeTraffic({ MAX_TRAFFIC }: { MAX_TRAFFIC: number }) {
 							Upload:
 						</span>
 						<span className="ml-auto ">
-							{realtimeTrafficQuery.data?.txMbps} Mbps
+							{realtimeTrafficQuery.data?.txMbps.toFixed(2)} Mbps
 						</span>
 					</div>
 					<Progress className="w-full" value={uploadPercent} />

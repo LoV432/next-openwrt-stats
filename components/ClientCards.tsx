@@ -171,8 +171,8 @@ function ClientCard({
 	>([]);
 
 	const [realTimeTraffic, setRealTimeTraffic] = useState<{
-		rxBytes: string | number;
-		txBytes: string | number;
+		rxBytes: number;
+		txBytes: number;
 	} | null>(null);
 
 	useEffect(() => {
@@ -205,8 +205,8 @@ function ClientCard({
 					{wifiData &&
 					(realTimeTraffic?.rxBytes || realTimeTraffic?.txBytes) ? (
 						<>
-							↓ {realTimeTraffic?.txBytes || '0.00'} / ↑{' '}
-							{realTimeTraffic?.rxBytes || '0.00'} Mbps
+							↓ {realTimeTraffic?.txBytes.toFixed(2) || '0.00'} / ↑{' '}
+							{realTimeTraffic?.rxBytes.toFixed(2) || '0.00'} Mbps
 						</>
 					) : (
 						<></>
