@@ -153,8 +153,8 @@ const wifiAPLiveData = z.object({
 				iwinfo: z
 					.object({
 						channel: z.number().optional(),
-						txpower: z.number(),
-						ssid: z.string(),
+						txpower: z.number().optional(),
+						ssid: z.string().optional(),
 						bitrate: z.number().optional()
 					})
 					.optional()

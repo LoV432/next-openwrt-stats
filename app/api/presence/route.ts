@@ -216,7 +216,11 @@ async function getIfnames() {
 						continue;
 					}
 					for (const wifiInterface of wifiData.interfaces) {
-						if (!wifiInterface.ifname || !wifiInterface.iwinfo) {
+						if (
+							!wifiInterface.ifname ||
+							!wifiInterface.iwinfo ||
+							!wifiInterface.iwinfo.ssid
+						) {
 							continue;
 						}
 						if (!wifiIfnames[router.displayName]) {
