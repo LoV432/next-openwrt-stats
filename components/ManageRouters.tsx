@@ -47,7 +47,14 @@ import {
 	SelectValue
 } from '@/components/ui/select';
 
-export function ManageRouters() {
+export function ManageRouters({
+	dialogState
+}: {
+	dialogState: {
+		isOpen: boolean;
+		setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	};
+}) {
 	const getRoutersQuery = useQuery({
 		queryKey: ['getRouters'],
 		queryFn: async () => {
@@ -66,19 +73,7 @@ export function ManageRouters() {
 	});
 
 	return (
-		<Dialog>
-			<DialogTrigger asChild>
-				<div>
-					<Button variant="outline" className="hidden md:flex">
-						<SettingsIcon className="h-4 w-4" />
-						Manage Routers
-					</Button>
-					<button className="flex w-full items-center justify-start gap-2 rounded-none p-2 md:hidden">
-						<SettingsIcon className="h-4 w-4" />
-						Manage Routers
-					</button>
-				</div>
-			</DialogTrigger>
+		<Dialog open={dialogState.isOpen} onOpenChange={dialogState.setIsOpen}>
 			<DialogContent className="w-full sm:w-fit">
 				<DialogHeader>
 					<DialogTitle>Manager Routers</DialogTitle>

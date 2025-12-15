@@ -17,9 +17,10 @@ export default async function Home() {
 	}
 	const MAX_TRAFFIC = Number(process.env.MAX_TRAFFIC) || 100;
 	const presenceEnabled = process.env.PRESENCE_ENABLED === 'true';
+	const pbrEnabled = process.env.PBR_ENABLED === 'true';
 	return (
 		<div className="bg-background mx-auto flex w-full flex-col items-center justify-center gap-4">
-			<Header />
+			<Header pbrEnabled={pbrEnabled} />
 			<div className="flex w-full flex-col p-4 sm:w-[80%]">
 				<div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
 					<RealtimeTraffic MAX_TRAFFIC={MAX_TRAFFIC} />

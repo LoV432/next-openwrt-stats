@@ -17,14 +17,10 @@ export function InterfacePicker() {
 			<Popover open={isOpen} onOpenChange={setIsOpen}>
 				<PopoverTrigger asChild>
 					<div>
-						<Button variant="outline" className="hidden md:flex">
+						<Button variant="outline" className="flex">
 							<GlobeIcon className="h-4 w-4" />
 							{activeDevice?.interface || 'Network Interfaces'}
 						</Button>
-						<button className="flex w-full items-center justify-start gap-2 rounded-none border-b-2 p-2 md:hidden">
-							<GlobeIcon className="h-4 w-4" />
-							{activeDevice?.interface || 'Network Interfaces'}
-						</button>
 					</div>
 				</PopoverTrigger>
 				<PopoverContent className="w-80 p-0" align="end">

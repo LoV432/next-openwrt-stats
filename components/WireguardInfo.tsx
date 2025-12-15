@@ -20,9 +20,18 @@ import { DeleteWireguardPeer } from './DeleteWireguardPeer';
 import { AddEditWireguardPeer } from './AddWireguardPeer';
 import WireguardQRCode from './WireguardQRCode';
 
-export function WireguardInfo({ interfaceName }: { interfaceName: string }) {
-	const [open, setOpen] = useState(false);
-
+export function WireguardInfo({
+	interfaceName,
+	wireguardDialogState,
+	showButton
+}: {
+	interfaceName: string;
+	wireguardDialogState: {
+		isOpen: boolean;
+		setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	};
+	showButton: boolean;
+}) {
 	const wireguardQuery = useQuery({
 		queryKey: ['wireguard', interfaceName],
 		queryFn: async () => {
@@ -34,16 +43,21 @@ export function WireguardInfo({ interfaceName }: { interfaceName: string }) {
 			}
 			return response.data[interfaceName];
 		},
-		enabled: open
+		enabled: wireguardDialogState.isOpen
 	});
 
 	return (
-		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				<Button variant="outline" size="sm">
-					<NetworkIcon className="h-3 w-3" />
-				</Button>
-			</DialogTrigger>
+		<Dialog
+			open={wireguardDialogState.isOpen}
+			onOpenChange={wireguardDialogState.setIsOpen}
+		>
+			{showButton && (
+				<DialogTrigger asChild>
+					<Button variant="outline" size="sm">
+						<NetworkIcon className="h-3 w-3" />
+					</Button>
+				</DialogTrigger>
+			)}
 			<DialogContent className="flex h-full max-h-[80vh] w-[90vw] max-w-3xl flex-col overflow-hidden">
 				<DialogHeader>
 					<DialogTitle>Wireguard Info - {interfaceName}</DialogTitle>

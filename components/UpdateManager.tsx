@@ -46,7 +46,14 @@ import {
 import { FirmwareUpdateExecuteResponse } from '@/app/api/routers/update/execute/route';
 import { UploadFirmwareResponse } from '@/app/api/routers/update/upload/route';
 
-export function UpdateManagerModal() {
+export function UpdateManagerModal({
+	dialogState
+}: {
+	dialogState: {
+		isOpen: boolean;
+		setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	};
+}) {
 	const allRouters = useQuery({
 		queryKey: ['getRouters'],
 		queryFn: async () => {
@@ -65,19 +72,7 @@ export function UpdateManagerModal() {
 	});
 
 	return (
-		<Dialog>
-			<DialogTrigger asChild>
-				<div>
-					<Button variant="outline" className="hidden md:flex">
-						<CloudDownloadIcon className="h-4 w-4" />
-						Update Manager
-					</Button>
-					<button className="flex w-full items-center justify-start gap-2 rounded-none border-b-2 p-2 md:hidden">
-						<CloudDownloadIcon className="h-4 w-4" />
-						Update Manager
-					</button>
-				</div>
-			</DialogTrigger>
+		<Dialog open={dialogState.isOpen} onOpenChange={dialogState.setIsOpen}>
 			<DialogContent className="max-h-[80vh] max-w-4xl overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle>Update Manager</DialogTitle>

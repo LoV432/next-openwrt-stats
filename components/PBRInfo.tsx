@@ -16,7 +16,7 @@ import { SVGIcon } from './SVGIcons';
 import { AddEditRule } from './AddPBRPolicy';
 import { toast } from 'sonner';
 import { useState } from 'react';
-import { LoaderCircle, ShieldIcon, Trash2Icon } from 'lucide-react';
+import { LoaderCircle, Trash2Icon } from 'lucide-react';
 
 function Field({ label, value }: { label: string; value: string }) {
 	const values = value.split(' ').map((v) => {
@@ -49,8 +49,14 @@ function Field({ label, value }: { label: string; value: string }) {
 	);
 }
 
-export function PBRInfo() {
-	const [isOpen, setIsOpen] = useState(false);
+export function PBRInfo({
+	pbrDialogState
+}: {
+	pbrDialogState: {
+		isOpen: boolean;
+		setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	};
+}) {
 	const {
 		data,
 		refetch: refetchPolicies,
@@ -66,7 +72,7 @@ export function PBRInfo() {
 			}
 			return pbrData.data;
 		},
-		enabled: isOpen
+		enabled: pbrDialogState.isOpen
 	});
 
 	const { data: interfaces } = useQuery({
@@ -78,7 +84,7 @@ export function PBRInfo() {
 			if (!pbrData.success) throw new Error(pbrData.errorMessage);
 			return pbrData.data;
 		},
-		enabled: isOpen
+		enabled: pbrDialogState.isOpen
 	});
 
 	const policies = Object.values(data || {})
@@ -98,19 +104,10 @@ export function PBRInfo() {
 		})
 		.filter((policy) => policy !== null);
 	return (
-		<Dialog open={isOpen} onOpenChange={setIsOpen}>
-			<DialogTrigger asChild>
-				<div>
-					<Button variant="outline" className="hidden md:flex">
-						<ShieldIcon className="h-4 w-4" />
-						Policy Based Routing
-					</Button>
-					<button className="flex w-full items-center justify-start gap-2 rounded-none border-b-2 p-2 md:hidden">
-						<ShieldIcon className="h-4 w-4" />
-						Policy Based Routing
-					</button>
-				</div>
-			</DialogTrigger>
+		<Dialog
+			open={pbrDialogState.isOpen}
+			onOpenChange={pbrDialogState.setIsOpen}
+		>
 			<DialogContent className="flex h-full max-h-[80vh] w-[90vw] max-w-3xl flex-col overflow-hidden">
 				<DialogHeader>
 					<DialogTitle>Policy Based Routing</DialogTitle>

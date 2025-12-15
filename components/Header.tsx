@@ -1,18 +1,33 @@
-import { ManageRouters } from '@/components/ManageRouters';
+'use client';
 import { InterfacePicker } from './InterfacePicker';
-import { PBRInfo } from './PBRInfo';
-import { UpdateManagerModal } from './UpdateManager';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuTrigger,
-	DropdownMenuLabel
-} from '@/components/ui/dropdown-menu';
-import { Menu, RouterIcon } from 'lucide-react';
+import { FileText, RouterIcon } from 'lucide-react';
 import { Button } from './ui/button';
+import { PluginsDropDown } from './PluginsDropDown';
+import { SystemDropDown } from './SystemDropDown';
+import { PBRInfo } from './PBRInfo';
+import { WireguardInfo } from './WireguardInfo';
+import { useState } from 'react';
+import { useNetwork } from '@/providers/networkContext';
 import { RouterLogs } from './RouterLogs';
+import { UpdateManagerModal } from './UpdateManager';
+import { ManageRouters } from './ManageRouters';
 
-export function Header() {
+export function Header({ pbrEnabled }: { pbrEnabled: boolean }) {
+	const pbrDialogState = useState(false);
+	const wireguardDialogState = useState(false);
+	const logsDialogState = useState(false);
+	const updateManagerDialogState = useState(false);
+	const managetRouterDialogState = useState(false);
+	const { networkInterfaces } = useNetwork();
+	const wireguardInterfaces = networkInterfaces?.filter(
+		(device) => device.proto === 'wireguard'
+	);
+	const [selectedWireguardInterface, setSelectedWireguardInterface] = useState(
+		wireguardInterfaces?.[0]?.interface || ''
+	);
+	const showPluginDropdown =
+		(wireguardInterfaces?.length && wireguardInterfaces.length > 0) ||
+		pbrEnabled;
 	return (
 		<header className="bg-card sticky top-0 z-10 w-full border-b border-neutral-800">
 			<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -21,43 +36,81 @@ export function Header() {
 						<div className="rounded-lg bg-neutral-800 p-2">
 							<RouterIcon className="h-6 w-6 text-white" />
 						</div>
-						<h1 className="text-2xl font-bold text-white">OpenWrt Stats</h1>
+						<h1 className="hidden text-2xl font-bold text-white md:block">
+							OpenWrt Stats
+						</h1>
 					</div>
 
-					<div className="hidden items-center gap-4 md:flex">
+					<div className="flex items-center gap-2 sm:gap-4">
 						<InterfacePicker />
-						{process.env.PBR_ENABLED === 'true' && <PBRInfo />}
-						<RouterLogs />
-						<UpdateManagerModal />
-						<ManageRouters />
-					</div>
-
-					<div className="flex items-center md:hidden">
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant="outline" size="sm" aria-label="Open menu">
-									<Menu className="h-4 w-4" />
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent
-								className="pointer-events-none sm:max-w-[320px]"
-								align="end"
-							>
-								<div className="flex flex-col">
-									<DropdownMenuLabel className="border-b-2 pb-2 text-base">
-										Menu
-									</DropdownMenuLabel>
-									<InterfacePicker />
-									{process.env.PBR_ENABLED === 'true' && <PBRInfo />}
-									<RouterLogs />
-									<UpdateManagerModal />
-									<ManageRouters />
-								</div>
-							</DropdownMenuContent>
-						</DropdownMenu>
+						<Button onClick={() => logsDialogState[1](true)} variant="outline">
+							<FileText className="h-4 w-4" />
+							<span className="hidden md:block">Router Logs</span>
+						</Button>
+						{showPluginDropdown && (
+							<PluginsDropDown
+								pbrDialogState={{
+									isOpen: pbrDialogState[0],
+									setIsOpen: pbrDialogState[1]
+								}}
+								wireguardDialogState={{
+									isOpen: wireguardDialogState[0],
+									setIsOpen: wireguardDialogState[1]
+								}}
+								wireguardInterfaces={wireguardInterfaces || []}
+								setSelectedWireguardInterface={setSelectedWireguardInterface}
+								pbrEnabled={pbrEnabled}
+							/>
+						)}
+						<SystemDropDown
+							updateManagerDialogState={{
+								isOpen: updateManagerDialogState[0],
+								setIsOpen: updateManagerDialogState[1]
+							}}
+							manageRoutersDialogState={{
+								isOpen: managetRouterDialogState[0],
+								setIsOpen: managetRouterDialogState[1]
+							}}
+						/>
 					</div>
 				</div>
 			</div>
+			{pbrEnabled && (
+				<PBRInfo
+					pbrDialogState={{
+						isOpen: pbrDialogState[0],
+						setIsOpen: pbrDialogState[1]
+					}}
+				/>
+			)}
+			{wireguardInterfaces?.length && wireguardInterfaces.length > 0 && (
+				<WireguardInfo
+					wireguardDialogState={{
+						isOpen: wireguardDialogState[0],
+						setIsOpen: wireguardDialogState[1]
+					}}
+					interfaceName={selectedWireguardInterface}
+					showButton={false}
+				/>
+			)}
+			<RouterLogs
+				dialogState={{
+					isOpen: logsDialogState[0],
+					setIsOpen: logsDialogState[1]
+				}}
+			/>
+			<UpdateManagerModal
+				dialogState={{
+					isOpen: updateManagerDialogState[0],
+					setIsOpen: updateManagerDialogState[1]
+				}}
+			/>
+			<ManageRouters
+				dialogState={{
+					isOpen: managetRouterDialogState[0],
+					setIsOpen: managetRouterDialogState[1]
+				}}
+			/>
 		</header>
 	);
 }

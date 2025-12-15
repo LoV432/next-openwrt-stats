@@ -22,8 +22,14 @@ import { useEffect, useRef, useState } from 'react';
 import type { RouterLogs } from '@/app/api/routers/info/logs/route';
 import { getRouterTimezone } from '@/app/api/routers/info/timezone/route';
 
-export function RouterLogs() {
-	const [isOpen, setIsOpen] = useState(false);
+export function RouterLogs({
+	dialogState
+}: {
+	dialogState: {
+		isOpen: boolean;
+		setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	};
+}) {
 	const [selectedRouter, setSelectedRouter] = useState<string | undefined>(
 		undefined
 	);
@@ -54,7 +60,7 @@ export function RouterLogs() {
 			}
 			return data.data;
 		},
-		enabled: isOpen,
+		enabled: dialogState.isOpen,
 		refetchOnWindowFocus: false,
 		refetchOnMount: false
 	});
@@ -115,7 +121,7 @@ export function RouterLogs() {
 			return data.data;
 		},
 		enabled:
-			isOpen &&
+			dialogState.isOpen &&
 			selectedRouter !== undefined &&
 			routerTimezone.data !== undefined,
 		refetchOnWindowFocus: false,
@@ -169,20 +175,8 @@ export function RouterLogs() {
 	}
 
 	return (
-		<Dialog open={isOpen} onOpenChange={setIsOpen}>
-			<DialogTrigger asChild>
-				<div>
-					<Button variant="outline" className="hidden md:flex">
-						<FileText className="h-4 w-4" />
-						Logs
-					</Button>
-					<button className="flex w-full items-center justify-start gap-2 rounded-none border-b-2 p-2 md:hidden">
-						<FileText className="h-4 w-4" />
-						Logs
-					</button>
-				</div>
-			</DialogTrigger>
-			<DialogContent className="h-[95dvh] w-[90vw] border-neutral-800 bg-neutral-900 px-2 sm:max-w-[1200px] sm:px-6">
+		<Dialog open={dialogState.isOpen} onOpenChange={dialogState.setIsOpen}>
+			<DialogContent className="sm:max-w-300 h-[95dvh] w-[90vw] border-neutral-800 bg-neutral-900 px-2 sm:px-6">
 				<DialogHeader className="px-4 sm:px-0">
 					<DialogTitle className="flex items-center gap-2 text-white">
 						<FileText className="h-5 w-5" />

@@ -4,9 +4,11 @@ import { secondsToHumanReadable } from '@/lib/utils';
 import { WireguardInfo } from './WireguardInfo';
 import { useNetwork } from '@/providers/networkContext';
 import { GlobeIcon } from 'lucide-react';
+import { useState } from 'react';
 
 export function NetworkInterfaceInfo() {
 	const { activeDevice, isLoading, error } = useNetwork();
+	const [wireguardIsOpen, setWireguardIsOpen] = useState(false);
 
 	if (error) {
 		return <LoadingErrorCard error={error.message} />;
@@ -24,7 +26,14 @@ export function NetworkInterfaceInfo() {
 						Network Interface
 					</h3>
 					{activeDevice?.proto === 'wireguard' && (
-						<WireguardInfo interfaceName={activeDevice.interface} />
+						<WireguardInfo
+							interfaceName={activeDevice.interface}
+							wireguardDialogState={{
+								isOpen: wireguardIsOpen,
+								setIsOpen: setWireguardIsOpen
+							}}
+							showButton={true}
+						/>
 					)}
 				</div>
 			</CardHeader>
