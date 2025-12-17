@@ -1,5 +1,5 @@
 import 'server-only';
-import { ubusCall } from './ubusCalls';
+import { ubusBatchCall, ubusCall } from './ubusCalls';
 import { dhcpDevicesSchema } from '@/types/ubusCalls';
 import { getRouters } from './router';
 import { logError } from '../client/errorLog';
@@ -21,9 +21,21 @@ export async function getDhcpDevices() {
 	}[] = [];
 	await Promise.all(
 		allRouters.data.map(async (router) => {
-			const dhcpDevicesResponse = await ubusCall({
+			const dhcpDevicesResponse = await ubusBatchCall({
 				displayName: router.displayName,
-				params: ['luci-rpc', 'getDHCPLeases', {}]
+				calls: [
+					{ id: 1, params: ['luci-rpc', 'getDHCPLeases', {}] },
+					{
+						id: 2,
+						params: [
+							'uci',
+							'get',
+							{
+								config: 'dhcp'
+							}
+						]
+					}
+				]
 			});
 			if (!dhcpDevicesResponse.success) {
 				logError({
@@ -34,7 +46,7 @@ export async function getDhcpDevices() {
 				return;
 			}
 			const parsedDhcpDevicesResponse = dhcpDevicesSchema.safeParse(
-				dhcpDevicesResponse.data
+				dhcpDevicesResponse.data.find((response) => response.id === 1)
 			);
 			if (!parsedDhcpDevicesResponse.success) {
 				logError({
@@ -56,6 +68,38 @@ export async function getDhcpDevices() {
 					});
 				}
 			}
+			try {
+				// We don't want to crash the whole app in case something goes wrong with static leases
+				// hence we're catching the error and just moving on
+				const dhcpConfig = dhcpDevicesResponse.data.find(
+					(response) => response.id === 2
+				);
+				if (!dhcpConfig || !dhcpConfig.success) {
+					return;
+				}
+				const dhcpStaticLeases = Object.values(
+					dhcpConfig?.result?.[1].values
+				).filter((device: any) => device['.type'] === 'host') as {
+					name: string;
+					mac: string[];
+					ip: string;
+					leasetime: string;
+				}[];
+				const allMacsInDhcpDevices = dhcpDevices.map(
+					(device) => device.macAddress
+				);
+				for (const device of dhcpStaticLeases) {
+					if (allMacsInDhcpDevices.includes(device.mac[0].toUpperCase())) {
+						continue;
+					}
+					dhcpDevices.push({
+						deviceName: device.name || 'Unknown Device',
+						macAddress: device.mac[0].toUpperCase(),
+						ipAddress: device.ip,
+						leaseTime: false
+					});
+				}
+			} catch {}
 		})
 	);
 	return {
