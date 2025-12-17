@@ -25,7 +25,6 @@ import {
 	PencilIcon,
 	RefreshCcwIcon,
 	RouterIcon,
-	SettingsIcon,
 	TrashIcon
 } from 'lucide-react';
 import {

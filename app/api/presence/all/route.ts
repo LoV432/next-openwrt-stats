@@ -5,30 +5,18 @@ import {
 	presencesEventTable,
 	wifisTable
 } from '@/drizzle/schema/schema';
-import { desc, eq, lt, gt, and, or, inArray } from 'drizzle-orm';
+import { desc, lt, gt, and, or, inArray, eq } from 'drizzle-orm';
 import { NextRequest } from 'next/server';
 import { alias } from 'drizzle-orm/sqlite-core';
 import z from 'zod';
-
-export type PresenceEvent = {
-	id: number;
-	timestamp: number;
-	eventType: (typeof eventTypeIdMap)[keyof typeof eventTypeIdMap];
-	clientMac?: string;
-	clientName?: string;
-	fromRouter: string | null;
-	fromSSID: string | null;
-	fromBand: string | null;
-	toRouter: string | null;
-	toSSID: string | null;
-	toBand: string | null;
-};
+import { PresenceEvent } from '../[mac]/route';
 
 const filterSchema = z.object({
 	eventType: z
 		.string()
 		.transform((val) => val.split(',').map((type) => Number(type)))
 		.optional(),
+	clientMac: z.string().optional(),
 	startTime: z
 		.string()
 		.transform((val) => Number(val))
@@ -39,63 +27,25 @@ const filterSchema = z.object({
 		.optional()
 });
 
-export async function GET(
-	req: NextRequest,
-	{ params }: { params: Promise<{ mac: string }> }
-) {
+export async function GET(req: NextRequest) {
 	if (process.env.PRESENCE_ENABLED !== 'true') {
 		return new Response('Not enabled', { status: 500 });
 	}
-	const { mac: clientMac } = await params;
-	if (!clientMac) {
-		return new Response(
-			JSON.stringify({
-				success: false,
-				errorMessage: 'No clientMac provided'
-			}),
-			{
-				status: 400,
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			}
-		);
-	}
+
 	const { searchParams } = new URL(req.url);
 	const cursor = searchParams.get('cursor');
-	const limit = parseInt(searchParams.get('limit') || '20');
+	const limit = parseInt(searchParams.get('limit') || '50');
 	const filter = filterSchema.safeParse({
 		eventType: searchParams.get('eventType'),
+		clientMac: searchParams.get('clientMac'),
 		startTime: searchParams.get('startTime') || undefined,
 		endTime: searchParams.get('endTime') || undefined
 	}).data;
 
-	const clientId = await db
-		.select({ id: clientsTable.id })
-		.from(clientsTable)
-		.where(eq(clientsTable.clientMacAddress, clientMac));
-	if (!clientId.length) {
-		return new Response(
-			JSON.stringify({
-				success: true,
-				data: [],
-				hasMore: false,
-				nextCursor: null
-			}),
-			{
-				status: 404,
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			}
-		);
-	}
 	const fromWifiAlias = alias(wifisTable, 'fromWifi');
 	const toWifiAlias = alias(wifisTable, 'toWifi');
 
-	const whereConditions: any[] = [
-		eq(presencesEventTable.clientId, clientId[0].id)
-	];
+	const whereConditions: any[] = [];
 
 	if (filter?.eventType) {
 		whereConditions.push(
@@ -104,6 +54,10 @@ export async function GET(
 				filter.eventType as (typeof eventTypeIdMap)[keyof typeof eventTypeIdMap][]
 			)
 		);
+	}
+
+	if (filter?.clientMac) {
+		whereConditions.push(eq(clientsTable.clientMacAddress, filter.clientMac));
 	}
 
 	if (filter?.startTime) {
@@ -135,6 +89,8 @@ export async function GET(
 			id: presencesEventTable.id,
 			timestamp: presencesEventTable.timestamp,
 			eventType: presencesEventTable.eventType,
+			clientMac: clientsTable.clientMacAddress,
+			clientName: clientsTable.clientName,
 			fromRouter: fromWifiAlias.displayName,
 			fromSSID: fromWifiAlias.ssid,
 			fromBand: fromWifiAlias.band,

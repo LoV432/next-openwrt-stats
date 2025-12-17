@@ -11,7 +11,12 @@ import {
 	DropdownMenuSubTrigger,
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { ChevronDownIcon, PlugIcon, ShieldIcon } from 'lucide-react';
+import {
+	ChevronDownIcon,
+	HistoryIcon,
+	PlugIcon,
+	ShieldIcon
+} from 'lucide-react';
 import { Fragment } from 'react';
 
 type DialogState = {
@@ -23,16 +28,20 @@ export function PluginsDropDown({
 	pbrDialogState,
 	wireguardDialogState,
 	wireguardInterfaces,
+	presenceDialogState,
 	setSelectedWireguardInterface,
-	pbrEnabled
+	pbrEnabled,
+	presenceEnabled
 }: {
 	pbrDialogState: DialogState;
 	wireguardDialogState: DialogState;
+	presenceDialogState: DialogState;
 	wireguardInterfaces: {
 		interface: string;
 	}[];
 	setSelectedWireguardInterface: React.Dispatch<React.SetStateAction<string>>;
 	pbrEnabled: boolean;
+	presenceEnabled: boolean;
 }) {
 	return (
 		<>
@@ -55,7 +64,7 @@ export function PluginsDropDown({
 							<DropdownMenuSub>
 								<DropdownMenuSubTrigger className="gap-2 py-2">
 									<svg
-										className="h-4 w-4 fill-white"
+										className="h-4 w-4 fill-stone-400"
 										role="img"
 										viewBox="0 0 24 24"
 										xmlns="http://www.w3.org/2000/svg"
@@ -90,11 +99,22 @@ export function PluginsDropDown({
 						</>
 					)}
 					{pbrEnabled && (
+						<>
+							<DropdownMenuItem
+								className="py-2"
+								onClick={() => pbrDialogState.setIsOpen(true)}
+							>
+								<ShieldIcon /> Policy Based Routing
+							</DropdownMenuItem>
+							<DropdownMenuSeparator />
+						</>
+					)}
+					{presenceEnabled && (
 						<DropdownMenuItem
 							className="py-2"
-							onClick={() => pbrDialogState.setIsOpen(true)}
+							onClick={() => presenceDialogState.setIsOpen(true)}
 						>
-							<ShieldIcon /> Policy Based Routing
+							<HistoryIcon /> Presence Events
 						</DropdownMenuItem>
 					)}
 				</DropdownMenuContent>

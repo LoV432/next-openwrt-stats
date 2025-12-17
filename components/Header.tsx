@@ -6,18 +6,26 @@ import { PluginsDropDown } from './PluginsDropDown';
 import { SystemDropDown } from './SystemDropDown';
 import { PBRInfo } from './PBRInfo';
 import { WireguardInfo } from './WireguardInfo';
+import { AllPresenceEventsDialog } from './AllPresenceEvents';
 import { useState } from 'react';
 import { useNetwork } from '@/providers/networkContext';
 import { RouterLogs } from './RouterLogs';
 import { UpdateManagerModal } from './UpdateManager';
 import { ManageRouters } from './ManageRouters';
 
-export function Header({ pbrEnabled }: { pbrEnabled: boolean }) {
+export function Header({
+	pbrEnabled,
+	presenceEnabled
+}: {
+	pbrEnabled: boolean;
+	presenceEnabled: boolean;
+}) {
 	const pbrDialogState = useState(false);
 	const wireguardDialogState = useState(false);
 	const logsDialogState = useState(false);
 	const updateManagerDialogState = useState(false);
 	const managetRouterDialogState = useState(false);
+	const presenceDialogState = useState(false);
 	const { networkInterfaces } = useNetwork();
 	const wireguardInterfaces = networkInterfaces?.filter(
 		(device) => device.proto === 'wireguard'
@@ -27,7 +35,8 @@ export function Header({ pbrEnabled }: { pbrEnabled: boolean }) {
 	);
 	const showPluginDropdown =
 		(wireguardInterfaces?.length && wireguardInterfaces.length > 0) ||
-		pbrEnabled;
+		pbrEnabled ||
+		presenceEnabled;
 	return (
 		<header className="bg-card sticky top-0 z-10 w-full border-b border-neutral-800">
 			<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -57,9 +66,14 @@ export function Header({ pbrEnabled }: { pbrEnabled: boolean }) {
 									isOpen: wireguardDialogState[0],
 									setIsOpen: wireguardDialogState[1]
 								}}
+								presenceDialogState={{
+									isOpen: presenceDialogState[0],
+									setIsOpen: presenceDialogState[1]
+								}}
 								wireguardInterfaces={wireguardInterfaces || []}
 								setSelectedWireguardInterface={setSelectedWireguardInterface}
 								pbrEnabled={pbrEnabled}
+								presenceEnabled={presenceEnabled}
 							/>
 						)}
 						<SystemDropDown
@@ -91,6 +105,14 @@ export function Header({ pbrEnabled }: { pbrEnabled: boolean }) {
 					}}
 					interfaceName={selectedWireguardInterface}
 					showButton={false}
+				/>
+			)}
+			{presenceEnabled && (
+				<AllPresenceEventsDialog
+					dialogState={{
+						isOpen: presenceDialogState[0],
+						setIsOpen: presenceDialogState[1]
+					}}
 				/>
 			)}
 			<RouterLogs
