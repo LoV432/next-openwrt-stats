@@ -85,8 +85,8 @@ export async function getDhcpDevices() {
 					ip: string;
 					leasetime: string;
 				}[];
-				const allMacsInDhcpDevices = dhcpDevices.map(
-					(device) => device.macAddress
+				const allMacsInDhcpDevices = dhcpDevices.map((device) =>
+					device.macAddress.toUpperCase()
 				);
 				for (const device of dhcpStaticLeases) {
 					if (allMacsInDhcpDevices.includes(device.mac[0].toUpperCase())) {
