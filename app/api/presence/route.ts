@@ -235,6 +235,11 @@ async function getIfnames() {
 				}
 			})
 		);
+		if (Math.random() < 0.1) {
+			// Update the dhcp client cache about every 10% of the time
+			// This is to help with client name changes
+			updateDhcpClientCache();
+		}
 		return {
 			success: true,
 			data: wifiIfnames
@@ -281,13 +286,13 @@ async function addEventToDB(event: PresenceEvent) {
 
 async function getClientDB({ clientMacAddress }: { clientMacAddress: string }) {
 	const getClientId = await db
-		.select({ id: clientsTable.id })
+		.select({ id: clientsTable.id, clientName: clientsTable.clientName })
 		.from(clientsTable)
 		.where(eq(clientsTable.clientMacAddress, clientMacAddress));
+	const checkDhcpClientCache = dhcpClientsCache.find(
+		(client) => client.macAddress === clientMacAddress
+	);
 	if (getClientId.length === 0) {
-		const checkDhcpClientCache = dhcpClientsCache.find(
-			(client) => client.macAddress === clientMacAddress
-		);
 		if (checkDhcpClientCache) {
 			console.log(
 				'[INFO] Presence event DHCP client found in cache. Saving....'
@@ -338,7 +343,32 @@ async function getClientDB({ clientMacAddress }: { clientMacAddress: string }) {
 				.returning();
 		}
 	}
+	if (
+		// Check if the client name has changed
+		checkDhcpClientCache &&
+		checkDhcpClientCache.deviceName !== getClientId[0].clientName &&
+		checkDhcpClientCache.deviceName !== 'Unknown' &&
+		checkDhcpClientCache.deviceName !== 'Unknown Device'
+	) {
+		console.log(
+			`[INFO] Client name changed for ${getClientId[0].clientName}. Updating client name to ${checkDhcpClientCache.deviceName}`
+		);
+		await db
+			.update(clientsTable)
+			.set({ clientName: checkDhcpClientCache.deviceName })
+			.where(eq(clientsTable.clientMacAddress, clientMacAddress));
+	}
 	return getClientId;
+}
+
+async function updateDhcpClientCache() {
+	try {
+		const newDhcpClientsCache = await getDhcpDevices();
+		if (!newDhcpClientsCache.success) {
+			return;
+		}
+		dhcpClientsCache = newDhcpClientsCache.data;
+	} catch {}
 }
 
 async function getWifiDB({
