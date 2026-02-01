@@ -64,7 +64,9 @@ export function NetworkProvider({ children }: { children: ReactNode }) {
 					localStorageActiveDevice
 				);
 				const activeDevice = networkInterfaces?.find(
-					(device) => device.device === localStorageActiveDeviceParsed.device
+					(device) =>
+						device.device === localStorageActiveDeviceParsed.device &&
+						device.interface === localStorageActiveDeviceParsed.interface
 				);
 				if (!activeDevice) {
 					const wanDevice = networkInterfaces?.find(
