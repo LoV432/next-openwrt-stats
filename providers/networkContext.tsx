@@ -53,7 +53,9 @@ export function NetworkProvider({ children }: { children: ReactNode }) {
 			(networkInterfaces && !activeDevice) ||
 			// This is in case the primary router is switched. This ensures the activeDevice is valid
 			networkInterfaces?.findIndex(
-				(device) => device.device === activeDevice?.device
+				(device) =>
+					device.device === activeDevice?.device &&
+					device.interface === activeDevice?.interface
 			) === -1
 		) {
 			const localStorageActiveDevice = localStorage.getItem('activeDevice');
