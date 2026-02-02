@@ -2,14 +2,28 @@ import 'server-only';
 import { db } from '@/lib/server/dbDriver';
 import { routersTable } from '@/drizzle/schema/schema';
 import { eq } from 'drizzle-orm';
-import { ubusCall } from '@/lib/server/ubusCalls';
+import { ubusBatchCall } from '@/lib/server/ubusCalls';
 import { NextRequest } from 'next/server';
 import { logError } from '@/lib/client/errorLog';
 
 export type RouterLogs = Awaited<
 	| {
 			success: true;
-			data: string[];
+			data:
+				| {
+						logs: string[];
+						version: 1;
+				  }
+				| {
+						logs: {
+							msg: string;
+							id: number;
+							priority: number;
+							source: number;
+							time: number;
+						}[];
+						version: 2;
+				  };
 	  }
 	| {
 			success: false;
@@ -60,13 +74,22 @@ export async function GET(request: NextRequest) {
 			);
 		}
 
-		const logsCall = await ubusCall({
+		const logsCall = await ubusBatchCall({
 			displayName: displayName,
-			params: [
-				'file',
-				'exec',
+			calls: [
 				{
-					command: '/usr/libexec/syslog-wrapper'
+					id: 1,
+					params: [
+						'file',
+						'exec',
+						{
+							command: '/usr/libexec/syslog-wrapper'
+						}
+					]
+				},
+				{
+					id: 2,
+					params: ['log', 'read', { lines: 1000, stream: false, oneshot: true }]
 				}
 			]
 		});
@@ -90,20 +113,22 @@ export async function GET(request: NextRequest) {
 				}
 			);
 		}
-
-		if (!logsCall.data.result?.[1]?.stdout) {
-			logError({
-				displayName,
-				errorMessage: 'Failed to get logs',
-				...logsCall
-			});
+		const oldLogCall = logsCall.data.find((call) => call.id === 1);
+		const newLogCall = logsCall.data.find((call) => call.id === 2);
+		if (oldLogCall?.success && oldLogCall.result?.[1]?.stdout) {
+			const logs = (oldLogCall.result[1].stdout as string)
+				.trimEnd()
+				.split('\n');
 			return new Response(
 				JSON.stringify({
-					success: false,
-					errorMessage: 'No logs found'
+					success: true,
+					data: {
+						logs,
+						version: 1
+					}
 				}),
 				{
-					status: 400,
+					status: 200,
 					headers: {
 						'Content-Type': 'application/json'
 					}
@@ -111,16 +136,32 @@ export async function GET(request: NextRequest) {
 			);
 		}
 
-		const logs = (logsCall.data.result[1].stdout as string)
-			.trimEnd()
-			.split('\n');
+		if (newLogCall?.success && newLogCall.result?.[1]?.log) {
+			const logs = newLogCall.result[1].log;
+			return new Response(
+				JSON.stringify({
+					success: true,
+					data: {
+						logs,
+						version: 2
+					}
+				}),
+				{
+					status: 200,
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				}
+			);
+		}
+
 		return new Response(
 			JSON.stringify({
-				success: true,
-				data: logs
+				success: false,
+				errorMessage: 'Failed to get logs.'
 			}),
 			{
-				status: 200,
+				status: 400,
 				headers: {
 					'Content-Type': 'application/json'
 				}

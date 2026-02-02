@@ -131,11 +131,75 @@ export function RouterLogs({
 
 	useEffect(() => {
 		if (routerLogs.data && selectedRouter) {
-			parseAndPushLogs(routerLogs.data, selectedRouter);
+			if (routerLogs.data.version === 1) {
+				parseAndPushOldLogs(routerLogs.data.logs, selectedRouter);
+			} else if (routerLogs.data.version === 2) {
+				parseAndPushNewLogs(
+					routerLogs.data.logs as {
+						msg: string;
+						id: number;
+						priority: number;
+						source: number;
+						time: number;
+					}[],
+					selectedRouter
+				);
+			}
 		}
 	}, [routerLogs.dataUpdatedAt]);
 
-	function parseAndPushLogs(logs: string[], router: string) {
+	function parseAndPushNewLogs(
+		logs: {
+			msg: string;
+			id: number;
+			priority: number;
+			source: number;
+			time: number;
+		}[],
+		router: string
+	) {
+		if (!logsByRouter.current[router]) {
+			logsByRouter.current[router] = {
+				logs: [],
+				lastLog: ''
+			};
+		}
+		const lastLogIndex = logs.findIndex(
+			(l) => l.id.toString() === logsByRouter.current[router].lastLog
+		);
+		let newLogs = logs;
+		if (lastLogIndex !== -1) {
+			newLogs = logs.slice(lastLogIndex + 1);
+		}
+		for (const entry of newLogs) {
+			const timestamp = new Date(entry.time).toLocaleString();
+			const splitMessage = entry.msg.split(':');
+			let message, source;
+			if (entry.source === 0) {
+				message = entry.msg;
+				source = 'kernel';
+			} else {
+				message = splitMessage.slice(1).join(':');
+				source = splitMessage[0] || 'system';
+			}
+			const severity = Math.floor(entry?.priority % 8) + 1;
+			const level = getLogLevelFromSeverity(severity);
+			logsByRouter.current[router].logs.push({
+				id: `${entry.id}`,
+				timestamp,
+				level,
+				message: message,
+				source: source,
+				facility: ''
+			});
+		}
+		logsByRouter.current[router].lastLog =
+			logs[logs.length - 1]?.id?.toString() || '';
+		setRerender(!rerender);
+		return true;
+	}
+
+	function parseAndPushOldLogs(logs: string[], router: string) {
 		if (!logsByRouter.current[router]) {
 			logsByRouter.current[router] = {
 				logs: [],
@@ -271,17 +335,42 @@ function getLogLevelStyle(level: string) {
 	switch (level.toUpperCase()) {
 		case 'ERR':
 		case 'ERROR':
+		case 'EMER':
+		case 'CRIT':
 			return 'text-red-400 bg-red-950 border-red-800';
 		case 'WARN':
 		case 'WARNING':
+		case 'ALERT':
 			return 'text-yellow-400 bg-yellow-950 border-yellow-800';
 		case 'INFO':
 			return 'text-blue-400 bg-blue-950 border-blue-800';
 		case 'NOTICE':
-			return 'text-green-400 bg-green-950 border-green-800';
 		case 'DEBUG':
-			return 'text-gray-400 bg-gray-950 border-gray-800';
+			return 'text-green-400 bg-green-950 border-green-800';
 		default:
 			return 'text-neutral-400 bg-neutral-950 border-neutral-800';
+	}
+}
+
+function getLogLevelFromSeverity(severity: number) {
+	switch (severity) {
+		case 0:
+			return 'EMER';
+		case 1:
+			return 'ALERT';
+		case 2:
+			return 'CRIT';
+		case 3:
+			return 'ERR';
+		case 4:
+			return 'WARN';
+		case 5:
+			return 'NOTICE';
+		case 6:
+			return 'INFO';
+		case 7:
+			return 'DEBUG';
+		default:
+			return 'INFO';
 	}
 }
