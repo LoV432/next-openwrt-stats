@@ -520,6 +520,13 @@ function UpdateManager({ router }: { router: string }) {
 					Current:{' '}
 					<span className="font-bold">{updateData.currentVersion}</span> →
 					Latest: <span className="font-bold">{updateData.latestVersion}</span>
+					{updateData.latestVersion.includes('25.12') &&
+						updateData.currentVersion.includes('24.10') && (
+							<div className="text-sm text-red-700">
+								WARNING: Updates from 24.10 to 25.12 are not properly tested.
+								Use at your own risk.
+							</div>
+						)}
 				</div>
 				<div>
 					{(buildStatus === buildStatusEnum.initial ||
