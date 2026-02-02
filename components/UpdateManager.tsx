@@ -577,7 +577,7 @@ function UpdateManager({ router }: { router: string }) {
 													})
 												}
 												placeholder="Enter package names, one per line..."
-												className="min-h-[300px] font-mono"
+												className="h-75 font-mono"
 											/>
 											<div className="flex flex-wrap justify-end gap-2">
 												<DialogClose asChild>
