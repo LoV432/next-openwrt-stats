@@ -5,6 +5,13 @@ import { ubusBatchCall } from '@/lib/server/ubusCalls';
 import { z } from 'zod';
 import { logError } from '@/lib/client/errorLog';
 
+type PackageDiff = {
+	source: string;
+	target?: string;
+	revision: number;
+	mandatory?: boolean;
+};
+
 const updateInfoSchema = z.object({
 	board_name: z.string(),
 	release: z.object({
@@ -297,6 +304,46 @@ export async function GET(request: NextRequest) {
 					packagesListClean.push(line.replace('Package: ', ''));
 				}
 			});
+		});
+
+		const getPackagesDiffRequest = await fetch(
+			'https://sysupgrade.openwrt.org/json/v1/overview.json'
+		);
+		if (!getPackagesDiffRequest.ok) {
+			const errorText = await getPackagesDiffRequest.text();
+			logError({
+				displayName: router.data.displayName,
+				errorMessage: 'Failed to get package diff',
+				rawResponse: errorText
+			});
+			return new Response(
+				JSON.stringify({
+					success: false,
+					errorMessage: 'Failed to get package diff'
+				}),
+				{
+					status: 400,
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				}
+			);
+		}
+		const getPackagesDiffJson = await getPackagesDiffRequest.json();
+		const packagesDiff = (
+			Object.values(getPackagesDiffJson.branches).find((branch: any) => {
+				return branch.versions.includes(latestVersion);
+			}) as any
+		).package_changes as PackageDiff[];
+		packagesDiff.forEach((pkg) => {
+			if (pkg.target) {
+				const index = packagesListClean.findIndex((pkgName) => {
+					return pkgName === pkg.source;
+				});
+				if (index !== -1) {
+					packagesListClean[index] = pkg.target;
+				}
+			}
 		});
 
 		const validatedData = {
