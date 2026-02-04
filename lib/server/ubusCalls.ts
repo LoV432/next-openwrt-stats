@@ -395,8 +395,8 @@ async function sendUbus(
 		const response = await fetch(routerIP + '/ubus', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(ubusObject),
-			signal: AbortSignal.timeout(timeout)
+			body: JSON.stringify(ubusObject)
+			// signal: AbortSignal.timeout(timeout)
 		});
 		const jsonResponse = await response.json();
 		const parsedResponse = validResponseSchema.safeParse(jsonResponse);
@@ -477,8 +477,8 @@ async function sendUbusBatch(
 		const response = await fetch(routerIP + '/ubus', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(calls),
-			signal: AbortSignal.timeout(timeout)
+			body: JSON.stringify(calls)
+			// signal: AbortSignal.timeout(timeout)
 		});
 		const jsonResponse = await response.json();
 		const parsedResponse = batchResponseSchema.safeParse(jsonResponse);
