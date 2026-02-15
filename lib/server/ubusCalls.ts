@@ -174,6 +174,19 @@ export async function ubusBatchCall({
 				...batchResponse
 			} as const;
 		}
+		if (
+			batchResponse.hasAccessDenied &&
+			batchResponse.hasAccessDenied.every((hasAccessDenied) => hasAccessDenied)
+		) {
+			dedupedLogin({
+				// TODO: We should retry all the ubus calls here
+				// Because if we are getting access denied, it means
+				// all the calls failed due to expired session
+				routerIP: session.data.routerIP,
+				username: session.data.username,
+				password: session.data.password
+			});
+		}
 		await updateLastAccessed(displayName);
 		return { success: true, data: batchResponse.data } as const;
 	} catch (error) {
@@ -457,6 +470,7 @@ type SendUbusBatchReturnType = Promise<
 	| {
 			success: true;
 			data: UbusBatchResponses[];
+			hasAccessDenied: boolean[];
 	  }
 	| {
 			success: false;
@@ -491,9 +505,11 @@ async function sendUbusBatch(
 				calls: calls
 			};
 		}
+		let hasAccessDenied: boolean[] = [];
 		const filteredPrasedResponses = parsedResponse.data.map(
 			(filteredParsedResponse) => {
 				if (filteredParsedResponse.result) {
+					hasAccessDenied.push(false);
 					return {
 						success: true,
 						jsonrpc: filteredParsedResponse.jsonrpc,
@@ -507,11 +523,19 @@ async function sendUbusBatch(
 						) as object
 					} as const;
 				} else {
+					const checkAccessDenied = accessDeniedSchema.safeParse(
+						filteredParsedResponse
+					);
+					if (checkAccessDenied.success) {
+						hasAccessDenied.push(true);
+					}
 					return {
 						success: false,
 						jsonrpc: filteredParsedResponse.jsonrpc,
 						id: filteredParsedResponse.id,
-						ubusErrorMessage: 'Failed to parse ubus response',
+						ubusErrorMessage: checkAccessDenied.success
+							? 'Access denied'
+							: 'Failed to parse ubus response',
 						rawResponse: jsonResponse.find(
 							(response: any) => response.id === filteredParsedResponse.id
 						),
@@ -524,7 +548,8 @@ async function sendUbusBatch(
 		);
 		return {
 			success: true,
-			data: filteredPrasedResponses
+			data: filteredPrasedResponses,
+			hasAccessDenied
 		};
 	} catch (error) {
 		return {
