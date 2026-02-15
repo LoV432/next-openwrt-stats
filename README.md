@@ -19,10 +19,14 @@ A web dashboard for monitoring and managing all your OpenWrt APs from a single p
   - **Historical Timeline**: View detailed connection history for each client
   - **Change Tracking**: Monitors when clients switch between WiFi networks, routers, or frequency bands
 
-### 🔒 VPN & Security
-- **WireGuard Management**: Full WireGuard VPN interface and peer management
+### 🔄 System Management
+- **Update Manager**: Check for and install OpenWrt firmware updates across all routers
+  - **Version Checking**: Automatically detect available firmware updates
+  - **Custom Packages**: Edit and customize packages to include in the firmware build
+  - **Configuration Backup**: Download backups before updating
 
-### 🛣️ Advanced Routing
+### 🔒 VPN & Security
+- **WireGuard Management**: WireGuard VPN interface and peer management
 - **Policy Based Routing (PBR)**: Manage OpenWrt's PBR package through the web interface
 
 
@@ -55,6 +59,9 @@ A web dashboard for monitoring and managing all your OpenWrt APs from a single p
 ### System Logs
 ![Logs](preview/Logs.png)
 
+### Update Manager
+![Update Manager](preview/Update%20Manager.png)
+
 ## Quick Start (Docker Compose)
 
 1. **Create Docker Compose configuration**
@@ -62,13 +69,13 @@ A web dashboard for monitoring and managing all your OpenWrt APs from a single p
    # docker-compose.yaml
    services:
      openwrtstats:
-       image: lov432/openwrt-stats:v2
+       image: lov432/openwrt-stats:latest
        container_name: openwrtstats
        volumes:
-         - ./drizzle/db/:/app/drizzle/db/
+         - ./db/:/app/drizzle/db/
        environment:
          - MAX_TRAFFIC=100 # Maximum traffic threshold for charts (in Mbps)
-         - PBR_ENABLED=false # Enable Policy Based Routing features (requires OpenWrt pbr package)
+         - PBR_ENABLED=false # Enable Policy Based Routing UI (requires OpenWrt pbr package)
          - PRESENCE_ENABLED=false # Enable WiFi client presence tracking and history
        ports:
          - 3000:3000

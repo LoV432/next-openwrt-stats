@@ -1,9 +1,13 @@
 services:
   openwrtstats:
-    image: lov432/openwrt-stats:v2
+    image: lov432/openwrt-stats:latest
     container_name: openwrtstats
     volumes:
-      - ./drizzle/db/:/app/drizzle/db/
+      - ./db/:/app/drizzle/db/
+    # environment:
+    #   - MAX_TRAFFIC=100 # Maximum traffic threshold for charts (in Mbps)
+    #   - PBR_ENABLED=false # Enable Policy Based Routing UI (requires OpenWrt pbr package)
+    #   - PRESENCE_ENABLED=false # Enable WiFi client presence tracking and history
     ports:
       - 3000:3000
     restart: unless-stopped
