@@ -157,7 +157,10 @@ export async function GET(request: NextRequest) {
 			);
 		}
 
-		const isSnapshot = parsedBoardData.data.release.target.includes('snapshot');
+		const isSnapshot =
+			parsedBoardData.data.release.target.includes('snapshot') ||
+			parsedBoardData.data.release.version.includes('-rc') ||
+			parsedBoardData.data.release.version.includes('snapshot');
 		if (isSnapshot) {
 			return new Response(
 				JSON.stringify({

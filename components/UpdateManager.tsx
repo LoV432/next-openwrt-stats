@@ -470,7 +470,7 @@ function UpdateManager({ router }: { router: string }) {
 					<div className="text-base">{router}</div>
 					{checkUpdate.data.isSnapshot ? (
 						<div className="flex items-center gap-1 pb-2 text-sm text-red-600">
-							Snapshots are not supported -{' '}
+							Snapshots and RCs are not supported -{' '}
 							<span className="font-bold">
 								v{checkUpdate.data.currentVersion}
 							</span>
