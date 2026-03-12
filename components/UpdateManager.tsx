@@ -106,12 +106,11 @@ function UpdateManager({ router }: { router: string }) {
 			const response = await fetch(
 				`/api/routers/update/check?displayName=${router}`
 			);
-			if (!response.ok) {
-				throw new Error('Failed to get update status');
-			}
 			const data = (await response.json()) as RouterUpdateInfo;
 			if (!data.success) {
-				throw new Error('Failed to get update status');
+				throw new Error('Failed to get update status', {
+					cause: data.errorMessage
+				});
 			}
 			return data.data;
 		},
@@ -426,6 +425,60 @@ function UpdateManager({ router }: { router: string }) {
 		executeUpdateQuery.reset();
 		downloadBackup.reset();
 		await checkUpdate.refetch();
+	}
+
+	if (checkUpdate.isError) {
+		return (
+			<>
+				<Card className="p-0">
+					<CardContent className="px-5 py-3">
+						<div className="text-base">{router}</div>
+						<div className="text-muted-foreground pb-2 text-sm">
+							{checkUpdate.error.message}
+						</div>
+						<Button
+							onClick={() => checkUpdate.refetch()}
+							variant={'destructive'}
+							className="flex items-center justify-center gap-1 font-semibold text-white"
+							size={'lg'}
+						>
+							<AlertCircle className="h-4 w-4" />
+							Update Check Failed - Retry?
+						</Button>
+						<div className="mt-1 flex items-center gap-1">
+							<div className="text-red-600">{checkUpdate.error.message}</div>
+							{typeof checkUpdate.error.cause === 'string' && (
+								<Dialog>
+									<DialogTrigger asChild>
+										<span className="cursor-pointer text-red-600 underline">
+											View Details
+										</span>
+									</DialogTrigger>
+									<DialogContent className="max-h-[80vh] max-w-4xl overflow-y-auto">
+										<DialogHeader>
+											<DialogTitle>Error Details</DialogTitle>
+										</DialogHeader>
+										<pre className="overflow-x-auto whitespace-pre-wrap rounded-md bg-stone-800 p-2 text-sm">
+											{checkUpdate.error.cause}
+										</pre>
+									</DialogContent>
+								</Dialog>
+							)}
+						</div>
+						<Button
+							onClick={() => downloadBackup.mutate()}
+							disabled={downloadBackup.isPending}
+							variant="outline"
+							className="mt-2 flex items-center justify-center font-semibold"
+							size={'lg'}
+						>
+							<HardDrive className="h-4 w-4" />
+							{downloadBackup.isPending ? 'Generating...' : 'Download Backup'}
+						</Button>
+					</CardContent>
+				</Card>
+			</>
+		);
 	}
 
 	if (!checkUpdate.data) {

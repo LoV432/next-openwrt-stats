@@ -298,16 +298,48 @@ export async function GET(request: NextRequest) {
 		const packagesList = packagesListText.split('\n\n');
 		let packagesListClean: string[] = [];
 
-		packagesList.forEach((pkg) => {
-			if (pkg.includes('Auto-Installed')) {
-				return;
-			}
-			pkg.split('\n').forEach((line) => {
-				if (line.includes('Package: ')) {
-					packagesListClean.push(line.replace('Package: ', ''));
+		try {
+			packagesList.forEach((pkg) => {
+				if (pkg.includes('Auto-Installed')) {
+					return;
+				}
+				for (const line of pkg.split('\n')) {
+					if (
+						line.includes('Package: ') &&
+						(!pkg.includes('Provides: ') || !pkg.includes('ABIVersion: '))
+					) {
+						packagesListClean.push(line.replace('Package: ', ''));
+						break;
+					}
+					if (line.includes('Provides: ') && pkg.includes('ABIVersion: ')) {
+						packagesListClean.push(line.replace('Provides: ', ''));
+						break;
+					} else if (line.includes('Provides: ')) {
+						throw new Error(
+							`Something went wrong while parsing the package list \n ${pkg}`
+						);
+					}
 				}
 			});
-		});
+		} catch (error: any) {
+			logError({
+				displayName: router.data.displayName,
+				errorMessage: 'Failed to parse package list',
+				rawResponse: error?.message
+			});
+			return new Response(
+				JSON.stringify({
+					success: false,
+					errorMessage: error?.message ?? 'Failed to parse package list'
+				}),
+				{
+					status: 400,
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				}
+			);
+		}
 
 		const getPackagesDiffRequest = await fetch(
 			'https://sysupgrade.openwrt.org/json/v1/overview.json'
@@ -355,7 +387,7 @@ export async function GET(request: NextRequest) {
 			latestVersion: latestVersion,
 			target: parsedBoardData.data.release.target,
 			profile: parsedBoardData.data.board_name,
-			packages: packagesListClean,
+			packages: packagesListClean.sort(),
 			displayName: router.data.displayName,
 			rootfs_type: parsedBoardData.data.rootfs_type,
 			isEfi: efiData.result[1] ? true : false
