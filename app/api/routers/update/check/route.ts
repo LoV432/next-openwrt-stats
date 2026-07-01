@@ -1,9 +1,10 @@
 import 'server-only';
 import { NextRequest } from 'next/server';
 import { getRouter } from '@/lib/server/router';
-import { ubusBatchCall } from '@/lib/server/ubusCalls';
+import { ubusBatchCall, ubusCall } from '@/lib/server/ubusCalls';
 import { z } from 'zod';
 import { logError } from '@/lib/client/errorLog';
+import { packagesListSchema } from '@/types/ubusCalls';
 
 type PackageDiff = {
 	source: string;
@@ -262,23 +263,16 @@ export async function GET(request: NextRequest) {
 			);
 		}
 
-		const packagesListRequest = await fetch(
-			`${router.data.routerIP}/cgi-bin/cgi-exec`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded'
-				},
-				body: `sessionid=${router.data.session}&command=/usr/libexec/package-manager-call list-installed`
-			}
-		);
+		const packagesListRequest = await ubusCall({
+			displayName: router.data.displayName,
+			params: ['rpc-sys', 'packagelist', {}]
+		});
 
-		if (!packagesListRequest.ok) {
-			const errorText = await packagesListRequest.text();
+		if (!packagesListRequest.success) {
 			logError({
 				displayName: router.data.displayName,
 				errorMessage: 'Failed to get installed packages',
-				rawResponse: errorText
+				...packagesListRequest
 			});
 			return new Response(
 				JSON.stringify({
@@ -294,43 +288,20 @@ export async function GET(request: NextRequest) {
 			);
 		}
 
-		const packagesListText = await packagesListRequest.text();
-		const packagesList = packagesListText.split('\n\n');
-		let packagesListClean: string[] = [];
+		const parsedPackagesList = packagesListSchema.safeParse(
+			packagesListRequest.data
+		);
 
-		try {
-			packagesList.forEach((pkg) => {
-				if (pkg.includes('Auto-Installed')) {
-					return;
-				}
-				for (const line of pkg.split('\n')) {
-					if (
-						line.includes('Package: ') &&
-						(!pkg.includes('Provides: ') || !pkg.includes('ABIVersion: '))
-					) {
-						packagesListClean.push(line.replace('Package: ', ''));
-						break;
-					}
-					if (line.includes('Provides: ') && pkg.includes('ABIVersion: ')) {
-						packagesListClean.push(line.replace('Provides: ', ''));
-						break;
-					} else if (line.includes('Provides: ')) {
-						throw new Error(
-							`Something went wrong while parsing the package list \n ${pkg}`
-						);
-					}
-				}
-			});
-		} catch (error: any) {
+		if (!parsedPackagesList.success) {
 			logError({
 				displayName: router.data.displayName,
-				errorMessage: 'Failed to parse package list',
-				rawResponse: error?.message
+				errorMessage: 'Failed to get installed packages',
+				zodError: parsedPackagesList.error
 			});
 			return new Response(
 				JSON.stringify({
 					success: false,
-					errorMessage: error?.message ?? 'Failed to parse package list'
+					errorMessage: 'Failed to get installed packages'
 				}),
 				{
 					status: 400,
@@ -340,6 +311,10 @@ export async function GET(request: NextRequest) {
 				}
 			);
 		}
+
+		let packagesListClean = Object.keys(
+			parsedPackagesList.data.result[1].packages
+		);
 
 		const getPackagesDiffRequest = await fetch(
 			'https://sysupgrade.openwrt.org/json/v1/overview.json'

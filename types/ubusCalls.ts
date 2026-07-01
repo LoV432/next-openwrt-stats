@@ -547,3 +547,14 @@ export const wireguardPeerConfigClientSchema = z
 		});
 		return val;
 	});
+
+export const packagesListSchema = z.object({
+	jsonrpc: z.string(),
+	id: z.number(),
+	result: z.tuple([
+		z.literal(0),
+		z.object({
+			packages: z.record(z.string(), z.string())
+		})
+	])
+});
