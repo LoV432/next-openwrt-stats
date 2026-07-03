@@ -34,7 +34,7 @@ export const batchResponseSchema = z.array(
 	z.object({
 		jsonrpc: z.string(),
 		id: z.number(),
-		result: z.tuple([z.number(), z.any()]).optional(),
+		result: z.tuple([z.number(), z.any().default(null)]).optional(),
 		error: z.any().optional()
 	})
 );
