@@ -1,6 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
 	checkRouterStatusAction,
 	deleteRouterAction,
@@ -309,6 +310,7 @@ function EditRouter({
 	const [displayName, setDisplayName] = useState('');
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
+	const [privateKey, setPrivateKey] = useState('');
 	const [isPrimary, setIsPrimary] = useState(wasPrimary === 1 ? true : false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
@@ -319,6 +321,7 @@ function EditRouter({
 		if (isOpen) {
 			setUsername('');
 			setPassword('');
+			setPrivateKey('');
 			setIsPrimary(wasPrimary === 1 ? true : false);
 		}
 	}, [isOpen]);
@@ -331,6 +334,7 @@ function EditRouter({
 				displayName,
 				username,
 				password,
+				privateKey,
 				isPrimary
 			});
 			if (!addRouterRequest.success) {
@@ -395,6 +399,12 @@ function EditRouter({
 								onChange={(e) => setPassword(e.target.value)}
 								type="password"
 							/>
+							<Textarea
+								placeholder="SSH Private Key — optional, used for the Device Monitor (empty if unchanged)"
+								value={privateKey}
+								onChange={(e) => setPrivateKey(e.target.value)}
+								className="max-h-40 min-h-20 font-mono text-xs"
+							/>
 							<div className="flex items-center space-x-2">
 								<Checkbox
 									id="primary"
@@ -427,6 +437,7 @@ function AddRouter() {
 	const [routerIP, setRouterIP] = useState('');
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
+	const [privateKey, setPrivateKey] = useState('');
 	const [isPrimary, setIsPrimary] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
@@ -439,6 +450,7 @@ function AddRouter() {
 			setRouterIP('');
 			setUsername('');
 			setPassword('');
+			setPrivateKey('');
 			setIsPrimary(false);
 		}
 	}, [isOpen]);
@@ -451,7 +463,8 @@ function AddRouter() {
 				protocol + routerIP,
 				username,
 				password,
-				isPrimary
+				isPrimary,
+				privateKey
 			);
 			if (!addRouterRequest.success) {
 				toast.error(addRouterRequest.errorMessage, {
@@ -537,6 +550,12 @@ function AddRouter() {
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
 								type="password"
+							/>
+							<Textarea
+								placeholder="SSH Private Key — optional, used for the Device Monitor"
+								value={privateKey}
+								onChange={(e) => setPrivateKey(e.target.value)}
+								className="max-h-40 min-h-20 font-mono text-xs"
 							/>
 							<div className="flex items-center space-x-2">
 								<Checkbox

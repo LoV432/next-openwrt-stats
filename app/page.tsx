@@ -18,6 +18,7 @@ export default async function Home() {
 	const MAX_TRAFFIC = Number(process.env.MAX_TRAFFIC) || 100;
 	const presenceEnabled = process.env.PRESENCE_ENABLED === 'true';
 	const pbrEnabled = process.env.PBR_ENABLED === 'true';
+	const monitorEnabled = process.env.MONITOR_ENABLED === 'true';
 	return (
 		<div className="bg-background mx-auto flex w-full flex-col items-center justify-center gap-4">
 			<Header pbrEnabled={pbrEnabled} presenceEnabled={presenceEnabled} />
@@ -30,7 +31,10 @@ export default async function Home() {
 				<SeparatorWithText text="Wireless APs" />
 				<WifiAPs />
 				<SeparatorWithText text="Clients" />
-				<ClientCards presenceEnabled={presenceEnabled} />
+				<ClientCards
+					presenceEnabled={presenceEnabled}
+					monitorEnabled={monitorEnabled}
+				/>
 			</div>
 		</div>
 	);

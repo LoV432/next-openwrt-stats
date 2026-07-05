@@ -7,6 +7,7 @@ export const routersTable = sqliteTable('routers', {
 	routerIP: text().notNull().unique(),
 	username: text().notNull(),
 	password: text().notNull(),
+	privateKey: text(),
 	session: text().notNull(),
 	lastAccessed: int().notNull().default(0),
 	isPrimary: int().notNull().default(0)

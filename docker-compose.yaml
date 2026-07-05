@@ -1,6 +1,7 @@
 services:
   openwrtstats:
     image: lov432/openwrt-stats:latest
+    # image: lov432/openwrt-stats:latest-tshark # Use this if you have MONITOR_ENABLED=true
     container_name: openwrtstats
     volumes:
       - ./db/:/app/drizzle/db/
@@ -8,6 +9,9 @@ services:
     #   - MAX_TRAFFIC=100 # Maximum traffic threshold for charts (in Mbps)
     #   - PBR_ENABLED=false # Enable Policy Based Routing UI (requires OpenWrt pbr package)
     #   - PRESENCE_ENABLED=false # Enable WiFi client presence tracking and history
+    #   - MONITOR_ENABLED=true # Enable per-device live traffic capture (requires tcpdump on the router + SSH access)
+    #   - MONITOR_MAX_SECONDS=300 # Server-enforced capture duration cap (<=300)
+    #   - MONITOR_MAX_PACKETS=50000 # Server-enforced capture packet cap (<=50000)
     ports:
       - 3000:3000
     restart: unless-stopped

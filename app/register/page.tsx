@@ -1,6 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { registerRouterAction } from '@/lib/server/routersActions';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -22,6 +23,7 @@ export default function Register() {
 	const [routerIP, setRouterIP] = useState('');
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
+	const [privateKey, setPrivateKey] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const queryClient = useQueryClient();
 	const router = useRouter();
@@ -34,7 +36,8 @@ export default function Register() {
 				protocol + routerIP,
 				username,
 				password,
-				true
+				true,
+				privateKey
 			);
 			if (!addRouterRequest.success) {
 				toast.error(addRouterRequest.errorMessage, {
@@ -149,6 +152,21 @@ export default function Register() {
 									value={password}
 									onChange={(e) => setPassword(e.target.value)}
 									type="password"
+								/>
+							</div>
+
+							<div>
+								<label className="mb-2 block text-sm font-medium text-neutral-300">
+									SSH Private Key{' '}
+									<span className="text-neutral-500">
+										(optional — used for the Device Monitor)
+									</span>
+								</label>
+								<Textarea
+									className="max-h-40 min-h-20 border-neutral-700 bg-neutral-800 font-mono text-xs text-white placeholder:text-neutral-500 focus:border-slate-600 focus:ring-slate-600"
+									placeholder="-----BEGIN OPENSSH PRIVATE KEY-----"
+									value={privateKey}
+									onChange={(e) => setPrivateKey(e.target.value)}
 								/>
 							</div>
 

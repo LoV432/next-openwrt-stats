@@ -12,7 +12,8 @@ export async function registerRouterAction(
 	routerIP: string,
 	username: string,
 	password: string,
-	isPrimary: boolean
+	isPrimary: boolean,
+	privateKey?: string
 ) {
 	const checkCredentials = await login({
 		routerIP,
@@ -39,6 +40,7 @@ export async function registerRouterAction(
 				routerIP,
 				username,
 				password,
+				privateKey: privateKey?.trim() ? privateKey : null,
 				session: checkCredentials.data.ubus_rpc_session,
 				lastAccessed: Date.now(),
 				isPrimary: isPrimary ? 1 : 0
@@ -76,12 +78,14 @@ export async function updateRouterAction({
 	displayName,
 	username,
 	password,
+	privateKey,
 	isPrimary
 }: {
 	routerToUpdate: string;
 	displayName?: string;
 	username?: string;
 	password?: string;
+	privateKey?: string;
 	isPrimary: boolean;
 }) {
 	try {
@@ -99,6 +103,9 @@ export async function updateRouterAction({
 					displayName: displayName ? displayName : router.data.displayName,
 					username: username ? username : router.data.username,
 					password: password ? password : router.data.password,
+					privateKey: privateKey?.trim()
+						? privateKey
+						: router.data.privateKey,
 					isPrimary: isPrimary ? 1 : 0
 				})
 				.where(eq(routersTable.displayName, routerToUpdate));

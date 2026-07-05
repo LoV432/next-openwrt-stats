@@ -37,6 +37,7 @@ export async function getRouter(displayName: string) {
 				routerIP: routersTable.routerIP,
 				username: routersTable.username,
 				password: routersTable.password,
+				privateKey: routersTable.privateKey,
 				session: routersTable.session,
 				isPrimary: routersTable.isPrimary,
 				id: routersTable.id

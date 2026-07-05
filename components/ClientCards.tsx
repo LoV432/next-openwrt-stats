@@ -16,11 +16,14 @@ import { useEffect, useState } from 'react';
 import { useWifiAPsQuery } from '@/providers/wifiAPsContext';
 import { SVGIcon } from './SVGIcons';
 import { PresenceHistoryDialog } from './ClientPresence';
+import { DeviceMonitorDialog } from './DeviceMonitor';
 
 export default function ClientCards({
-	presenceEnabled
+	presenceEnabled,
+	monitorEnabled
 }: {
 	presenceEnabled: boolean;
+	monitorEnabled: boolean;
 }) {
 	const dhcpDevicesQuery = useQuery({
 		queryKey: ['dhcpDevices'],
@@ -121,6 +124,7 @@ export default function ClientCards({
 							wifiClientsTrafficQuery.data?.[device.macAddress.toUpperCase()]
 						}
 						presenceEnabled={presenceEnabled}
+						monitorEnabled={monitorEnabled}
 					/>
 				))}
 		</div>
@@ -131,7 +135,8 @@ function ClientCard({
 	device,
 	wifiData,
 	wifiClientTraffic,
-	presenceEnabled
+	presenceEnabled,
+	monitorEnabled
 }: {
 	device: {
 		deviceName: string;
@@ -165,6 +170,7 @@ function ClientCard({
 		  }
 		| undefined;
 	presenceEnabled: boolean;
+	monitorEnabled: boolean;
 }) {
 	const [bytesHistory, setBytesHistory] = useState<
 		[number, number, number, number][]
@@ -234,6 +240,12 @@ function ClientCard({
 							<PresenceHistoryDialog
 								clientMac={device.macAddress}
 								clientName={device.deviceName}
+							/>
+						)}
+						{monitorEnabled && (
+							<DeviceMonitorDialog
+								deviceIp={device.ipAddress}
+								deviceName={device.deviceName}
 							/>
 						)}
 						{wifiData && (

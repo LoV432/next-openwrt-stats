@@ -27,6 +27,16 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
+# tshark dissects the router's live pcap stream for the Device Monitor feature.
+ARG TSHARK_ENABLED=false
+RUN if [ "$TSHARK_ENABLED" = "true" ]; then \
+        apt-get update \
+        && echo "wireshark-common wireshark-common/install-setuid boolean false" | debconf-set-selections \
+        && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tshark libcap2-bin \
+        && (setcap -r /usr/bin/dumpcap 2>/dev/null || true) \
+        && rm -rf /var/lib/apt/lists/*
+    fi
+
 ENV NODE_ENV production
 # Uncomment the following line in case you want to disable telemetry during runtime.
 ENV NEXT_TELEMETRY_DISABLED 1
