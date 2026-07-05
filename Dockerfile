@@ -34,8 +34,9 @@ RUN if [ "$TSHARK_ENABLED" = "true" ]; then \
         && echo "wireshark-common wireshark-common/install-setuid boolean false" | debconf-set-selections \
         && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tshark libcap2-bin \
         && (setcap -r /usr/bin/dumpcap 2>/dev/null || true) \
-        && rm -rf /var/lib/apt/lists/*
-    fi
+        && rm -rf /var/lib/apt/lists/* \
+        ; fi
+
 
 ENV NODE_ENV production
 # Uncomment the following line in case you want to disable telemetry during runtime.
